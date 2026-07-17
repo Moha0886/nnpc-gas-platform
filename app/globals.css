@@ -3,21 +3,81 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --paper: #FAFAF7;
+  --ink: #16211E;
+  --pine: #0F4C42;
+  --pine-deep: #0A332C;
+  --flare: #D98E04;
+  --alert: #B3402A;
+  --gasblue: #2E6FA3;
+  --line: #DCDAD2;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* All figures use tabular monospace numerals */
+.tabular-nums {
+  font-family: 'IBM Plex Mono', 'SF Mono', 'Consolas', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+@layer components {
+  /* KPI Card - primary data display component */
+  .kpi-card {
+    @apply bg-white border border-line rounded-lg p-6 shadow-sm;
+  }
+
+  /* Sidebar link styling */
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors;
+  }
+
+  .sidebar-link-active {
+    @apply bg-pine text-white;
+  }
+
+  .sidebar-link-inactive {
+    @apply text-ink/70 hover:bg-pine/10 hover:text-pine;
+  }
+
+  /* Button variants */
+  .btn-primary {
+    @apply bg-pine text-white px-4 py-2 rounded-lg font-medium hover:bg-pine-deep transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-white border border-line text-ink px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors;
+  }
+
+  /* Table styling for operations data */
+  .data-table {
+    @apply w-full border-collapse;
+  }
+
+  .data-table th {
+    @apply bg-gray-50 px-4 py-3 text-left text-xs font-medium text-ink/70 uppercase tracking-wider border-b border-line;
+  }
+
+  .data-table td {
+    @apply px-4 py-3 border-b border-line tabular-nums;
+  }
+
+  /* Status badges */
+  .badge-operational {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pine/10 text-pine;
+  }
+
+  .badge-alert {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-alert/10 text-alert;
+  }
+
+  .badge-warning {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-flare/10 text-flare;
+  }
 }
 
 @layer utilities {

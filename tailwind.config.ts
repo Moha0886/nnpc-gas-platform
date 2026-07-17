@@ -9,8 +9,34 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        paper: "#FAFAF7",
+        ink: "#16211E",
+        pine: {
+          DEFAULT: "#0F4C42",
+          deep: "#0A332C",
+        },
+        flare: "#D98E04",
+        alert: "#B3402A",
+        gasblue: "#2E6FA3",
+        line: "#DCDAD2",
+      },
+      fontFamily: {
+        sans: [
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
+        mono: [
+          "IBM Plex Mono",
+          "SF Mono",
+          "Consolas",
+          "monospace",
+        ],
+      },
+      fontVariantNumeric: {
+        tabular: "tabular-nums",
       },
     },
   },
