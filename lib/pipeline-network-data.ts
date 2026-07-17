@@ -292,6 +292,628 @@ export const pipelines: PipelineFeature[] = [
       deferment: 0,
     },
   },
+
+  // ============================================================================
+  // CUSTOMER DELIVERY PIPELINES - Connections to End Users
+  // ============================================================================
+
+  // ELPS to Egbin Power Station
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.3500, 6.6500], // ELPS Itoki Terminal
+        [3.5000, 6.5800], // Egbin Power Station
+      ],
+    },
+    properties: {
+      id: "delivery-egbin",
+      name: "ELPS → Egbin Power",
+      network: "ELPS",
+      pipelineType: "delivery",
+      diameter: 20,
+      length: 18,
+      capacity: 215,
+      currentFlow: 180,
+      utilization: 83.7,
+      pressure: 950,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+    },
+  },
+
+  // ELPS to Olorunsogo Power
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.2500, 6.8800], // ELPS Ogun section
+        [3.2500, 6.8900], // Olorunsogo Power
+      ],
+    },
+    properties: {
+      id: "delivery-olorunsogo",
+      name: "ELPS → Olorunsogo Power",
+      network: "ELPS",
+      pipelineType: "delivery",
+      diameter: 18,
+      length: 12,
+      capacity: 140,
+      currentFlow: 118,
+      utilization: 84.3,
+      pressure: 920,
+      status: "operational",
+      corridor: "Western",
+      deferment: 0,
+    },
+  },
+
+  // ELPS to Omotosho Power
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.6250, 6.3380], // ELPS Benin area
+        [4.8400, 6.6600], // Omotosho Power
+      ],
+    },
+    properties: {
+      id: "delivery-omotosho",
+      name: "ELPS → Omotosho Power",
+      network: "ELPS",
+      pipelineType: "delivery",
+      diameter: 16,
+      length: 45,
+      capacity: 125,
+      currentFlow: 105,
+      utilization: 84.0,
+      pressure: 900,
+      status: "operational",
+      corridor: "Western",
+      deferment: 0,
+    },
+  },
+
+  // ELPS to Delta/Ughelli Power
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.9938, 5.5002], // ELPS Ughelli/Delta
+        [5.9151, 5.5399], // Delta Power Station
+      ],
+    },
+    properties: {
+      id: "delivery-delta",
+      name: "ELPS → Delta Power",
+      network: "ELPS",
+      pipelineType: "delivery",
+      diameter: 16,
+      length: 8,
+      capacity: 150,
+      currentFlow: 125,
+      utilization: 83.3,
+      pressure: 950,
+      status: "operational",
+      corridor: "Western",
+      deferment: 0,
+    },
+  },
+
+  // ELPS to Sapele Power
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.7603, 5.5442], // ELPS Warri
+        [5.7005, 5.8797], // Sapele Power
+      ],
+    },
+    properties: {
+      id: "delivery-sapele",
+      name: "ELPS → Sapele Power",
+      network: "ELPS",
+      pipelineType: "delivery",
+      diameter: 14,
+      length: 35,
+      capacity: 90,
+      currentFlow: 72,
+      utilization: 80.0,
+      pressure: 880,
+      status: "operational",
+      corridor: "Western",
+      deferment: 0,
+    },
+  },
+
+  // ELPS to Ihovbor Power
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.6250, 6.3380], // ELPS Benin
+        [5.6833, 6.4056], // Ihovbor Power
+      ],
+    },
+    properties: {
+      id: "delivery-ihovbor",
+      name: "ELPS → Ihovbor Power (NIPP)",
+      network: "ELPS",
+      pipelineType: "delivery",
+      diameter: 14,
+      length: 8,
+      capacity: 75,
+      currentFlow: 62,
+      utilization: 82.7,
+      pressure: 910,
+      status: "operational",
+      corridor: "Western",
+      deferment: 0,
+    },
+  },
+
+  // Oben-Geregu to Geregu Power
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.3000, 7.8000], // Geregu pipeline endpoint
+        [7.3000, 7.8000], // Geregu Power (same location)
+      ],
+    },
+    properties: {
+      id: "delivery-geregu",
+      name: "Oben-Geregu → Geregu Power",
+      network: "Oben-Geregu",
+      pipelineType: "delivery",
+      diameter: 20,
+      length: 2,
+      capacity: 170,
+      currentFlow: 145,
+      utilization: 85.3,
+      pressure: 950,
+      status: "operational",
+      corridor: "Northern",
+      deferment: 0,
+    },
+  },
+
+  // OB3 to Okpai Power
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [6.9580, 5.4520], // OB3 Obite area
+        [6.2400, 5.8500], // Okpai Power
+      ],
+    },
+    properties: {
+      id: "delivery-okpai",
+      name: "OB3 → Okpai Power",
+      network: "OB3",
+      pipelineType: "delivery",
+      diameter: 16,
+      length: 65,
+      capacity: 78,
+      currentOutput: 68,
+      utilization: 87.2,
+      pressure: 890,
+      status: "operational",
+      corridor: "Eastern",
+      deferment: 0,
+    },
+  },
+
+  // Eastern Network to Afam VI
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.0100, 4.7500], // Alakiri
+        [7.2400, 4.9400], // Afam VI
+      ],
+    },
+    properties: {
+      id: "delivery-afam",
+      name: "Eastern Network → Afam VI",
+      network: "Eastern",
+      pipelineType: "delivery",
+      diameter: 16,
+      length: 25,
+      capacity: 102,
+      currentFlow: 88,
+      utilization: 86.3,
+      pressure: 910,
+      status: "operational",
+      corridor: "Eastern",
+      deferment: 0,
+    },
+  },
+
+  // Eastern Network to Alaoji
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.3500, 5.0600], // Obigbo
+        [7.3500, 5.0800], // Alaoji
+      ],
+    },
+    properties: {
+      id: "delivery-alaoji",
+      name: "Eastern Network → Alaoji NIPP",
+      network: "Eastern",
+      pipelineType: "delivery",
+      diameter: 18,
+      length: 5,
+      capacity: 175,
+      currentFlow: 148,
+      utilization: 84.6,
+      pressure: 930,
+      status: "operational",
+      corridor: "Eastern",
+      deferment: 0,
+    },
+  },
+
+  // ELPS to Dangote Fertiliser
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.3500, 6.6500], // ELPS Itoki
+        [3.4100, 6.4300], // Dangote Fertiliser
+      ],
+    },
+    properties: {
+      id: "delivery-dangote-fert",
+      name: "ELPS → Dangote Fertiliser",
+      network: "ELPS",
+      pipelineType: "delivery",
+      diameter: 16,
+      length: 24,
+      capacity: 195,
+      currentFlow: 165,
+      utilization: 84.6,
+      pressure: 920,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+    },
+  },
+
+  // ELPS to Dangote Refinery
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.3500, 6.6500], // ELPS Itoki
+        [3.4050, 6.4280], // Dangote Refinery
+      ],
+    },
+    properties: {
+      id: "delivery-dangote-ref",
+      name: "ELPS → Dangote Refinery",
+      network: "ELPS",
+      pipelineType: "delivery",
+      diameter: 20,
+      length: 25,
+      capacity: 650,
+      currentFlow: 500,
+      utilization: 76.9,
+      pressure: 940,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+    },
+  },
+
+  // OB3 to Indorama
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.0100, 4.7500], // Alakiri
+        [7.1200, 4.7800], // Indorama
+      ],
+    },
+    properties: {
+      id: "delivery-indorama",
+      name: "Eastern Network → Indorama",
+      network: "Eastern",
+      pipelineType: "delivery",
+      diameter: 14,
+      length: 12,
+      capacity: 145,
+      currentFlow: 125,
+      utilization: 86.2,
+      pressure: 900,
+      status: "operational",
+      corridor: "Eastern",
+      deferment: 0,
+    },
+  },
+
+  // OB3 to Notore
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [6.9580, 5.4520], // Obite
+        [6.9500, 5.5800], // Notore
+      ],
+    },
+    properties: {
+      id: "delivery-notore",
+      name: "OB3 → Notore Fertiliser",
+      network: "OB3",
+      pipelineType: "delivery",
+      diameter: 10,
+      length: 15,
+      capacity: 35,
+      currentFlow: 28,
+      utilization: 80.0,
+      pressure: 850,
+      status: "operational",
+      corridor: "Eastern",
+      deferment: 0,
+    },
+  },
+
+  // ELPS to WAPCO Shagamu
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.2500, 6.8800], // ELPS Ogun
+        [3.6400, 6.8500], // WAPCO Shagamu
+      ],
+    },
+    properties: {
+      id: "delivery-wapco",
+      name: "ELPS → WAPCO Cement",
+      network: "ELPS",
+      pipelineType: "delivery",
+      diameter: 10,
+      length: 28,
+      capacity: 85,
+      currentFlow: 70,
+      utilization: 82.4,
+      pressure: 870,
+      status: "operational",
+      corridor: "Western",
+      deferment: 0,
+    },
+  },
+
+  // ELPS to Warri Refinery
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.7603, 5.5442], // ELPS Warri
+        [5.7600, 5.5500], // Warri Refinery
+      ],
+    },
+    properties: {
+      id: "delivery-wrpc",
+      name: "ELPS → Warri Refinery",
+      network: "ELPS",
+      pipelineType: "delivery",
+      diameter: 12,
+      length: 3,
+      capacity: 125,
+      currentFlow: 95,
+      utilization: 76.0,
+      pressure: 890,
+      status: "operational",
+      corridor: "Western",
+      deferment: 0,
+    },
+  },
+
+  // Lagos Distribution to Shell LDC
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.3900, 6.4550], // Ijora
+        [3.3700, 6.4900], // Shell LDC
+      ],
+    },
+    properties: {
+      id: "delivery-shell-ldc",
+      name: "Lagos Network → Shell LDC",
+      network: "Lagos",
+      pipelineType: "delivery",
+      diameter: 12,
+      length: 5,
+      capacity: 85,
+      currentFlow: 72,
+      utilization: 84.7,
+      pressure: 920,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+    },
+  },
+
+  // Lagos Distribution to Axxela LDC
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.3900, 6.4550], // Ijora
+        [3.4200, 6.4400], // Axxela LDC
+      ],
+    },
+    properties: {
+      id: "delivery-axxela-ldc",
+      name: "Lagos Network → Axxela LDC",
+      network: "Lagos",
+      pipelineType: "delivery",
+      diameter: 12,
+      length: 4,
+      capacity: 72,
+      currentFlow: 65,
+      utilization: 90.3,
+      pressure: 910,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+    },
+  },
+
+  // Shell LDC to Sub-customers
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.3700, 6.4900], // Shell LDC
+        [3.3350, 6.5550], // Ikeja Industrial
+      ],
+    },
+    properties: {
+      id: "delivery-ikeja",
+      name: "Shell LDC → Ikeja Industrial",
+      network: "Lagos",
+      pipelineType: "flow",
+      diameter: 8,
+      length: 8,
+      capacity: 22,
+      currentFlow: 19,
+      utilization: 86.4,
+      pressure: 850,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+    },
+  },
+
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.3700, 6.4900], // Shell LDC
+        [3.3850, 6.4500], // Apapa
+      ],
+    },
+    properties: {
+      id: "delivery-apapa",
+      name: "Shell LDC → Apapa Logistics",
+      network: "Lagos",
+      pipelineType: "flow",
+      diameter: 8,
+      length: 3,
+      capacity: 18,
+      currentFlow: 16,
+      utilization: 88.9,
+      pressure: 860,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+    },
+  },
+
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.3700, 6.4900], // Shell LDC
+        [3.4250, 6.4280], // VI Commercial
+      ],
+    },
+    properties: {
+      id: "delivery-vi",
+      name: "Shell LDC → Victoria Island",
+      network: "Lagos",
+      pipelineType: "flow",
+      diameter: 6,
+      length: 6,
+      capacity: 15,
+      currentFlow: 13,
+      utilization: 86.7,
+      pressure: 840,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+    },
+  },
+
+  // Axxela LDC to Sub-customers
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.4200, 6.4400], // Axxela LDC
+        [3.4700, 6.4200], // Lekki FTZ
+      ],
+    },
+    properties: {
+      id: "delivery-lekki",
+      name: "Axxela LDC → Lekki FTZ",
+      network: "Lagos",
+      pipelineType: "flow",
+      diameter: 8,
+      length: 5,
+      capacity: 28,
+      currentFlow: 25,
+      utilization: 89.3,
+      pressure: 850,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+    },
+  },
+
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.4200, 6.4400], // Axxela LDC
+        [3.5100, 6.6100], // Ikorodu
+      ],
+    },
+    properties: {
+      id: "delivery-ikorodu",
+      name: "Axxela LDC → Ikorodu Industrial",
+      network: "Lagos",
+      pipelineType: "flow",
+      diameter: 8,
+      length: 20,
+      capacity: 19,
+      currentFlow: 17,
+      utilization: 89.5,
+      pressure: 830,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+    },
+  },
 ];
 
 // ============================================================================
@@ -420,6 +1042,7 @@ export const processingPlants: AssetFeature[] = [
 // ============================================================================
 
 export const powerPlants: AssetFeature[] = [
+  // Western Corridor Power Plants
   {
     type: "Feature",
     geometry: {
@@ -434,28 +1057,9 @@ export const powerPlants: AssetFeature[] = [
       currentOutput: 950,
       utilization: 72.0,
       status: "operational",
-      corridor: "Lagos",
+      corridor: "Western",
       deferment: 0,
       operator: "Egbin Power Plc",
-    },
-  },
-  {
-    type: "Feature",
-    geometry: {
-      type: "Point",
-      coordinates: [7.3000, 7.8000],
-    },
-    properties: {
-      id: "power-geregu",
-      name: "Geregu Power Complex (I & II)",
-      assetType: "power-plant",
-      capacity: 848,
-      currentOutput: 680,
-      utilization: 80.2,
-      status: "operational",
-      corridor: "Northern",
-      deferment: 0,
-      operator: "Geregu Power Plc / NIPP",
     },
   },
   {
@@ -466,7 +1070,7 @@ export const powerPlants: AssetFeature[] = [
     },
     properties: {
       id: "power-olorunsogo",
-      name: "Olorunsogo Power Complex (I & II)",
+      name: "Olorunsogo Power Station",
       assetType: "power-plant",
       capacity: 1010,
       currentOutput: 750,
@@ -553,6 +1157,84 @@ export const powerPlants: AssetFeature[] = [
       operator: "NIPP",
     },
   },
+  // Northern Corridor Power Plants
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [7.3000, 7.8000],
+    },
+    properties: {
+      id: "power-geregu",
+      name: "Geregu Power Complex (I & II)",
+      assetType: "power-plant",
+      capacity: 848,
+      currentOutput: 680,
+      utilization: 80.2,
+      status: "operational",
+      corridor: "Northern",
+      deferment: 0,
+      operator: "Geregu Power Plc / NIPP",
+    },
+  },
+  // Eastern Corridor Power Plants
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [6.2400, 5.8500],
+    },
+    properties: {
+      id: "power-okpai",
+      name: "Okpai Power Station",
+      assetType: "power-plant",
+      capacity: 480,
+      currentOutput: 380,
+      utilization: 79.2,
+      status: "operational",
+      corridor: "Eastern",
+      deferment: 0,
+      operator: "Agip (Eni)",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [7.2400, 4.9400],
+    },
+    properties: {
+      id: "power-afam-vi",
+      name: "Afam VI Power Station",
+      assetType: "power-plant",
+      capacity: 650,
+      currentOutput: 520,
+      utilization: 80.0,
+      status: "operational",
+      corridor: "Eastern",
+      deferment: 0,
+      operator: "Sahara Power Group",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [7.3500, 5.0800],
+    },
+    properties: {
+      id: "power-alaoji",
+      name: "Alaoji Power Station (NIPP)",
+      assetType: "power-plant",
+      capacity: 1074,
+      currentOutput: 820,
+      utilization: 76.3,
+      status: "operational",
+      corridor: "Eastern",
+      deferment: 0,
+      operator: "NIPP",
+    },
+  },
 ];
 
 // ============================================================================
@@ -560,6 +1242,7 @@ export const powerPlants: AssetFeature[] = [
 // ============================================================================
 
 export const industrialOfftakers: AssetFeature[] = [
+  // Lagos/Western Corridor
   {
     type: "Feature",
     geometry: {
@@ -636,6 +1319,46 @@ export const industrialOfftakers: AssetFeature[] = [
       operator: "NNPC Limited",
     },
   },
+  // Eastern Corridor - Fertiliser Plants
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [7.1200, 4.7800],
+    },
+    properties: {
+      id: "ind-indorama",
+      name: "Indorama Eleme Petrochemicals",
+      assetType: "industrial",
+      capacity: 145,
+      currentOutput: 125,
+      utilization: 86.2,
+      status: "operational",
+      corridor: "Eastern",
+      deferment: 0,
+      operator: "Indorama Corporation",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [6.9500, 5.5800],
+    },
+    properties: {
+      id: "ind-notore",
+      name: "Notore Fertiliser Plant",
+      assetType: "industrial",
+      capacity: 35,
+      currentOutput: 28,
+      utilization: 80.0,
+      status: "operational",
+      corridor: "Eastern",
+      deferment: 0,
+      operator: "Notore Chemical Industries",
+    },
+  },
+  // Northern Corridor
   {
     type: "Feature",
     geometry: {
@@ -653,6 +1376,141 @@ export const industrialOfftakers: AssetFeature[] = [
       corridor: "Northern",
       deferment: 200,
       operator: "Federal Government",
+    },
+  },
+  // LDC Main Distributors
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [3.3700, 6.4900],
+    },
+    properties: {
+      id: "ind-shell-ldc",
+      name: "Shell Nigeria Gas (LDC)",
+      assetType: "industrial",
+      capacity: 85,
+      currentOutput: 72,
+      utilization: 84.7,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+      operator: "Shell Nigeria Gas",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [3.4200, 6.4400],
+    },
+    properties: {
+      id: "ind-axxela-ldc",
+      name: "Axxela Gas Distribution",
+      assetType: "industrial",
+      capacity: 72,
+      currentOutput: 65,
+      utilization: 90.3,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+      operator: "Axxela Limited",
+    },
+  },
+  // LDC Sub-customers (Commercial/Industrial clusters)
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [3.3350, 6.5550],
+    },
+    properties: {
+      id: "ind-ikeja-industrial",
+      name: "Ikeja Industrial Estate",
+      assetType: "industrial",
+      capacity: 22,
+      currentOutput: 19,
+      utilization: 86.4,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+      operator: "Shell Nigeria Gas (sub)",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [3.3850, 6.4500],
+    },
+    properties: {
+      id: "ind-apapa-logistics",
+      name: "Apapa Logistics Hub",
+      assetType: "industrial",
+      capacity: 18,
+      currentOutput: 16,
+      utilization: 88.9,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+      operator: "Shell Nigeria Gas (sub)",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [3.4250, 6.4280],
+    },
+    properties: {
+      id: "ind-vi-commercial",
+      name: "Victoria Island Commercial",
+      assetType: "industrial",
+      capacity: 15,
+      currentOutput: 13,
+      utilization: 86.7,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+      operator: "Shell Nigeria Gas (sub)",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [3.4700, 6.4200],
+    },
+    properties: {
+      id: "ind-lekki-ftz",
+      name: "Lekki FTZ Customers",
+      assetType: "industrial",
+      capacity: 28,
+      currentOutput: 25,
+      utilization: 89.3,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+      operator: "Axxela Limited (sub)",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [3.5100, 6.6100],
+    },
+    properties: {
+      id: "ind-ikorodu-industrial",
+      name: "Ikorodu Industrial",
+      assetType: "industrial",
+      capacity: 19,
+      currentOutput: 17,
+      utilization: 89.5,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+      operator: "Axxela Limited (sub)",
     },
   },
 ];
