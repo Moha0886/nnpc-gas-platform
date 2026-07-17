@@ -205,6 +205,9 @@ export default function PipelineMap({ onAssetClick }: PipelineMapProps) {
         "metering-station": "📊",
         terminal: "🚢",
         storage: "🛢️",
+        "power-plant": "⚡",
+        "industrial": "🏗️",
+        "city-gate": "🚪",
       };
       el.innerHTML = `<div style="font-size: 12px; text-align: center; line-height: 20px;">${assetIcons[assetType] || "📍"}</div>`;
 

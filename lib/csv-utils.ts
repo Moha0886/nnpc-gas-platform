@@ -53,6 +53,22 @@ export const CSV_TEMPLATES = {
       ["2026-07-15", "Bonny Plant", "Eastern", "2500.0", "2450.0", "50.0", "Compressor failure", "Maintenance", "CS-02 bearing replacement"],
     ],
   },
+  volumes: {
+    filename: "volumes_upload_template.csv",
+    headers: ["Date", "Produced (MMscf/d)", "NGL Extracted (MMscf/d)", "Into Transmission (MMscf/d)", "Fuel Gas (MMscf/d)", "Line Pack Δ (MMscf/d)", "Delivered (MMscf/d)", "UFG (MMscf/d)", "UFG %", "Remarks"],
+    sample: [
+      ["2026-07-15", "2850.5", "320.3", "2530.2", "85.5", "12.3", "2420.5", "11.9", "0.47", "Normal operations"],
+      ["2026-07-14", "2780.2", "315.8", "2464.4", "82.8", "-8.5", "2380.1", "10.0", "0.41", ""],
+    ],
+  },
+  incidents: {
+    filename: "incidents_upload_template.csv",
+    headers: ["Date Occurred", "Date Reported", "Title", "Description", "Facility", "Facility Type", "Corridor", "Category", "Severity", "Status", "Deferment (MMscf/d)", "Estimated Loss ($)", "Reported By", "Assigned To", "Remarks"],
+    sample: [
+      ["2026-07-15", "2026-07-15", "Pipeline Leak at KP 125", "Hot tap vandalism detected on Trans-Niger Pipeline", "Trans-Niger Pipeline", "pipeline", "Eastern", "pipeline-leak", "critical", "under-investigation", "64.8", "226800", "John Eze", "HSE Manager", "Security team dispatched"],
+      ["2026-07-14", "2026-07-15", "Compressor Failure CS-02", "Bearing failure on main compressor", "Obite Station", "compressor", "Lagos", "equipment-failure", "high", "open", "50.0", "175000", "Victor Amadi", "Maintenance Team", "Spare parts ordered"],
+    ],
+  },
 };
 
 // Download CSV template

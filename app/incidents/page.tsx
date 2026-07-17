@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   AlertTriangle,
   FileText,
@@ -14,6 +15,8 @@ import {
   Calendar,
   DollarSign,
   Activity,
+  Upload,
+  Download,
 } from "lucide-react";
 import {
   incidents,
@@ -22,6 +25,10 @@ import {
   type IncidentStatus,
   type IncidentSeverity,
 } from "@/lib/incident-data";
+import UploadModal from "@/components/UploadModal";
+import { useReportUpload } from "@/lib/use-report-upload";
+import { REPORT_CONFIGS } from "@/lib/report-upload-configs";
+import { formatDateForCSV } from "@/lib/csv-utils";
 
 export default function IncidentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -29,10 +36,20 @@ export default function IncidentsPage() {
   const [severityFilter, setSeverityFilter] = useState<IncidentSeverity | "all">("all");
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
 
+  // Upload/Export functionality
+  const config = REPORT_CONFIGS.incidents;
+  const {
+    data: incidentData,
+    uploadModalOpen,
+    setUploadModalOpen,
+    handleUpload,
+    handleExport,
+  } = useReportUpload(incidents, config);
+
   const stats = getIncidentStats();
 
   // Filter incidents
-  const filteredIncidents = incidents.filter((incident) => {
+  const filteredIncidents = incidentData.filter((incident) => {
     const matchesSearch =
       incident.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       incident.facilityName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -67,14 +84,39 @@ export default function IncidentsPage() {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3 mb-2">
-          <AlertTriangle className="w-8 h-8 text-alert" />
-          <h1 className="text-2xl font-bold text-ink">Incident Reporting</h1>
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <AlertTriangle className="w-8 h-8 text-alert" />
+            <h1 className="text-2xl font-bold text-ink">Incident Reporting</h1>
+          </div>
+          <p className="text-ink/60">
+            Track and manage HSE incidents across gas infrastructure
+          </p>
         </div>
-        <p className="text-ink/60">
-          Track and manage HSE incidents across gas infrastructure
-        </p>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => handleExport(filteredIncidents, `incidents_${formatDateForCSV(new Date())}.csv`)}
+            className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
+          <button
+            onClick={() => setUploadModalOpen(true)}
+            className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+          >
+            <Upload className="w-4 h-4" />
+            Upload CSV
+          </button>
+          <Link
+            href="/records/incidents"
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Report Incident
+          </Link>
+        </div>
       </div>
 
       {/* Statistics Cards */}
@@ -475,6 +517,18 @@ export default function IncidentsPage() {
           </div>
         </div>
       )}
+
+      {/* Upload Modal */}
+      <UploadModal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        templateType={config.templateType}
+        title="Upload Incident Data"
+        existingData={incidentData}
+        identifierFields={config.identifierFields}
+        requiredFields={config.requiredFields}
+        onUploadSuccess={handleUpload}
+      />
     </div>
   );
 }

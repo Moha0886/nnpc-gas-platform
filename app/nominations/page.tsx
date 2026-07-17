@@ -1,13 +1,71 @@
 "use client";
 
-import { useState, Fragment } from "react";
+import { useState, Fragment, useMemo } from "react";
+import Link from "next/link";
 import { getOfftakerFlows, offtakers } from "@/lib/data";
 import { formatNumber } from "@/lib/utils";
-import { FileText, AlertCircle } from "lucide-react";
+import { FileText, AlertCircle, Upload, Plus, Download } from "lucide-react";
 import type { Corridor } from "@/lib/types";
+import UploadModal from "@/components/UploadModal";
+import { useReportUpload } from "@/lib/use-report-upload";
+import { REPORT_CONFIGS } from "@/lib/report-upload-configs";
+import { formatDateForCSV } from "@/lib/csv-utils";
+
+// Mock historical nomination snapshots
+const mockNominationSnapshots = [
+  {
+    id: "nom-snap-001",
+    gasDay: "2026-07-16",
+    corridor: "All",
+    offtaker: "System Total",
+    dcq: 2500.0,
+    priorityLevel: "Normal",
+    requestedBy: "System",
+    nominatedVolume: 2420.5,
+    allocatedVolume: 2380.2,
+    forecastSupply: 2350.8,
+    allocationVsDcq: 95.2,
+  },
+  {
+    id: "nom-snap-002",
+    gasDay: "2026-07-15",
+    corridor: "All",
+    offtaker: "System Total",
+    dcq: 2500.0,
+    priorityLevel: "Normal",
+    requestedBy: "System",
+    nominatedVolume: 2385.3,
+    allocatedVolume: 2340.5,
+    forecastSupply: 2315.2,
+    allocationVsDcq: 93.6,
+  },
+  {
+    id: "nom-snap-003",
+    gasDay: "2026-07-14",
+    corridor: "All",
+    offtaker: "System Total",
+    dcq: 2500.0,
+    priorityLevel: "Normal",
+    requestedBy: "System",
+    nominatedVolume: 2455.8,
+    allocatedVolume: 2420.3,
+    forecastSupply: 2398.5,
+    allocationVsDcq: 96.8,
+  },
+];
 
 export default function NominationsPage() {
   const [selectedCorridor, setSelectedCorridor] = useState<Corridor | "All">("All");
+
+  // Upload/Export functionality for historical snapshots
+  const config = REPORT_CONFIGS.nominations;
+  const {
+    data: nominationSnapshots,
+    uploadModalOpen,
+    setUploadModalOpen,
+    handleUpload,
+    handleExport,
+  } = useReportUpload(mockNominationSnapshots, config);
 
   const flows = getOfftakerFlows(
     undefined,
@@ -74,21 +132,28 @@ export default function NominationsPage() {
               6-stage nomination cycle per delivery point
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-ink/70 mr-2">Corridor:</span>
-            {corridors.map((corridor) => (
-              <button
-                key={corridor}
-                onClick={() => setSelectedCorridor(corridor)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  selectedCorridor === corridor
-                    ? "bg-primary text-white"
-                    : "bg-white border border-line text-ink/70 hover:bg-gray-50"
-                }`}
-              >
-                {corridor}
-              </button>
-            ))}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handleExport(nominationSnapshots, `nominations_${formatDateForCSV(new Date())}.csv`)}
+              className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export CSV
+            </button>
+            <button
+              onClick={() => setUploadModalOpen(true)}
+              className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <Upload className="w-4 h-4" />
+              Upload CSV
+            </button>
+            <Link
+              href="/records/nominations"
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add Record
+            </Link>
           </div>
         </div>
       </div>
@@ -147,6 +212,7 @@ export default function NominationsPage() {
             <table className="data-table">
               <thead>
                 <tr>
+                  <th className="text-left">Gas Day</th>
                   <th className="text-left">Offtaker</th>
                   <th className="text-left">Sector</th>
                   <th className="text-left">Corridor</th>
@@ -173,7 +239,7 @@ export default function NominationsPage() {
                         <Fragment key={`corridor-${corridor}`}>
                           <tr key={`header-${corridor}`} className="bg-gray-50">
                             <td
-                              colSpan={10}
+                              colSpan={11}
                               className="font-semibold text-primary py-2"
                             >
                               {corridor} Corridor
@@ -181,6 +247,7 @@ export default function NominationsPage() {
                           </tr>
                           {groupedFlows[corridor].map((flow) => (
                             <tr key={flow.offtakerId}>
+                              <td className="text-sm font-medium text-primary">{flow.gasDay}</td>
                               <td className="font-medium">{flow.offtakerName}</td>
                               <td className="text-sm text-ink/70">{flow.sector}</td>
                               <td>
@@ -231,6 +298,7 @@ export default function NominationsPage() {
                       ))
                   : enrichedFlows.map((flow) => (
                       <tr key={flow.offtakerId}>
+                        <td className="text-sm font-medium text-primary">{flow.gasDay}</td>
                         <td className="font-medium">{flow.offtakerName}</td>
                         <td className="text-sm text-ink/70">{flow.sector}</td>
                         <td>
@@ -274,7 +342,7 @@ export default function NominationsPage() {
 
                 {/* Totals Row */}
                 <tr className="bg-primary/5 font-bold border-t-2 border-primary">
-                  <td colSpan={3}>TOTAL</td>
+                  <td colSpan={4}>TOTAL</td>
                   <td className="text-right">{formatNumber(totals.nominated, 0)}</td>
                   <td className="text-right">{formatNumber(totals.allocated, 0)}</td>
                   <td className="text-right">
@@ -307,7 +375,80 @@ export default function NominationsPage() {
             nominations desk monitors.
           </p>
         </div>
+
+        {/* Historical Nomination Snapshots */}
+        <div className="kpi-card mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-ink">Historical Nomination Snapshots</h3>
+            <p className="text-sm text-ink/60">
+              Showing <span className="font-semibold text-ink">{nominationSnapshots.length}</span> records
+            </p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-line">
+                <tr>
+                  <th className="text-left px-4 py-3 text-sm font-semibold text-ink">Gas Day</th>
+                  <th className="text-left px-4 py-3 text-sm font-semibold text-ink">Offtaker</th>
+                  <th className="text-left px-4 py-3 text-sm font-semibold text-ink">Corridor</th>
+                  <th className="text-right px-4 py-3 text-sm font-semibold text-ink">DCQ (MMscf/d)</th>
+                  <th className="text-right px-4 py-3 text-sm font-semibold text-ink">Nominated</th>
+                  <th className="text-right px-4 py-3 text-sm font-semibold text-ink">Allocated</th>
+                  <th className="text-right px-4 py-3 text-sm font-semibold text-ink">Forecast</th>
+                  <th className="text-right px-4 py-3 text-sm font-semibold text-ink">Allocation vs DCQ (%)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {nominationSnapshots.map((record) => (
+                  <tr key={record.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm font-medium text-primary">{record.gasDay}</td>
+                    <td className="px-4 py-3 text-sm text-ink">{record.offtaker}</td>
+                    <td className="px-4 py-3 text-sm">
+                      <span className="badge-operational">{record.corridor}</span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-ink/70 text-right tabular-nums">
+                      {formatNumber(record.dcq, 1)}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-ink text-right tabular-nums">
+                      {formatNumber(record.nominatedVolume, 1)}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-primary font-semibold text-right tabular-nums">
+                      {formatNumber(record.allocatedVolume, 1)}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-accent text-right tabular-nums">
+                      {formatNumber(record.forecastSupply, 1)}
+                    </td>
+                    <td className={`px-4 py-3 text-sm font-semibold text-right tabular-nums ${
+                      record.allocationVsDcq >= 95 ? 'text-primary' : record.allocationVsDcq >= 85 ? 'text-flare' : 'text-alert'
+                    }`}>
+                      {record.allocationVsDcq.toFixed(1)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {nominationSnapshots.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-ink/60">No historical nomination records found</p>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Upload Modal */}
+      <UploadModal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        templateType={config.templateType}
+        title="Upload Nomination Data"
+        existingData={nominationSnapshots}
+        identifierFields={config.identifierFields}
+        requiredFields={config.requiredFields}
+        onUploadSuccess={handleUpload}
+      />
     </div>
   );
 }
