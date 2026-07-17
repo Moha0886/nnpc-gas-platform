@@ -7,12 +7,17 @@ import {
   ArrowLeft,
   Upload,
   Plus,
+  Download,
   FileSpreadsheet,
   FileText as FilePdf,
   Filter,
   Activity,
 } from "lucide-react";
 import type { Corridor } from "@/lib/types";
+import UploadModal from "@/components/UploadModal";
+import { useReportUpload } from "@/lib/use-report-upload";
+import { REPORT_CONFIGS } from "@/lib/report-upload-configs";
+import { formatDateForCSV } from "@/lib/csv-utils";
 
 // Mock historical flow readings data
 const mockFlowRecords = [
@@ -122,13 +127,23 @@ export default function FlowReportsPage() {
   const [selectedPipeline, setSelectedPipeline] = useState<string>("All");
   const [selectedDataSource, setSelectedDataSource] = useState<string>("All");
 
+  // Upload/Export functionality
+  const config = REPORT_CONFIGS.flows;
+  const {
+    data: flowsData,
+    uploadModalOpen,
+    setUploadModalOpen,
+    handleUpload,
+    handleExport,
+  } = useReportUpload(mockFlowRecords, config);
+
   const corridors: Array<Corridor | "All"> = ["All", "Eastern", "Western", "Northern", "Lagos"];
   const pipelines = ["All", "ELPS", "OB3", "AKK"];
   const dataSources = ["All", "SCADA", "Metering Station", "Manual"];
 
   // Filter records
   const filteredRecords = useMemo(() => {
-    return mockFlowRecords.filter((record) => {
+    return flowsData.filter((record) => {
       const recordDate = record.timestamp.split(" ")[0];
       if (dateFrom && recordDate < dateFrom) return false;
       if (dateTo && recordDate > dateTo) return false;
@@ -171,9 +186,19 @@ export default function FlowReportsPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2">
+            <button
+              onClick={() => handleExport(filteredRecords, `flows_report_${formatDateForCSV(new Date())}.csv`)}
+              className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export CSV
+            </button>
+            <button
+              onClick={() => setUploadModalOpen(true)}
+              className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
               <Upload className="w-4 h-4" />
-              Upload
+              Upload CSV
             </button>
             <Link
               href="/records/flows"
@@ -395,6 +420,18 @@ export default function FlowReportsPage() {
           )}
         </div>
       </div>
+
+      {/* Upload Modal */}
+      <UploadModal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        templateType={config.templateType}
+        title="Upload Flow Readings Data"
+        existingData={flowsData}
+        identifierFields={config.identifierFields}
+        requiredFields={config.requiredFields}
+        onUploadSuccess={handleUpload}
+      />
     </div>
   );
 }

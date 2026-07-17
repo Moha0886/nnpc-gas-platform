@@ -7,12 +7,17 @@ import {
   ArrowLeft,
   Upload,
   Plus,
+  Download,
   FileSpreadsheet,
   FileText as FilePdf,
   Filter,
   Flame,
 } from "lucide-react";
 import type { Corridor } from "@/lib/types";
+import UploadModal from "@/components/UploadModal";
+import { useReportUpload } from "@/lib/use-report-upload";
+import { REPORT_CONFIGS } from "@/lib/report-upload-configs";
+import { formatDateForCSV } from "@/lib/csv-utils";
 
 // Mock historical flare records data
 const mockFlareRecords = [
@@ -132,9 +137,19 @@ export default function FlareReportsPage() {
   const reasons = ["All", "Operational", "Safety", "Emergency", "Routine", "Technical"];
   const operators = ["All", "NGIC", "NGML", "NLNG", "Shell"];
 
+  // Upload/Export functionality
+  const config = REPORT_CONFIGS.flare;
+  const {
+    data: flareData,
+    uploadModalOpen,
+    setUploadModalOpen,
+    handleUpload,
+    handleExport,
+  } = useReportUpload(mockFlareRecords, config);
+
   // Filter records
   const filteredRecords = useMemo(() => {
-    return mockFlareRecords.filter((record) => {
+    return flareData.filter((record) => {
       if (dateFrom && record.eventDate < dateFrom) return false;
       if (dateTo && record.eventDate > dateTo) return false;
       if (selectedCorridor !== "All" && record.corridor !== selectedCorridor) return false;
@@ -166,9 +181,12 @@ export default function FlareReportsPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2">
+            <button
+              onClick={() => setUploadModalOpen(true)}
+              className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
               <Upload className="w-4 h-4" />
-              Upload
+              Upload CSV
             </button>
             <Link
               href="/records/flare"
@@ -300,13 +318,12 @@ export default function FlareReportsPage() {
           </p>
 
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2">
-              <FileSpreadsheet className="w-4 h-4" />
-              Export Excel
-            </button>
-            <button className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2">
-              <FilePdf className="w-4 h-4" />
-              Export PDF
+            <button
+              onClick={() => handleExport(filteredRecords, `flare_report_${formatDateForCSV(new Date())}.csv`)}
+              className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export CSV
             </button>
           </div>
         </div>
@@ -391,6 +408,18 @@ export default function FlareReportsPage() {
           )}
         </div>
       </div>
+
+      {/* Upload Modal */}
+      <UploadModal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        templateType={config.templateType}
+        title="Upload Flare Data"
+        existingData={flareData}
+        identifierFields={config.identifierFields}
+        requiredFields={config.requiredFields}
+        onUploadSuccess={handleUpload}
+      />
     </div>
   );
 }

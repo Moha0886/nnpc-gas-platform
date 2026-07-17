@@ -20,6 +20,7 @@ import {
   Wallet,
   Receipt,
   GitBranch,
+  Siren,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -40,6 +41,7 @@ const navigation = [
   { name: "Collections", href: "/collections", icon: Wallet },
   { name: "Take-or-Pay", href: "/take-or-pay", icon: Receipt },
   { name: "Pipeline Network", href: "/network", icon: GitBranch },
+  { name: "Incident Reporting", href: "/incidents", icon: Siren },
 ];
 
 export default function Sidebar() {

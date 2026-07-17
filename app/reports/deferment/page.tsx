@@ -7,12 +7,17 @@ import {
   ArrowLeft,
   Upload,
   Plus,
+  Download,
   FileSpreadsheet,
   FileText as FilePdf,
   Filter,
   AlertTriangle,
 } from "lucide-react";
 import type { Corridor } from "@/lib/types";
+import UploadModal from "@/components/UploadModal";
+import { useReportUpload } from "@/lib/use-report-upload";
+import { REPORT_CONFIGS } from "@/lib/report-upload-configs";
+import { formatDateForCSV } from "@/lib/csv-utils";
 
 // Mock historical deferment records data
 const mockDefermentRecords = [
@@ -100,6 +105,16 @@ const mockDefermentRecords = [
 
 export default function DefermentReportsPage() {
   const searchParams = useSearchParams();
+
+  // Upload/Export functionality
+  const config = REPORT_CONFIGS.deferment;
+  const {
+    data: defermentData,
+    uploadModalOpen,
+    setUploadModalOpen,
+    handleUpload,
+    handleExport,
+  } = useReportUpload(mockDefermentRecords, config);
   const fromParam = searchParams.get("from") || "";
   const toParam = searchParams.get("to") || new Date().toISOString().split("T")[0];
   const corridorParam = searchParams.get("corridor") || "All";
@@ -127,7 +142,7 @@ export default function DefermentReportsPage() {
 
   // Filter records
   const filteredRecords = useMemo(() => {
-    return mockDefermentRecords.filter((record) => {
+    return defermentData.filter((record) => {
       if (dateFrom && record.startDate < dateFrom) return false;
       if (dateTo && record.startDate > dateTo) return false;
       if (selectedCorridor !== "All" && record.corridor !== selectedCorridor) return false;
@@ -137,7 +152,7 @@ export default function DefermentReportsPage() {
         return false;
       return true;
     });
-  }, [dateFrom, dateTo, selectedCorridor, selectedCause, selectedStatus, selectedFacilityType]);
+  }, [dateFrom, dateTo, selectedCorridor, selectedCause, selectedStatus, selectedFacilityType, defermentData]);
 
   // Calculate summary stats
   const totalCumulativeVolume = filteredRecords.reduce((sum, r) => sum + r.cumulativeVolume, 0);
@@ -161,9 +176,12 @@ export default function DefermentReportsPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2">
+            <button
+              onClick={() => setUploadModalOpen(true)}
+              className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
               <Upload className="w-4 h-4" />
-              Upload
+              Upload CSV
             </button>
             <Link
               href="/records/deferment"
@@ -321,13 +339,12 @@ export default function DefermentReportsPage() {
           </p>
 
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2">
-              <FileSpreadsheet className="w-4 h-4" />
-              Export Excel
-            </button>
-            <button className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2">
-              <FilePdf className="w-4 h-4" />
-              Export PDF
+            <button
+              onClick={() => handleExport(filteredRecords, `deferment_report_${formatDateForCSV(new Date())}.csv`)}
+              className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export CSV
             </button>
           </div>
         </div>
@@ -410,6 +427,18 @@ export default function DefermentReportsPage() {
           )}
         </div>
       </div>
+
+      {/* Upload Modal */}
+      <UploadModal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        templateType={config.templateType}
+        title="Upload Deferment Data"
+        existingData={defermentData}
+        identifierFields={config.identifierFields}
+        requiredFields={config.requiredFields}
+        onUploadSuccess={handleUpload}
+      />
     </div>
   );
 }

@@ -14,6 +14,8 @@ import {
   TrendingUp,
 } from "lucide-react";
 import type { Corridor } from "@/lib/types";
+import UploadModal from "@/components/UploadModal";
+import { exportToCSV, formatDateForCSV } from "@/lib/csv-utils";
 
 // Mock historical production data
 const mockProductionRecords = [
@@ -152,14 +154,80 @@ export default function ProductionReportsPage() {
   );
   const [selectedFacilityType, setSelectedFacilityType] = useState<string>("All");
   const [selectedOperator, setSelectedOperator] = useState<string>("All");
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [productionData, setProductionData] = useState(mockProductionRecords);
 
   const corridors: Array<Corridor | "All"> = ["All", "Eastern", "Western", "Northern", "Lagos"];
   const facilityTypes = ["All", "Plant", "Field", "Well"];
   const operators = ["All", "NGIC", "NGML", "NLNG", "Shell"];
 
+  // Handle CSV upload
+  const handleUpload = (data: any[], overwriteDuplicates: boolean) => {
+    // Transform uploaded data to match our format
+    const newRecords = data.map((row, index) => ({
+      id: `prod-upload-${Date.now()}-${index}`,
+      gasDay: formatDateForCSV(row.Date || row.date),
+      facilityType: "Plant",
+      facilityId: `facility-${index}`,
+      facilityName: row.Station || row.station,
+      operator: "NGIC",
+      corridor: row.Corridor || row.corridor,
+      gasProduction: parseFloat(row["Gas (MMscf/d)"] || row.gas || 0),
+      facilityCapacity: 0,
+      nglProduction: 0,
+      lpgProduction: 0,
+      flareVolume: 0,
+      utilization: 0,
+    }));
+
+    if (overwriteDuplicates) {
+      // Remove existing records with same date+station and add new ones
+      const existingWithoutDuplicates = productionData.filter(
+        (existing) =>
+          !newRecords.some(
+            (newRec) =>
+              newRec.gasDay === existing.gasDay &&
+              newRec.facilityName === existing.facilityName
+          )
+      );
+      setProductionData([...existingWithoutDuplicates, ...newRecords]);
+    } else {
+      // Add only new records (skip duplicates)
+      const trulyNewRecords = newRecords.filter(
+        (newRec) =>
+          !productionData.some(
+            (existing) =>
+              existing.gasDay === newRec.gasDay &&
+              existing.facilityName === newRec.facilityName
+          )
+      );
+      setProductionData([...productionData, ...trulyNewRecords]);
+    }
+  };
+
+  // Handle CSV export
+  const handleExport = () => {
+    const exportData = filteredRecords.map((record) => ({
+      Date: record.gasDay,
+      Station: record.facilityName,
+      Corridor: record.corridor,
+      "Gas Production (MMscf/d)": record.gasProduction,
+      "Facility Capacity (MMscf/d)": record.facilityCapacity,
+      "NGL Production (bbls/d)": record.nglProduction,
+      "LPG Production (MT/d)": record.lpgProduction,
+      "Flare Volume (MMscf/d)": record.flareVolume,
+      "Utilization (%)": record.utilization,
+      Operator: record.operator,
+      Type: record.facilityType,
+    }));
+
+    const filename = `production_report_${formatDateForCSV(new Date())}.csv`;
+    exportToCSV(exportData, filename);
+  };
+
   // Filter records
   const filteredRecords = useMemo(() => {
-    return mockProductionRecords.filter((record) => {
+    return productionData.filter((record) => {
       // Date filter
       if (dateFrom && record.gasDay < dateFrom) return false;
       if (dateTo && record.gasDay > dateTo) return false;
@@ -204,9 +272,19 @@ export default function ProductionReportsPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2">
+            <button
+              onClick={handleExport}
+              className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export CSV
+            </button>
+            <button
+              onClick={() => setUploadModalOpen(true)}
+              className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
               <Upload className="w-4 h-4" />
-              Upload
+              Upload CSV
             </button>
             <Link
               href="/records/production"
@@ -426,6 +504,18 @@ export default function ProductionReportsPage() {
           )}
         </div>
       </div>
+
+      {/* Upload Modal */}
+      <UploadModal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        templateType="production"
+        title="Upload Production Data"
+        existingData={productionData}
+        identifierFields={["gasDay", "facilityName"]}
+        requiredFields={["Date", "Station", "Corridor", "Gas (MMscf/d)"]}
+        onUploadSuccess={handleUpload}
+      />
     </div>
   );
 }

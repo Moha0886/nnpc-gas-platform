@@ -7,12 +7,17 @@ import {
   ArrowLeft,
   Upload,
   Plus,
+  Download,
   FileSpreadsheet,
   FileText as FilePdf,
   Filter,
   Gauge,
 } from "lucide-react";
 import type { Corridor } from "@/lib/types";
+import UploadModal from "@/components/UploadModal";
+import { useReportUpload } from "@/lib/use-report-upload";
+import { REPORT_CONFIGS } from "@/lib/report-upload-configs";
+import { formatDateForCSV } from "@/lib/csv-utils";
 
 // Mock historical delivery records data
 const mockDeliveryRecords = [
@@ -144,9 +149,19 @@ export default function DeliveriesReportsPage() {
   ];
   const meterStatuses = ["All", "Operational", "Degraded", "Failed"];
 
+  // Upload/Export functionality
+  const config = REPORT_CONFIGS.deliveries;
+  const {
+    data: deliveriesData,
+    uploadModalOpen,
+    setUploadModalOpen,
+    handleUpload,
+    handleExport,
+  } = useReportUpload(mockDeliveryRecords, config);
+
   // Filter records
   const filteredRecords = useMemo(() => {
-    return mockDeliveryRecords.filter((record) => {
+    return deliveriesData.filter((record) => {
       if (dateFrom && record.gasDay < dateFrom) return false;
       if (dateTo && record.gasDay > dateTo) return false;
       if (selectedCorridor !== "All" && record.corridor !== selectedCorridor) return false;
@@ -182,9 +197,19 @@ export default function DeliveriesReportsPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2">
+            <button
+              onClick={() => handleExport(filteredRecords, `deliveries_report_${formatDateForCSV(new Date())}.csv`)}
+              className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export CSV
+            </button>
+            <button
+              onClick={() => setUploadModalOpen(true)}
+              className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
               <Upload className="w-4 h-4" />
-              Upload
+              Upload CSV
             </button>
             <Link
               href="/records/deliveries"
@@ -427,6 +452,18 @@ export default function DeliveriesReportsPage() {
           )}
         </div>
       </div>
+
+      {/* Upload Modal */}
+      <UploadModal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        templateType={config.templateType}
+        title="Upload Deliveries Data"
+        existingData={deliveriesData}
+        identifierFields={config.identifierFields}
+        requiredFields={config.requiredFields}
+        onUploadSuccess={handleUpload}
+      />
     </div>
   );
 }

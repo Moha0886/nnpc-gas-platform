@@ -13,6 +13,7 @@ import {
   type PipelineFeature,
   type AssetFeature,
 } from "@/lib/pipeline-network-data";
+import { getActiveIncidents, type Incident } from "@/lib/incident-data";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
 
@@ -54,6 +55,9 @@ export default function PipelineMap({ onAssetClick }: PipelineMapProps) {
 
       // Add assets
       addAssets();
+
+      // Add incident markers
+      addIncidents();
     });
 
     return () => {
@@ -69,6 +73,7 @@ export default function PipelineMap({ onAssetClick }: PipelineMapProps) {
       map.current.once("styledata", () => {
         addPipelines();
         addAssets();
+        addIncidents();
       });
     }
   }, [mapStyle]);
@@ -228,6 +233,84 @@ export default function PipelineMap({ onAssetClick }: PipelineMapProps) {
         onAssetClick?.(id);
       });
     });
+  };
+
+  // Add incident markers
+  const addIncidents = () => {
+    if (!map.current) return;
+
+    const activeIncidents = getActiveIncidents();
+
+    activeIncidents.forEach((incident) => {
+      // Create incident marker element
+      const el = document.createElement("div");
+      el.className = "incident-marker";
+      el.style.width = "32px";
+      el.style.height = "32px";
+      el.style.borderRadius = "50%";
+      el.style.cursor = "pointer";
+      el.style.border = "3px solid white";
+      el.style.boxShadow = "0 3px 6px rgba(0,0,0,0.4)";
+      el.style.display = "flex";
+      el.style.alignItems = "center";
+      el.style.justifyContent = "center";
+      el.style.fontSize = "16px";
+      el.style.animation = "pulse 2s infinite";
+
+      // Color and icon based on severity
+      const severityStyles = {
+        critical: { bg: "#BD1B00", icon: "⚠️" },
+        high: { bg: "#D98E04", icon: "⚠️" },
+        medium: { bg: "#0D5EBA", icon: "ℹ️" },
+        low: { bg: "#00246B", icon: "ℹ️" },
+      };
+      const style = severityStyles[incident.severity];
+      el.style.backgroundColor = style.bg;
+      el.innerHTML = style.icon;
+
+      // Create detailed popup
+      const statusBadges = {
+        open: '<span class="bg-alert/20 text-alert px-2 py-0.5 rounded text-xs">Open</span>',
+        "under-investigation": '<span class="bg-flare/20 text-flare px-2 py-0.5 rounded text-xs">Investigating</span>',
+        resolved: '<span class="bg-primary/20 text-primary px-2 py-0.5 rounded text-xs">Resolved</span>',
+        closed: '<span class="bg-secondary/20 text-secondary px-2 py-0.5 rounded text-xs">Closed</span>',
+      };
+
+      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
+        <div class="p-3 max-w-sm">
+          <div class="flex items-start justify-between gap-2 mb-2">
+            <h3 class="font-bold text-sm text-alert">${incident.title}</h3>
+            ${statusBadges[incident.status]}
+          </div>
+          <div class="text-xs space-y-1 mb-3">
+            <div><span class="text-ink/60">Facility:</span> <span class="font-medium">${incident.facilityName}</span></div>
+            <div><span class="text-ink/60">Category:</span> <span class="font-medium capitalize">${incident.category.replace("-", " ")}</span></div>
+            <div><span class="text-ink/60">Date:</span> <span class="font-medium">${new Date(incident.dateOccurred).toLocaleDateString()}</span></div>
+            ${incident.deferment > 0 ? `<div class="text-alert"><span class="text-ink/60">Deferment:</span> <span class="font-medium">${incident.deferment} MMscf/d</span></div>` : ""}
+          </div>
+          <p class="text-xs text-ink/70">${incident.description.substring(0, 120)}...</p>
+        </div>
+      `);
+
+      // Add marker to map
+      new mapboxgl.Marker(el)
+        .setLngLat(incident.location.coordinates)
+        .setPopup(popup)
+        .addTo(map.current!);
+    });
+
+    // Add CSS for pulse animation
+    const style = document.createElement("style");
+    style.textContent = `
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.1); }
+      }
+    `;
+    if (!document.querySelector('style[data-incident-pulse]')) {
+      style.setAttribute('data-incident-pulse', 'true');
+      document.head.appendChild(style);
+    }
   };
 
   // Toggle network visibility
