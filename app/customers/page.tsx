@@ -67,7 +67,7 @@ export default function CustomersPage() {
                 onClick={() => setSelectedCorridor(corridor)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   selectedCorridor === corridor
-                    ? "bg-pine text-white"
+                    ? "bg-primary text-white"
                     : "bg-white border border-line text-ink/70 hover:bg-gray-50"
                 }`}
               >
@@ -83,7 +83,7 @@ export default function CustomersPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="kpi-card">
             <p className="text-sm text-ink/60 mb-1">Top Performers (Score {"≥"}80)</p>
-            <p className="text-3xl font-bold text-pine">
+            <p className="text-3xl font-bold text-primary">
               {customerScores.filter((c) => c.compositeScore >= 80).length}
             </p>
           </div>
@@ -98,7 +98,7 @@ export default function CustomersPage() {
           </div>
           <div className="kpi-card">
             <p className="text-sm text-ink/60 mb-1">Low DSO Customers ({"<"}45 days)</p>
-            <p className="text-3xl font-bold text-pine">
+            <p className="text-3xl font-bold text-primary">
               {customerScores.filter((c) => c.dso < 45).length}
             </p>
           </div>
@@ -128,7 +128,7 @@ export default function CustomersPage() {
               <tbody>
                 {customerScores.map((customer, idx) => (
                   <tr key={customer.id}>
-                    <td className="font-bold text-pine">#{idx + 1}</td>
+                    <td className="font-bold text-primary">#{idx + 1}</td>
                     <td className="font-medium">{customer.name}</td>
                     <td className="text-sm">{customer.sector}</td>
                     <td>
@@ -138,7 +138,7 @@ export default function CustomersPage() {
                       <span
                         className={
                           customer.dso < 45
-                            ? "text-pine font-semibold"
+                            ? "text-primary font-semibold"
                             : customer.dso > 90
                             ? "text-alert font-semibold"
                             : ""
@@ -166,7 +166,7 @@ export default function CustomersPage() {
                       <span
                         className={`font-bold text-lg ${
                           customer.compositeScore >= 80
-                            ? "text-pine"
+                            ? "text-primary"
                             : customer.compositeScore >= 60
                             ? "text-ink"
                             : "text-alert"
@@ -183,7 +183,7 @@ export default function CustomersPage() {
         </div>
 
         {/* Note */}
-        <div className="mt-6 p-4 bg-pine/5 border border-pine/20 rounded-lg">
+        <div className="mt-6 p-4 bg-primary/5 border border-pine/20 rounded-lg">
           <p className="text-sm text-ink/70">
             <strong>Scoring Logic:</strong> DSO (30% weight, lower is better), Take
             reliability (40%), Margin (20%), Sector risk (10%). Dollar-paying industrials

@@ -90,7 +90,7 @@ export default function AssetsPage() {
                   onClick={() => setFilter(f)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     filter === f
-                      ? "bg-pine text-white"
+                      ? "bg-primary text-white"
                       : "bg-white border border-line text-ink/70 hover:bg-gray-50"
                   }`}
                 >
@@ -107,7 +107,7 @@ export default function AssetsPage() {
                   onClick={() => setSelectedCorridor(corridor)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     selectedCorridor === corridor
-                      ? "bg-pine text-white"
+                      ? "bg-primary text-white"
                       : "bg-white border border-line text-ink/70 hover:bg-gray-50"
                   }`}
                 >
@@ -138,7 +138,8 @@ export default function AssetsPage() {
                   <th className="text-left">Subsidiary</th>
                   <th className="text-left">Corridor</th>
                   <th className="text-right">Capacity</th>
-                  <th className="text-left">Specs</th>
+                  <th className="text-left">Specs / Products</th>
+                  <th className="text-left">Pressure (PSI)</th>
                   <th className="text-left">Status</th>
                   <th className="text-left">Commissioned</th>
                   <th className="text-left">Source</th>
@@ -172,7 +173,16 @@ export default function AssetsPage() {
                       <td className="text-sm text-ink/70">
                         {asset.diameterIn && asset.lengthKm
                           ? `${asset.diameterIn}" × ${asset.lengthKm} km`
+                          : asset.products
+                          ? asset.products.join(", ")
+                          : asset.productType
+                          ? asset.productType
                           : asset.designPressure || asset.gasType || "—"}
+                      </td>
+                      <td className="text-sm text-ink/70">
+                        {asset.inletPressure && asset.outletPressure
+                          ? `${formatNumber(asset.inletPressure, 0)} / ${formatNumber(asset.outletPressure, 0)}`
+                          : "—"}
                       </td>
                       <td>
                         <span
@@ -197,7 +207,7 @@ export default function AssetsPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={9} className="text-center text-ink/60 py-8">
+                    <td colSpan={10} className="text-center text-ink/60 py-8">
                       <Database className="w-8 h-8 text-ink/30 mx-auto mb-2" />
                       No assets found matching the selected filters
                     </td>
@@ -212,23 +222,23 @@ export default function AssetsPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
           <div className="kpi-card">
             <p className="text-sm text-ink/60 mb-1">Total Pipelines</p>
-            <p className="text-2xl font-bold text-pine">
+            <p className="text-2xl font-bold text-primary">
               {assets.filter((a) => a.cls === "Pipeline").length}
             </p>
           </div>
           <div className="kpi-card">
             <p className="text-sm text-ink/60 mb-1">Processing Plants</p>
-            <p className="text-2xl font-bold text-pine">{processingPlants.length}</p>
+            <p className="text-2xl font-bold text-primary">{processingPlants.length}</p>
           </div>
           <div className="kpi-card">
             <p className="text-sm text-ink/60 mb-1">Power Offtakers</p>
-            <p className="text-2xl font-bold text-pine">
+            <p className="text-2xl font-bold text-primary">
               {offtakers.filter((o) => o.sector === "Power").length}
             </p>
           </div>
           <div className="kpi-card">
             <p className="text-sm text-ink/60 mb-1">Industrial Offtakers</p>
-            <p className="text-2xl font-bold text-pine">
+            <p className="text-2xl font-bold text-primary">
               {
                 offtakers.filter(
                   (o) =>
@@ -243,7 +253,7 @@ export default function AssetsPage() {
         </div>
 
         {/* Note */}
-        <div className="mt-6 p-4 bg-pine/5 border border-pine/20 rounded-lg">
+        <div className="mt-6 p-4 bg-primary/5 border border-pine/20 rounded-lg">
           <p className="text-sm text-ink/70">
             <strong>Seed Data:</strong> Loaded from NNPC_Gas_Asset_Inventory.xlsx equivalent.
             Capacities are nameplate/installed; replace with contracted/DCQ values from

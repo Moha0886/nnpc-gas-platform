@@ -79,7 +79,7 @@ export default function DefermentPage() {
                 onClick={() => setSelectedCorridor(corridor)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   selectedCorridor === corridor
-                    ? "bg-pine text-white"
+                    ? "bg-primary text-white"
                     : "bg-white border border-line text-ink/70 hover:bg-gray-50"
                 }`}
               >

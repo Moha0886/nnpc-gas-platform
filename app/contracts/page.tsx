@@ -79,7 +79,7 @@ export default function ContractsPage() {
                   onClick={() => setSelectedCorridor(corridor)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     selectedCorridor === corridor
-                      ? "bg-pine text-white"
+                      ? "bg-primary text-white"
                       : "bg-white border border-line text-ink/70 hover:bg-gray-50"
                   }`}
                 >
@@ -96,11 +96,11 @@ export default function ContractsPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="kpi-card">
             <p className="text-sm text-ink/60 mb-1">Total Contracts</p>
-            <p className="text-3xl font-bold text-pine">{contracts.length}</p>
+            <p className="text-3xl font-bold text-primary">{contracts.length}</p>
           </div>
           <div className="kpi-card">
             <p className="text-sm text-ink/60 mb-1">Green Status</p>
-            <p className="text-3xl font-bold text-pine">
+            <p className="text-3xl font-bold text-primary">
               {contracts.filter((c) => c.ragStatus === "green").length}
             </p>
           </div>
@@ -179,7 +179,7 @@ export default function ContractsPage() {
         </div>
 
         {/* Note */}
-        <div className="mt-6 p-4 bg-pine/5 border border-pine/20 rounded-lg">
+        <div className="mt-6 p-4 bg-primary/5 border border-pine/20 rounded-lg">
           <p className="text-sm text-ink/70">
             <strong>RAG Status:</strong> Green ({"≥"}95% delivery, DSO {"<"}45 days), Amber
             ({"≥"}85% delivery OR DSO {"<"}90 days), Red (below thresholds).

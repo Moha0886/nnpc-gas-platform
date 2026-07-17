@@ -86,7 +86,7 @@ export default function OfftakersPage() {
                 onClick={() => setSelectedCorridor(corridor)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   selectedCorridor === corridor
-                    ? "bg-pine text-white"
+                    ? "bg-primary text-white"
                     : "bg-white border border-line text-ink/70 hover:bg-gray-50"
                 }`}
               >
@@ -123,7 +123,7 @@ export default function OfftakersPage() {
                   <div className="flex items-center gap-4 flex-1">
                     {hasSubs ? (
                       isExpanded ? (
-                        <ChevronDown className="w-5 h-5 text-pine" />
+                        <ChevronDown className="w-5 h-5 text-primary" />
                       ) : (
                         <ChevronRight className="w-5 h-5 text-ink/40" />
                       )
@@ -148,7 +148,7 @@ export default function OfftakersPage() {
                           Delivery Point: {main.deliveryPointId}
                         </span>
                         {hasSubs && (
-                          <span className="text-pine font-medium">
+                          <span className="text-primary font-medium">
                             {subs.length} sub-offtaker{subs.length > 1 ? "s" : ""}
                           </span>
                         )}
@@ -160,13 +160,13 @@ export default function OfftakersPage() {
                   <div className="flex items-center gap-8">
                     <div className="text-right">
                       <p className="text-xs text-ink/60 mb-1">Received</p>
-                      <p className="text-xl font-bold text-gasblue tabular-nums">
+                      <p className="text-xl font-bold text-accent tabular-nums">
                         {formatNumber(mainFlow?.received || 0, 0)}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-ink/60 mb-1">Offtaken</p>
-                      <p className="text-xl font-bold text-pine tabular-nums">
+                      <p className="text-xl font-bold text-primary tabular-nums">
                         {formatNumber(mainFlow?.offtaken || 0, 0)}
                       </p>
                     </div>
@@ -221,7 +221,7 @@ export default function OfftakersPage() {
                       <div
                         className={`p-4 rounded-lg border-2 ${
                           recon.status === "OK"
-                            ? "bg-pine/5 border-pine/20"
+                            ? "bg-primary/5 border-pine/20"
                             : recon.status === "Warning"
                             ? "bg-flare/5 border-flare/20"
                             : "bg-alert/5 border-alert/20"
@@ -230,7 +230,7 @@ export default function OfftakersPage() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             {recon.status === "OK" ? (
-                              <CheckCircle className="w-5 h-5 text-pine" />
+                              <CheckCircle className="w-5 h-5 text-primary" />
                             ) : (
                               <AlertTriangle
                                 className={`w-5 h-5 ${
@@ -266,7 +266,7 @@ export default function OfftakersPage() {
                               <p
                                 className={`text-lg font-bold tabular-nums ${
                                   recon.status === "OK"
-                                    ? "text-pine"
+                                    ? "text-primary"
                                     : recon.status === "Warning"
                                     ? "text-flare"
                                     : "text-alert"
@@ -290,7 +290,7 @@ export default function OfftakersPage() {
         )}
 
         {/* Notes */}
-        <div className="p-4 bg-pine/5 border border-pine/20 rounded-lg">
+        <div className="p-4 bg-primary/5 border border-pine/20 rounded-lg">
           <p className="text-sm text-ink/70">
             <strong>Reconciliation Status:</strong> OK ({"<"}2% difference), Warning (2-5%
             difference), Alert ({">"}5% difference). Sub-offtaker volumes must reconcile to

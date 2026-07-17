@@ -41,7 +41,7 @@ export default function VolumesPage() {
                 onClick={() => setSelectedCorridor(corridor)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   selectedCorridor === corridor
-                    ? "bg-pine text-white"
+                    ? "bg-primary text-white"
                     : "bg-white border border-line text-ink/70 hover:bg-gray-50"
                 }`}
               >
@@ -64,7 +64,7 @@ export default function VolumesPage() {
             <div className="flex items-center gap-4">
               <div className="w-48 text-sm font-medium text-ink">Gas Production</div>
               <div className="flex-1 flex items-center gap-3">
-                <div className="bg-gasblue text-white px-6 py-3 rounded-lg font-bold tabular-nums">
+                <div className="bg-accent text-white px-6 py-3 rounded-lg font-bold tabular-nums">
                   {formatNumber(balance.produced, 0)}
                 </div>
                 <span className="text-sm text-ink/60">MMscf/d from fields & JVs</span>
@@ -86,7 +86,7 @@ export default function VolumesPage() {
             <div className="flex items-center gap-4 border-t border-line pt-4">
               <div className="w-48 text-sm font-medium text-ink">Into Transmission</div>
               <div className="flex-1 flex items-center gap-3">
-                <div className="bg-gasblue text-white px-6 py-3 rounded-lg font-bold tabular-nums">
+                <div className="bg-accent text-white px-6 py-3 rounded-lg font-bold tabular-nums">
                   {formatNumber(balance.receivedIntoTransmission, 0)}
                 </div>
                 <span className="text-sm text-ink/60">
@@ -121,7 +121,7 @@ export default function VolumesPage() {
             <div className="flex items-center gap-4 border-t border-line pt-4">
               <div className="w-48 text-sm font-medium text-ink">Delivered to Offtakers</div>
               <div className="flex-1 flex items-center gap-3">
-                <div className="bg-pine text-white px-6 py-3 rounded-lg font-bold tabular-nums">
+                <div className="bg-primary text-white px-6 py-3 rounded-lg font-bold tabular-nums">
                   {formatNumber(balance.delivered, 0)}
                 </div>
                 <span className="text-sm text-ink/60">NGML sales to customers</span>
@@ -239,7 +239,7 @@ export default function VolumesPage() {
         </div>
 
         {/* Note */}
-        <div className="mt-6 p-4 bg-pine/5 border border-pine/20 rounded-lg">
+        <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-lg">
           <p className="text-sm text-ink/70">
             <strong>Note:</strong> UFG is computed as: Received − Fuel Gas − Line Pack Δ
             − Delivered. Gas day is 06:00–06:00 WAT.

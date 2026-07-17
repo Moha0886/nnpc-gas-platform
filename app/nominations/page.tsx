@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { getOfftakerFlows, offtakers } from "@/lib/data";
 import { formatNumber } from "@/lib/utils";
 import { FileText, AlertCircle } from "lucide-react";
@@ -82,7 +82,7 @@ export default function NominationsPage() {
                 onClick={() => setSelectedCorridor(corridor)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   selectedCorridor === corridor
-                    ? "bg-pine text-white"
+                    ? "bg-primary text-white"
                     : "bg-white border border-line text-ink/70 hover:bg-gray-50"
                 }`}
               >
@@ -98,7 +98,7 @@ export default function NominationsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="kpi-card">
             <div className="flex items-center gap-3 mb-2">
-              <FileText className="w-5 h-5 text-pine" />
+              <FileText className="w-5 h-5 text-primary" />
               <span className="text-sm font-medium text-ink/60">Total Nominated</span>
             </div>
             <p className="text-3xl font-bold text-ink tabular-nums">
@@ -170,11 +170,11 @@ export default function NominationsPage() {
                   ? Object.keys(groupedFlows)
                       .sort()
                       .map((corridor) => (
-                        <>
+                        <Fragment key={`corridor-${corridor}`}>
                           <tr key={`header-${corridor}`} className="bg-gray-50">
                             <td
                               colSpan={10}
-                              className="font-semibold text-pine py-2"
+                              className="font-semibold text-primary py-2"
                             >
                               {corridor} Corridor
                             </td>
@@ -227,7 +227,7 @@ export default function NominationsPage() {
                               </td>
                             </tr>
                           ))}
-                        </>
+                        </Fragment>
                       ))
                   : enrichedFlows.map((flow) => (
                       <tr key={flow.offtakerId}>
@@ -273,7 +273,7 @@ export default function NominationsPage() {
                     ))}
 
                 {/* Totals Row */}
-                <tr className="bg-pine/5 font-bold border-t-2 border-pine">
+                <tr className="bg-primary/5 font-bold border-t-2 border-primary">
                   <td colSpan={3}>TOTAL</td>
                   <td className="text-right">{formatNumber(totals.nominated, 0)}</td>
                   <td className="text-right">{formatNumber(totals.allocated, 0)}</td>
@@ -295,7 +295,7 @@ export default function NominationsPage() {
         </div>
 
         {/* Notes */}
-        <div className="mt-6 p-4 bg-pine/5 border border-pine/20 rounded-lg">
+        <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-lg">
           <p className="text-sm text-ink/70">
             <strong>6-Stage Cycle:</strong> Nominated (offtaker request) → Allocated
             (NGML allocation) → Forecast supply (forward projection) → Received (metered

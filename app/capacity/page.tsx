@@ -49,7 +49,7 @@ export default function CapacityPage() {
                 onClick={() => setSelectedCorridor(corridor)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   selectedCorridor === corridor
-                    ? "bg-pine text-white"
+                    ? "bg-primary text-white"
                     : "bg-white border border-line text-ink/70 hover:bg-gray-50"
                 }`}
               >
@@ -143,7 +143,7 @@ export default function CapacityPage() {
         </div>
 
         {/* Note */}
-        <div className="mt-6 p-4 bg-pine/5 border border-pine/20 rounded-lg">
+        <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-lg">
           <p className="text-sm text-ink/70">
             <strong>Capacity Layers:</strong> Nameplate (installed), Available (after
             maintenance/outages), Contracted (committed capacity), Actual (current flow).

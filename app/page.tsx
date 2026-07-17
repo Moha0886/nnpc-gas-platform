@@ -97,7 +97,7 @@ export default function ExecutiveOverview() {
             value={formatNumber(balance.produced, 0)}
             unit="MMscf/d"
             icon={Activity}
-            color="gasblue"
+            color="accent"
             trend={{ value: 2.3, isPositive: true }}
           />
           <KPICard
@@ -105,7 +105,7 @@ export default function ExecutiveOverview() {
             value={formatNumber(balance.delivered, 0)}
             unit="MMscf/d"
             icon={TrendingUp}
-            color="pine"
+            color="primary"
             trend={{ value: 1.8, isPositive: true }}
           />
           <KPICard
@@ -121,7 +121,7 @@ export default function ExecutiveOverview() {
             value={networkUtilization.toFixed(1)}
             unit="%"
             icon={Gauge}
-            color="pine"
+            color="primary"
             trend={{ value: 0.5, isPositive: true }}
           />
         </div>
@@ -260,7 +260,7 @@ export default function ExecutiveOverview() {
         </div>
 
         {/* Note */}
-        <div className="mt-8 p-4 bg-pine/5 border border-pine/20 rounded-lg">
+        <div className="mt-8 p-4 bg-primary/5 border border-primary/20 rounded-lg">
           <p className="text-sm text-ink/70">
             <strong>Note:</strong> Data shown is from seed data / mock values. Replace
             with real NGIC/NGML figures for production use. Corridor filter will apply

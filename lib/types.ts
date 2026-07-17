@@ -48,6 +48,8 @@ export interface Asset {
   diameterIn?: number; // pipelines
   lengthKm?: number; // pipelines
   designPressure?: string; // e.g. "98 barg"
+  inletPressure?: number; // PSI - for pipelines
+  outletPressure?: number; // PSI - for pipelines
   status: AssetStatus;
   commissioned?: number;
   source?: string; // provenance for seed data
@@ -61,11 +63,14 @@ export interface ProcessingPlant extends Asset {
 
 // ---------- Offtaker Hierarchy ----------
 
+export type ProductType = "Lean gas" | "Rich gas" | "LPG" | "Condensate" | "LNG feedstock" | "Mixed";
+
 export interface Offtaker {
   id: string;
   name: string;
   corridor: Corridor;
   sector: Sector;
+  productType?: ProductType; // Type of gas product they take
   parentOfftakerId?: string; // null = main offtaker; set = sub-offtaker
   deliveryPointId: string; // custody-transfer point that meters it
   dcq?: number; // Daily Contract Quantity, MMscf/d

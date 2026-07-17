@@ -3,13 +3,16 @@
 @tailwind utilities;
 
 :root {
+  /* NNPC Branding Colors */
+  --primary: #00AD51;
+  --secondary: #00246B;
+  --accent: #0D5EBA;
+
+  /* Operational Colors */
   --paper: #FAFAF7;
   --ink: #16211E;
-  --pine: #0F4C42;
-  --pine-deep: #0A332C;
   --flare: #D98E04;
   --alert: #B3402A;
-  --gasblue: #2E6FA3;
   --line: #DCDAD2;
 }
 
@@ -37,16 +40,16 @@ body {
   }
 
   .sidebar-link-active {
-    @apply bg-pine text-white;
+    @apply bg-primary text-white;
   }
 
   .sidebar-link-inactive {
-    @apply text-ink/70 hover:bg-pine/10 hover:text-pine;
+    @apply text-ink/70 hover:bg-primary/10 hover:text-primary;
   }
 
   /* Button variants */
   .btn-primary {
-    @apply bg-pine text-white px-4 py-2 rounded-lg font-medium hover:bg-pine-deep transition-colors;
+    @apply bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-600 transition-colors;
   }
 
   .btn-secondary {
@@ -68,7 +71,7 @@ body {
 
   /* Status badges */
   .badge-operational {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pine/10 text-pine;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary;
   }
 
   .badge-alert {

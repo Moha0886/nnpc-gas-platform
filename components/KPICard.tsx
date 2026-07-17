@@ -10,7 +10,7 @@ interface KPICardProps {
     value: number;
     isPositive: boolean;
   };
-  color?: "pine" | "gasblue" | "flare" | "alert";
+  color?: "primary" | "accent" | "flare" | "alert";
   className?: string;
 }
 
@@ -20,12 +20,12 @@ export default function KPICard({
   unit,
   icon: Icon,
   trend,
-  color = "pine",
+  color = "primary",
   className,
 }: KPICardProps) {
   const colorClasses = {
-    pine: "bg-pine/10 text-pine",
-    gasblue: "bg-gasblue/10 text-gasblue",
+    primary: "bg-primary/10 text-primary",
+    accent: "bg-accent/10 text-accent",
     flare: "bg-flare/10 text-flare",
     alert: "bg-alert/10 text-alert",
   };
@@ -45,7 +45,7 @@ export default function KPICard({
               <span
                 className={cn(
                   "text-sm font-medium",
-                  trend.isPositive ? "text-pine" : "text-alert"
+                  trend.isPositive ? "text-primary" : "text-alert"
                 )}
               >
                 {trend.isPositive ? "+" : ""}

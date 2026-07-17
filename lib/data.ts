@@ -2,7 +2,7 @@
  * Mock Data Layer - NNPC Gas Performance Platform
  *
  * This file contains seed data from the spec (Section 6).
- * Each export will be replaced with Route Handlers (app/api/*/route.ts)
+ * Each export will be replaced with Route Handlers in app/api
  * that query the governed data platform.
  */
 
@@ -40,6 +40,8 @@ export const assets: Asset[] = [
     diameterIn: 36,
     lengthKm: 514,
     designPressure: "85 barg",
+    inletPressure: 1233, // PSI (85 barg)
+    outletPressure: 1050, // PSI (~15% pressure drop over 514km)
     status: "Operational",
     commissioned: 1989,
     source: "NNPC Gas Asset Inventory",
@@ -54,6 +56,8 @@ export const assets: Asset[] = [
     diameterIn: 48,
     lengthKm: 130,
     designPressure: "90 barg",
+    inletPressure: 1305, // PSI (90 barg)
+    outletPressure: 1200, // PSI (~8% pressure drop over 130km)
     status: "Operational",
     commissioned: 2010,
     source: "NNPC Gas Asset Inventory",
@@ -68,6 +72,8 @@ export const assets: Asset[] = [
     diameterIn: 40,
     lengthKm: 614,
     designPressure: "98 barg",
+    inletPressure: 1421, // PSI (98 barg)
+    outletPressure: 1180, // PSI (~17% pressure drop over 614km)
     status: "Under construction",
     commissioned: 2025,
     source: "NNPC Gas Asset Inventory",
@@ -133,6 +139,7 @@ export const offtakers: Offtaker[] = [
     name: "Egbin Power Station",
     corridor: "Western",
     sector: "Power",
+    productType: "Lean gas",
     deliveryPointId: "dp-egbin",
     dcq: 215,
     contractId: "gsa-egbin-001",
@@ -142,6 +149,7 @@ export const offtakers: Offtaker[] = [
     name: "Olorunsogo Power Station",
     corridor: "Western",
     sector: "Power",
+    productType: "Lean gas",
     deliveryPointId: "dp-olorunsogo",
     dcq: 140,
     contractId: "gsa-olorunsogo-001",
@@ -151,6 +159,7 @@ export const offtakers: Offtaker[] = [
     name: "Omotosho Power Station",
     corridor: "Western",
     sector: "Power",
+    productType: "Lean gas",
     deliveryPointId: "dp-omotosho",
     dcq: 125,
     contractId: "gsa-omotosho-001",
@@ -162,6 +171,7 @@ export const offtakers: Offtaker[] = [
     name: "Okpai Power Station",
     corridor: "Eastern",
     sector: "Power",
+    productType: "Lean gas",
     deliveryPointId: "dp-okpai",
     dcq: 78,
     contractId: "gsa-okpai-001",
@@ -171,6 +181,7 @@ export const offtakers: Offtaker[] = [
     name: "Afam VI Power Station",
     corridor: "Eastern",
     sector: "Power",
+    productType: "Lean gas",
     deliveryPointId: "dp-afam-vi",
     dcq: 102,
     contractId: "gsa-afam-vi-001",
@@ -180,6 +191,7 @@ export const offtakers: Offtaker[] = [
     name: "Alaoji Power Station",
     corridor: "Eastern",
     sector: "Power",
+    productType: "Lean gas",
     deliveryPointId: "dp-alaoji",
     dcq: 175,
     contractId: "gsa-alaoji-001",
@@ -191,6 +203,7 @@ export const offtakers: Offtaker[] = [
     name: "Dangote Fertiliser",
     corridor: "Western",
     sector: "Fertiliser",
+    productType: "Lean gas",
     deliveryPointId: "dp-dangote-fert",
     dcq: 195,
     contractId: "gsa-dangote-001",
@@ -202,6 +215,7 @@ export const offtakers: Offtaker[] = [
     name: "Indorama Eleme",
     corridor: "Eastern",
     sector: "Fertiliser",
+    productType: "Lean gas",
     deliveryPointId: "dp-indorama",
     dcq: 145,
     contractId: "gsa-indorama-001",
@@ -211,6 +225,7 @@ export const offtakers: Offtaker[] = [
     name: "Notore Fertiliser",
     corridor: "Eastern",
     sector: "Fertiliser",
+    productType: "Lean gas",
     deliveryPointId: "dp-notore",
     dcq: 35,
     contractId: "gsa-notore-001",
@@ -222,6 +237,7 @@ export const offtakers: Offtaker[] = [
     name: "Shell Nigeria Gas (LDC)",
     corridor: "Lagos",
     sector: "LDC / distributor",
+    productType: "Lean gas",
     deliveryPointId: "dp-shell-ldc",
     dcq: 85,
     contractId: "gsa-shell-ldc-001",
@@ -231,6 +247,7 @@ export const offtakers: Offtaker[] = [
     name: "Ikeja Industrial Estate",
     corridor: "Lagos",
     sector: "LDC / distributor",
+    productType: "Lean gas",
     parentOfftakerId: "off-shell-ldc",
     deliveryPointId: "dp-shell-sub-01",
     dcq: 22,
@@ -240,6 +257,7 @@ export const offtakers: Offtaker[] = [
     name: "Apapa Logistics Hub",
     corridor: "Lagos",
     sector: "LDC / distributor",
+    productType: "Lean gas",
     parentOfftakerId: "off-shell-ldc",
     deliveryPointId: "dp-shell-sub-02",
     dcq: 18,
@@ -249,6 +267,7 @@ export const offtakers: Offtaker[] = [
     name: "Victoria Island Commercial",
     corridor: "Lagos",
     sector: "LDC / distributor",
+    productType: "Lean gas",
     parentOfftakerId: "off-shell-ldc",
     deliveryPointId: "dp-shell-sub-03",
     dcq: 15,
@@ -260,6 +279,7 @@ export const offtakers: Offtaker[] = [
     name: "Axxela Gas Distribution",
     corridor: "Lagos",
     sector: "LDC / distributor",
+    productType: "Lean gas",
     deliveryPointId: "dp-axxela-ldc",
     dcq: 72,
     contractId: "gsa-axxela-ldc-001",
@@ -269,6 +289,7 @@ export const offtakers: Offtaker[] = [
     name: "Lekki FTZ Customers",
     corridor: "Lagos",
     sector: "LDC / distributor",
+    productType: "Lean gas",
     parentOfftakerId: "off-axxela-ldc",
     deliveryPointId: "dp-axxela-sub-01",
     dcq: 28,
@@ -278,6 +299,7 @@ export const offtakers: Offtaker[] = [
     name: "Ikorodu Industrial",
     corridor: "Lagos",
     sector: "LDC / distributor",
+    productType: "Lean gas",
     parentOfftakerId: "off-axxela-ldc",
     deliveryPointId: "dp-axxela-sub-02",
     dcq: 19,
