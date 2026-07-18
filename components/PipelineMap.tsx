@@ -204,7 +204,7 @@ export default function PipelineMap({
       const el = document.createElement("div");
       el.className = "asset-marker";
       el.style.cursor = "pointer";
-      el.style.transition = "transform 0.2s";
+      el.style.transition = "filter 0.2s";
 
       // Color based on status
       const statusColors = {
@@ -283,11 +283,11 @@ export default function PipelineMap({
 
       // Add hover effect
       el.addEventListener("mouseenter", () => {
-        el.style.transform = "scale(1.15)";
+        el.style.filter = "brightness(1.2) drop-shadow(0 0 8px rgba(0,0,0,0.3))";
         el.style.zIndex = "1000";
       });
       el.addEventListener("mouseleave", () => {
-        el.style.transform = "scale(1)";
+        el.style.filter = "";
         el.style.zIndex = "auto";
       });
 
