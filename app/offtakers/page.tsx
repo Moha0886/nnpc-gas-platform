@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { offtakers, getOfftakerFlows } from "@/lib/data";
 import { formatNumber } from "@/lib/utils";
-import { ChevronDown, ChevronRight, Network, AlertTriangle, CheckCircle } from "lucide-react";
+import { ChevronDown, ChevronRight, Network, AlertTriangle, CheckCircle, Gauge } from "lucide-react";
 import type { Corridor } from "@/lib/types";
 
 export default function OfftakersPage() {
@@ -67,15 +67,42 @@ export default function OfftakersPage() {
 
   const corridors: Array<Corridor | "All"> = ["All", "Eastern", "Western", "Northern", "Lagos"];
 
+  // Calculate overall capacity utilization metrics
+  const utilizationMetrics = mainOfftakers.reduce(
+    (acc, offtaker) => {
+      const flow = getFlowData(offtaker.id);
+      const dcq = offtaker.dcq || 0;
+      const offtaken = flow?.offtaken || 0;
+
+      acc.totalDCQ += dcq;
+      acc.totalOfftaken += offtaken;
+
+      if (dcq > 0) {
+        acc.count += 1;
+        const utilization = (offtaken / dcq) * 100;
+        if (utilization >= 80) acc.highUtil += 1;
+        else if (utilization >= 60) acc.moderateUtil += 1;
+        else acc.lowUtil += 1;
+      }
+
+      return acc;
+    },
+    { totalDCQ: 0, totalOfftaken: 0, count: 0, highUtil: 0, moderateUtil: 0, lowUtil: 0 }
+  );
+
+  const overallUtilization = utilizationMetrics.totalDCQ > 0
+    ? (utilizationMetrics.totalOfftaken / utilizationMetrics.totalDCQ) * 100
+    : 0;
+
   return (
     <div className="min-h-screen">
       {/* Header */}
       <div className="bg-white border-b border-line px-8 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-ink">Offtaker Hierarchy</h2>
+            <h2 className="text-2xl font-bold text-ink">Offtaker Capacity & Hierarchy</h2>
             <p className="text-sm text-ink/60 mt-1">
-              Main offtakers with sub-offtaker branches and reconciliation
+              Customer capacity utilization with sub-offtaker reconciliation
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -97,7 +124,58 @@ export default function OfftakersPage() {
         </div>
       </div>
 
-      <div className="p-8 space-y-6">
+      <div className="p-8">
+        {/* Capacity Utilization Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="kpi-card">
+            <div className="flex items-center gap-3 mb-2">
+              <Gauge className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium text-ink/60">Overall Utilization</span>
+            </div>
+            <p className="text-3xl font-bold text-primary tabular-nums">
+              {overallUtilization.toFixed(1)}
+              <span className="text-lg text-ink/60 ml-1">%</span>
+            </p>
+            <p className="text-xs text-ink/50 mt-1">
+              {formatNumber(utilizationMetrics.totalOfftaken, 0)} / {formatNumber(utilizationMetrics.totalDCQ, 0)} MMscf/d
+            </p>
+          </div>
+
+          <div className="kpi-card">
+            <div className="flex items-center gap-3 mb-2">
+              <CheckCircle className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium text-ink/60">High Utilization</span>
+            </div>
+            <p className="text-3xl font-bold text-primary tabular-nums">
+              {utilizationMetrics.highUtil}
+            </p>
+            <p className="text-xs text-ink/50 mt-1">≥80% of DCQ</p>
+          </div>
+
+          <div className="kpi-card">
+            <div className="flex items-center gap-3 mb-2">
+              <AlertTriangle className="w-5 h-5 text-flare" />
+              <span className="text-sm font-medium text-ink/60">Moderate Utilization</span>
+            </div>
+            <p className="text-3xl font-bold text-flare tabular-nums">
+              {utilizationMetrics.moderateUtil}
+            </p>
+            <p className="text-xs text-ink/50 mt-1">60-79% of DCQ</p>
+          </div>
+
+          <div className="kpi-card">
+            <div className="flex items-center gap-3 mb-2">
+              <AlertTriangle className="w-5 h-5 text-alert" />
+              <span className="text-sm font-medium text-ink/60">Low Utilization</span>
+            </div>
+            <p className="text-3xl font-bold text-alert tabular-nums">
+              {utilizationMetrics.lowUtil}
+            </p>
+            <p className="text-xs text-ink/50 mt-1">&lt;60% of DCQ</p>
+          </div>
+        </div>
+
+        <div className="space-y-6">
         {mainOfftakers.length === 0 ? (
           <div className="kpi-card text-center py-12">
             <Network className="w-12 h-12 text-ink/30 mx-auto mb-3" />
@@ -169,6 +247,36 @@ export default function OfftakersPage() {
                       <p className="text-xl font-bold text-primary tabular-nums">
                         {formatNumber(mainFlow?.offtaken || 0, 0)}
                       </p>
+                    </div>
+                    <div className="text-right min-w-[120px]">
+                      <p className="text-xs text-ink/60 mb-1">Capacity Utilization</p>
+                      {(() => {
+                        const dcq = main.dcq || 0;
+                        const offtaken = mainFlow?.offtaken || 0;
+                        const utilization = dcq > 0 ? (offtaken / dcq) * 100 : 0;
+                        const utilizationColor =
+                          utilization >= 80 ? "text-primary" :
+                          utilization >= 60 ? "text-flare" :
+                          "text-alert";
+
+                        return (
+                          <div>
+                            <p className={`text-xl font-bold tabular-nums ${utilizationColor}`}>
+                              {utilization.toFixed(1)}%
+                            </p>
+                            <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                              <div
+                                className={`h-2 rounded-full ${
+                                  utilization >= 80 ? "bg-primary" :
+                                  utilization >= 60 ? "bg-flare" :
+                                  "bg-alert"
+                                }`}
+                                style={{ width: `${Math.min(utilization, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -289,9 +397,16 @@ export default function OfftakersPage() {
           })
         )}
 
+        </div>
+
         {/* Notes */}
-        <div className="p-4 bg-primary/5 border border-pine/20 rounded-lg">
+        <div className="p-4 bg-primary/5 border border-pine/20 rounded-lg mt-6">
           <p className="text-sm text-ink/70">
+            <strong>Capacity Utilization:</strong> High (≥80% of DCQ) = Efficient use of contracted capacity.
+            Moderate (60-79%) = Room for improvement. Low (&lt;60%) = Significant underutilization.
+            Utilization % = Offtaken / DCQ.
+          </p>
+          <p className="text-sm text-ink/70 mt-2">
             <strong>Reconciliation Status:</strong> OK ({"<"}2% difference), Warning (2-5%
             difference), Alert ({">"}5% difference). Sub-offtaker volumes must reconcile to
             the parent custody meter.

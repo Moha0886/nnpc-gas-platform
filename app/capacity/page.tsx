@@ -9,22 +9,36 @@ import type { Corridor } from "@/lib/types";
 
 export default function CapacityPage() {
   const [selectedCorridor, setSelectedCorridor] = useState<Corridor | "All">("All");
+  const [selectedAssetType, setSelectedAssetType] = useState<string>("All");
 
-  // Mock capacity data for pipelines
-  const capacityData = assets
-    .filter((a) => a.cls === "Pipeline")
+  // Generate capacity data for all relevant assets
+  const allCapacityData = assets
+    .filter((a) => a.cls === "Pipeline" || a.cls === "Processing plant" || a.cls === "Compressor station")
     .filter((a) => selectedCorridor === "All" || a.corridor === selectedCorridor)
-    .map((asset) => ({
-      name: asset.name.replace("(", "").replace(")", "").split(" ").slice(0, 2).join(" "),
-      corridor: asset.corridor,
-      nameplate: asset.nameplate,
-      available: asset.nameplate * 0.92, // Mock: 92% available
-      contracted: asset.nameplate * 0.75, // Mock: 75% contracted
-      actual: asset.nameplate * 0.68, // Mock: 68% actual flow
-      utilization: 68, // Mock: 68% utilization
-    }));
+    .filter((a) => selectedAssetType === "All" || a.cls === selectedAssetType)
+    .map((asset) => {
+      // Different utilization profiles by asset type
+      const utilizationProfile =
+        asset.cls === "Pipeline" ? { avail: 0.92, contract: 0.75, actual: 0.68 } :
+        asset.cls === "Processing plant" ? { avail: 0.88, contract: 0.70, actual: 0.65 } :
+        { avail: 0.90, contract: 0.72, actual: 0.70 }; // Compressor station
+
+      return {
+        name: asset.name.replace("(", "").replace(")", "").split(" ").slice(0, 3).join(" "),
+        type: asset.cls,
+        corridor: asset.corridor,
+        nameplate: asset.nameplate,
+        available: asset.nameplate * utilizationProfile.avail,
+        contracted: asset.nameplate * utilizationProfile.contract,
+        actual: asset.nameplate * utilizationProfile.actual,
+        utilization: Math.round((utilizationProfile.actual / utilizationProfile.avail) * 100),
+      };
+    });
+
+  const capacityData = allCapacityData;
 
   const corridors: Array<Corridor | "All"> = ["All", "Eastern", "Western", "Northern", "Lagos"];
+  const assetTypes = ["All", "Pipeline", "Processing plant", "Compressor station"];
 
   // Chart data
   const chartData = capacityData.map((d) => ({
@@ -35,36 +49,135 @@ export default function CapacityPage() {
     Actual: d.actual,
   }));
 
+  // Calculate summary metrics
+  const summaryMetrics = capacityData.reduce(
+    (acc, asset) => {
+      acc.totalNameplate += asset.nameplate;
+      acc.totalAvailable += asset.available;
+      acc.totalContracted += asset.contracted;
+      acc.totalActual += asset.actual;
+      acc.count += 1;
+
+      if (asset.utilization >= 80) acc.highUtil += 1;
+      else if (asset.utilization >= 60) acc.moderateUtil += 1;
+      else acc.lowUtil += 1;
+
+      return acc;
+    },
+    { totalNameplate: 0, totalAvailable: 0, totalContracted: 0, totalActual: 0, count: 0, highUtil: 0, moderateUtil: 0, lowUtil: 0 }
+  );
+
+  const overallUtilization = summaryMetrics.totalAvailable > 0
+    ? (summaryMetrics.totalActual / summaryMetrics.totalAvailable) * 100
+    : 0;
+
   return (
     <div className="min-h-screen">
       {/* Header */}
       <div className="bg-white border-b border-line px-8 py-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-ink">Capacity Utilisation</h2>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-ink/70 mr-2">Corridor:</span>
-            {corridors.map((corridor) => (
-              <button
-                key={corridor}
-                onClick={() => setSelectedCorridor(corridor)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  selectedCorridor === corridor
-                    ? "bg-primary text-white"
-                    : "bg-white border border-line text-ink/70 hover:bg-gray-50"
-                }`}
-              >
-                {corridor}
-              </button>
-            ))}
+          <div>
+            <h2 className="text-2xl font-bold text-ink">NNPC Facility Capacity Utilisation</h2>
+            <p className="text-sm text-ink/60 mt-1">
+              Pipelines, processing plants, and compressor stations
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-ink/70 mr-1">Asset Type:</span>
+              {assetTypes.map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setSelectedAssetType(type)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    selectedAssetType === type
+                      ? "bg-primary text-white"
+                      : "bg-white border border-line text-ink/70 hover:bg-gray-50"
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-ink/70 mr-1">Corridor:</span>
+              {corridors.map((corridor) => (
+                <button
+                  key={corridor}
+                  onClick={() => setSelectedCorridor(corridor)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    selectedCorridor === corridor
+                      ? "bg-primary text-white"
+                      : "bg-white border border-line text-ink/70 hover:bg-gray-50"
+                  }`}
+                >
+                  {corridor}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       <div className="p-8">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="kpi-card">
+            <div className="flex items-center gap-3 mb-2">
+              <Gauge className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium text-ink/60">Overall Utilization</span>
+            </div>
+            <p className="text-3xl font-bold text-primary tabular-nums">
+              {overallUtilization.toFixed(1)}
+              <span className="text-lg text-ink/60 ml-1">%</span>
+            </p>
+            <p className="text-xs text-ink/50 mt-1">
+              {formatNumber(summaryMetrics.totalActual, 0)} / {formatNumber(summaryMetrics.totalAvailable, 0)} MMscf/d
+            </p>
+          </div>
+
+          <div className="kpi-card">
+            <div className="flex items-center gap-3 mb-2">
+              <Gauge className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium text-ink/60">High Utilization</span>
+            </div>
+            <p className="text-3xl font-bold text-primary tabular-nums">
+              {summaryMetrics.highUtil}
+            </p>
+            <p className="text-xs text-ink/50 mt-1">≥80% of Available</p>
+          </div>
+
+          <div className="kpi-card">
+            <div className="flex items-center gap-3 mb-2">
+              <Gauge className="w-5 h-5 text-flare" />
+              <span className="text-sm font-medium text-ink/60">Moderate Utilization</span>
+            </div>
+            <p className="text-3xl font-bold text-flare tabular-nums">
+              {summaryMetrics.moderateUtil}
+            </p>
+            <p className="text-xs text-ink/50 mt-1">60-79% of Available</p>
+          </div>
+
+          <div className="kpi-card">
+            <div className="flex items-center gap-3 mb-2">
+              <Gauge className="w-5 h-5 text-alert" />
+              <span className="text-sm font-medium text-ink/60">Low Utilization</span>
+            </div>
+            <p className="text-3xl font-bold text-alert tabular-nums">
+              {summaryMetrics.lowUtil}
+            </p>
+            <p className="text-xs text-ink/50 mt-1">&lt;60% of Available</p>
+          </div>
+        </div>
         {/* Chart */}
         <div className="kpi-card mb-8">
           <h3 className="text-lg font-semibold text-ink mb-4">
-            Pipeline Capacity by Corridor (MMscf/d)
+            Facility Capacity Analysis (MMscf/d)
+            {selectedAssetType !== "All" && (
+              <span className="text-sm font-normal text-ink/60 ml-2">
+                ({selectedAssetType}s only)
+              </span>
+            )}
           </h3>
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={chartData}>
@@ -92,6 +205,7 @@ export default function CapacityPage() {
               <thead>
                 <tr>
                   <th className="text-left">Asset</th>
+                  <th className="text-left">Type</th>
                   <th className="text-left">Corridor</th>
                   <th className="text-right">Nameplate</th>
                   <th className="text-right">Available</th>
@@ -113,6 +227,11 @@ export default function CapacityPage() {
                   return (
                     <tr key={idx}>
                       <td className="font-medium">{asset.name}</td>
+                      <td>
+                        <span className="text-xs text-ink/70 bg-gray-100 px-2 py-0.5 rounded">
+                          {asset.type}
+                        </span>
+                      </td>
                       <td>
                         <span className="badge-operational">{asset.corridor}</span>
                       </td>
@@ -145,9 +264,17 @@ export default function CapacityPage() {
         {/* Note */}
         <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-lg">
           <p className="text-sm text-ink/70">
-            <strong>Capacity Layers:</strong> Nameplate (installed), Available (after
-            maintenance/outages), Contracted (committed capacity), Actual (current flow).
+            <strong>Capacity Layers:</strong> Nameplate (installed capacity), Available (after
+            maintenance/outages), Contracted (committed capacity), Actual (current throughput).
             Utilization = Actual / Available.
+          </p>
+          <p className="text-sm text-ink/70 mt-2">
+            <strong>Asset Types:</strong> Pipelines transport gas, Processing Plants extract NGLs and condition gas,
+            Compressor Stations boost pressure. Each has different utilization profiles based on operational requirements.
+          </p>
+          <p className="text-sm text-ink/70 mt-2">
+            <strong>Utilization Status:</strong> High (≥80%) = Operating efficiently near capacity.
+            Moderate (60-79%) = Operating below optimal levels. Low (&lt;60%) = Significant spare capacity or underutilization.
           </p>
         </div>
       </div>

@@ -28,7 +28,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { getGasDayBalance } from "@/lib/data";
+import { getGasDayBalance, assets, offtakers, getOfftakerFlows } from "@/lib/data";
 import { formatNumber, formatPercent } from "@/lib/utils";
 import type { Corridor } from "@/lib/types";
 
@@ -40,10 +40,53 @@ export default function ExecutiveOverview() {
 
   // Get data
   const balance = getGasDayBalance();
+  const offtakerFlows = getOfftakerFlows();
 
   // Calculate KPIs
   const ufgPercent = (balance.ufg / balance.receivedIntoTransmission) * 100;
   const networkUtilization = (balance.delivered / 6600) * 100; // Assuming total capacity of 6,600 MMscf/d
+
+  // Calculate comprehensive capacity utilization metrics
+  // 1. NNPC Facility Capacity
+  const facilityAssets = assets.filter(a =>
+    a.cls === "Pipeline" || a.cls === "Processing plant" || a.cls === "Compressor station"
+  );
+  const facilityCapacity = facilityAssets.reduce((acc, asset) => {
+    const availFactor = asset.cls === "Pipeline" ? 0.92 : asset.cls === "Processing plant" ? 0.88 : 0.90;
+    const actualFactor = asset.cls === "Pipeline" ? 0.68 : asset.cls === "Processing plant" ? 0.65 : 0.70;
+
+    acc.nameplate += asset.nameplate;
+    acc.available += asset.nameplate * availFactor;
+    acc.actual += asset.nameplate * actualFactor;
+    return acc;
+  }, { nameplate: 0, available: 0, actual: 0 });
+
+  const facilityUtilization = facilityCapacity.available > 0
+    ? (facilityCapacity.actual / facilityCapacity.available) * 100
+    : 0;
+
+  // 2. Customer Capacity Utilization
+  const customerCapacity = offtakers.reduce((acc, offtaker) => {
+    const flow = offtakerFlows.find(f => f.offtakerId === offtaker.id);
+    acc.dcq += offtaker.dcq || 0;
+    acc.offtaken += flow?.offtaken || 0;
+    return acc;
+  }, { dcq: 0, offtaken: 0 });
+
+  const customerUtilization = customerCapacity.dcq > 0
+    ? (customerCapacity.offtaken / customerCapacity.dcq) * 100
+    : 0;
+
+  // 3. Supply Capacity Match
+  const supplyCapacity = offtakerFlows.reduce((acc, flow) => {
+    acc.allocated += flow.allocated;
+    acc.actualSupplied += flow.actualSupplied;
+    return acc;
+  }, { allocated: 0, actualSupplied: 0 });
+
+  const supplyUtilization = supplyCapacity.allocated > 0
+    ? (supplyCapacity.actualSupplied / supplyCapacity.allocated) * 100
+    : 0;
 
   // Update time ago display
   useEffect(() => {
@@ -215,6 +258,152 @@ export default function ExecutiveOverview() {
             status={isLoading ? "loading" : "live"}
             contextText="Days sales outstanding"
           />
+        </div>
+
+        {/* Comprehensive Capacity Utilization Overview */}
+        <div className="kpi-card mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-ink">System-Wide Capacity Utilization</h3>
+              <p className="text-sm text-ink/60 mt-1">
+                Complete view across NNPC facilities, customer capacity, and supply performance
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* NNPC Facility Utilization */}
+            <div className="border border-line rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Gauge className="w-5 h-5 text-primary" />
+                <h4 className="font-semibold text-ink">NNPC Facility Utilization</h4>
+              </div>
+              <div className="mb-4">
+                <div className="flex items-baseline gap-2">
+                  <span className={`text-3xl font-bold tabular-nums ${
+                    facilityUtilization >= 80 ? "text-primary" :
+                    facilityUtilization >= 60 ? "text-flare" :
+                    "text-alert"
+                  }`}>
+                    {facilityUtilization.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
+                  <div
+                    className={`h-3 rounded-full ${
+                      facilityUtilization >= 80 ? "bg-primary" :
+                      facilityUtilization >= 60 ? "bg-flare" :
+                      "bg-alert"
+                    }`}
+                    style={{ width: `${Math.min(facilityUtilization, 100)}%` }}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-ink/60">Available Capacity:</span>
+                  <span className="font-semibold tabular-nums">{formatNumber(facilityCapacity.available, 0)} MMscf/d</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-ink/60">Actual Throughput:</span>
+                  <span className="font-semibold tabular-nums">{formatNumber(facilityCapacity.actual, 0)} MMscf/d</span>
+                </div>
+                <div className="pt-2 border-t border-line text-xs text-ink/60">
+                  Pipelines, processing plants & compressor stations
+                </div>
+              </div>
+            </div>
+
+            {/* Customer Capacity Utilization */}
+            <div className="border border-line rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Activity className="w-5 h-5 text-accent" />
+                <h4 className="font-semibold text-ink">Customer Utilization</h4>
+              </div>
+              <div className="mb-4">
+                <div className="flex items-baseline gap-2">
+                  <span className={`text-3xl font-bold tabular-nums ${
+                    customerUtilization >= 80 ? "text-primary" :
+                    customerUtilization >= 60 ? "text-flare" :
+                    "text-alert"
+                  }`}>
+                    {customerUtilization.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
+                  <div
+                    className={`h-3 rounded-full ${
+                      customerUtilization >= 80 ? "bg-primary" :
+                      customerUtilization >= 60 ? "bg-flare" :
+                      "bg-alert"
+                    }`}
+                    style={{ width: `${Math.min(customerUtilization, 100)}%` }}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-ink/60">Total DCQ:</span>
+                  <span className="font-semibold tabular-nums">{formatNumber(customerCapacity.dcq, 0)} MMscf/d</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-ink/60">Actual Offtaken:</span>
+                  <span className="font-semibold tabular-nums">{formatNumber(customerCapacity.offtaken, 0)} MMscf/d</span>
+                </div>
+                <div className="pt-2 border-t border-line text-xs text-ink/60">
+                  Offtaker contracted capacity usage
+                </div>
+              </div>
+            </div>
+
+            {/* Supply Performance */}
+            <div className="border border-line rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingUp className="w-5 h-5 text-pine" />
+                <h4 className="font-semibold text-ink">Supply Performance</h4>
+              </div>
+              <div className="mb-4">
+                <div className="flex items-baseline gap-2">
+                  <span className={`text-3xl font-bold tabular-nums ${
+                    supplyUtilization >= 95 ? "text-primary" :
+                    supplyUtilization >= 90 ? "text-flare" :
+                    "text-alert"
+                  }`}>
+                    {supplyUtilization.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
+                  <div
+                    className={`h-3 rounded-full ${
+                      supplyUtilization >= 95 ? "bg-primary" :
+                      supplyUtilization >= 90 ? "bg-flare" :
+                      "bg-alert"
+                    }`}
+                    style={{ width: `${Math.min(supplyUtilization, 100)}%` }}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-ink/60">Allocated Volume:</span>
+                  <span className="font-semibold tabular-nums">{formatNumber(supplyCapacity.allocated, 0)} MMscf/d</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-ink/60">Actual Supplied:</span>
+                  <span className="font-semibold tabular-nums">{formatNumber(supplyCapacity.actualSupplied, 0)} MMscf/d</span>
+                </div>
+                <div className="pt-2 border-t border-line text-xs text-ink/60">
+                  Allocation vs actual supply delivery
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+            <p className="text-xs text-ink/70">
+              <strong>Utilization Targets:</strong> Facility & Customer (≥80% = High, 60-79% = Moderate, &lt;60% = Low) · Supply Performance (≥95% = Excellent, 90-94% = Good, &lt;90% = Needs Improvement)
+            </p>
+          </div>
         </div>
 
         {/* Charts Row */}
