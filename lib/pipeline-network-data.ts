@@ -914,6 +914,37 @@ export const pipelines: PipelineFeature[] = [
       deferment: 0,
     },
   },
+
+  // WAGP (West African Gas Pipeline) - International Export
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.3500, 6.6500], // Lagos/Badagry (Nigeria)
+        [2.8800, 6.4400], // Entry to Benin
+        [2.1000, 6.3500], // Benin coastal route
+        [1.2500, 6.2000], // Togo coastal route
+        [0.5000, 6.1000], // Entry to Ghana
+        [-0.2000, 5.6000], // Tema (Ghana)
+      ],
+    },
+    properties: {
+      id: "wagp",
+      name: "WAGP (West African Gas Pipeline)",
+      network: "WAGP",
+      pipelineType: "export",
+      diameter: 20,
+      length: 678,
+      capacity: 170,
+      currentFlow: 120,
+      utilization: 70.6,
+      pressure: 1100,
+      status: "operational",
+      corridor: "Western",
+      deferment: 0,
+    },
+  },
 ];
 
 // ============================================================================
@@ -1863,6 +1894,7 @@ export const networks = [
   { id: "ANOH", name: "ANOH-OB3 CTMS", color: "#06B6D4" },
   { id: "Trans-Niger", name: "Trans-Niger (NLNG)", color: "#DC2626" },
   { id: "Lagos", name: "Lagos Distribution", color: "#3B82F6" },
+  { id: "WAGP", name: "WAGP (West Africa Export)", color: "#F97316" },
 ];
 
 // ============================================================================
