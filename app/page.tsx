@@ -13,6 +13,9 @@ import {
   RefreshCw,
   Clock,
   CheckCircle,
+  Filter,
+  Download,
+  FileText,
 } from "lucide-react";
 import {
   BarChart,
@@ -38,6 +41,9 @@ export default function ExecutiveOverview() {
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [timeAgo, setTimeAgo] = useState("just now");
+  const [timeRange, setTimeRange] = useState<"today" | "7days" | "30days">("today");
+  const [selectedSector, setSelectedSector] = useState<string>("All");
+  const [showFilters, setShowFilters] = useState(false);
 
   // Get data
   const balance = getGasDayBalance();
@@ -89,6 +95,38 @@ export default function ExecutiveOverview() {
     ? (supplyCapacity.actualSupplied / supplyCapacity.allocated) * 100
     : 0;
 
+  // Generate time-series data for capacity request vs delivery (last 14 days)
+  const generateTimeSeriesData = () => {
+    const data = [];
+    const today = new Date();
+
+    for (let i = 13; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+
+      // Simulate historical data with some variation
+      const baseNominated = 1200 + Math.random() * 100;
+      const baseReceived = baseNominated * (0.92 + Math.random() * 0.06); // 92-98% fulfillment
+
+      // Add some realistic fluctuations
+      const dayOfWeek = date.getDay();
+      const weekendFactor = (dayOfWeek === 0 || dayOfWeek === 6) ? 0.85 : 1.0;
+
+      data.push({
+        date: dateStr,
+        shortDate: `${date.getMonth() + 1}/${date.getDate()}`,
+        nominated: Math.round(baseNominated * weekendFactor),
+        received: Math.round(baseReceived * weekendFactor),
+        gap: Math.round((baseNominated - baseReceived) * weekendFactor),
+      });
+    }
+
+    return data;
+  };
+
+  const timeSeriesData = generateTimeSeriesData();
+
   // Update time ago display
   useEffect(() => {
     const updateTimeAgo = () => {
@@ -122,6 +160,56 @@ export default function ExecutiveOverview() {
     setIsLoading(false);
   };
 
+  // Export handler
+  const handleExport = (format: 'csv' | 'pdf') => {
+    const data = {
+      gasDay: currentGasDay,
+      corridor: selectedCorridor,
+      sector: selectedSector,
+      timeRange,
+      metrics: {
+        produced: balance.produced,
+        delivered: balance.delivered,
+        ufg: ufgPercent,
+        networkUtilization,
+        facilityUtilization,
+        customerUtilization,
+        supplyUtilization,
+      }
+    };
+
+    if (format === 'csv') {
+      // Create CSV content
+      const csvContent = [
+        ['NNPC Gas Performance Platform - Executive Overview'],
+        ['Generated:', new Date().toISOString()],
+        ['Gas Day:', currentGasDay],
+        ['Corridor:', selectedCorridor],
+        [''],
+        ['Key Metrics'],
+        ['Metric', 'Value', 'Unit'],
+        ['Produced', balance.produced.toString(), 'MMscf/d'],
+        ['Delivered', balance.delivered.toString(), 'MMscf/d'],
+        ['UFG %', ufgPercent.toFixed(1), '%'],
+        ['Network Utilization', networkUtilization.toFixed(1), '%'],
+        ['Facility Utilization', facilityUtilization.toFixed(1), '%'],
+        ['Customer Utilization', customerUtilization.toFixed(1), '%'],
+        ['Supply Performance', supplyUtilization.toFixed(1), '%'],
+      ].map(row => row.join(',')).join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `executive-overview-${currentGasDay}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+  };
+
+  // Get available sectors
+  const sectors = ["All", "Power", "Fertiliser", "Petrochemical", "LDC / distributor", "LNG feedstock"];
+
   // Format current gas day
   const currentGasDay = new Date().toISOString().split('T')[0];
 
@@ -151,36 +239,147 @@ export default function ExecutiveOverview() {
 
   return (
     <div className="min-h-screen">
-      {/* Enhanced Header with Timestamp and Refresh */}
+      {/* Enhanced Header with Filters and Export */}
       <div className="bg-white border-b border-line px-8 py-4 sticky top-0 z-20 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-ink">Executive Overview</h2>
-            <div className="flex items-center gap-3 mt-1 text-sm">
-              <div className="flex items-center gap-1.5 text-ink/60">
-                <Calendar className="w-4 h-4" />
-                <span>Gas Day: <span className="font-semibold text-ink">{currentGasDay}</span></span>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-ink">Executive Overview</h2>
+              <div className="flex items-center gap-3 mt-1 text-sm">
+                <div className="flex items-center gap-1.5 text-ink/60">
+                  <Calendar className="w-4 h-4" />
+                  <span>Gas Day: <span className="font-semibold text-ink">{currentGasDay}</span></span>
+                </div>
+                <div className="flex items-center gap-1.5 text-ink/60">
+                  <Clock className="w-4 h-4" />
+                  <span>Updated <span className="font-semibold text-ink">{timeAgo}</span></span>
+                </div>
+                <span className="pulse-live text-success text-xs font-medium">
+                  Live
+                </span>
               </div>
-              <div className="flex items-center gap-1.5 text-ink/60">
-                <Clock className="w-4 h-4" />
-                <span>Updated <span className="font-semibold text-ink">{timeAgo}</span></span>
-              </div>
-              <span className="pulse-live text-success text-xs font-medium">
-                Live
-              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`px-3 py-2 border rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                  showFilters ? 'bg-primary text-white border-primary' : 'border-line text-ink hover:bg-gray-50'
+                }`}
+              >
+                <Filter className="w-4 h-4" />
+                <span className="hidden sm:inline">Filters</span>
+              </button>
+              <button
+                onClick={() => handleExport('csv')}
+                className="px-3 py-2 border border-line rounded-lg text-sm font-medium text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                <span className="hidden sm:inline">Export CSV</span>
+              </button>
+              <button
+                onClick={handleRefresh}
+                disabled={isLoading}
+                className="px-3 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-600 transition-colors flex items-center gap-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Refresh</span>
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <CorridorFilter onChange={setSelectedCorridor} />
-            <button
-              onClick={handleRefresh}
-              disabled={isLoading}
-              className="btn-secondary flex items-center gap-2"
-            >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Refresh</span>
-            </button>
-          </div>
+
+          {/* Filter Panel */}
+          {showFilters && (
+            <div className="border-t border-line pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Time Range Filter */}
+                <div>
+                  <label className="block text-xs font-medium text-ink/60 mb-2">Time Range</label>
+                  <div className="flex gap-2">
+                    {(['today', '7days', '30days'] as const).map((range) => (
+                      <button
+                        key={range}
+                        onClick={() => setTimeRange(range)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                          timeRange === range
+                            ? 'bg-primary text-white'
+                            : 'bg-gray-100 text-ink hover:bg-gray-200'
+                        }`}
+                      >
+                        {range === 'today' ? 'Today' : range === '7days' ? '7 Days' : '30 Days'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Corridor Filter */}
+                <div>
+                  <label className="block text-xs font-medium text-ink/60 mb-2">Corridor</label>
+                  <select
+                    value={selectedCorridor}
+                    onChange={(e) => setSelectedCorridor(e.target.value as Corridor | "All")}
+                    className="w-full px-3 py-1.5 border border-line rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="All">All Corridors</option>
+                    <option value="Eastern">Eastern</option>
+                    <option value="Western">Western</option>
+                    <option value="Northern">Northern</option>
+                    <option value="Lagos">Lagos</option>
+                  </select>
+                </div>
+
+                {/* Sector Filter */}
+                <div>
+                  <label className="block text-xs font-medium text-ink/60 mb-2">Sector</label>
+                  <select
+                    value={selectedSector}
+                    onChange={(e) => setSelectedSector(e.target.value)}
+                    className="w-full px-3 py-1.5 border border-line rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    {sectors.map((sector) => (
+                      <option key={sector} value={sector}>
+                        {sector}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Active Filters Display */}
+              <div className="flex items-center gap-2 mt-3">
+                <span className="text-xs text-ink/60">Active Filters:</span>
+                {selectedCorridor !== "All" && (
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full flex items-center gap-1">
+                    Corridor: {selectedCorridor}
+                    <button onClick={() => setSelectedCorridor("All")} className="hover:text-primary-600">×</button>
+                  </span>
+                )}
+                {selectedSector !== "All" && (
+                  <span className="px-2 py-1 bg-accent/10 text-accent text-xs rounded-full flex items-center gap-1">
+                    Sector: {selectedSector}
+                    <button onClick={() => setSelectedSector("All")} className="hover:text-accent-600">×</button>
+                  </span>
+                )}
+                {timeRange !== "today" && (
+                  <span className="px-2 py-1 bg-flare/10 text-flare text-xs rounded-full flex items-center gap-1">
+                    Range: {timeRange === '7days' ? '7 Days' : '30 Days'}
+                    <button onClick={() => setTimeRange("today")} className="hover:text-flare-600">×</button>
+                  </span>
+                )}
+                {(selectedCorridor !== "All" || selectedSector !== "All" || timeRange !== "today") && (
+                  <button
+                    onClick={() => {
+                      setSelectedCorridor("All");
+                      setSelectedSector("All");
+                      setTimeRange("today");
+                    }}
+                    className="text-xs text-primary hover:underline ml-2"
+                  >
+                    Clear All
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -591,6 +790,119 @@ export default function ExecutiveOverview() {
           <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-xs text-ink/70">
               <strong>Note:</strong> Unused capacity represents contracted but not utilized DCQ. High unused capacity may indicate overcapacity contracts or customer operational constraints. Consider contract renegotiation for persistent underutilizers.
+            </p>
+          </div>
+        </div>
+
+        {/* Time Series: Customer Requests vs Delivery */}
+        <div className="kpi-card mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-ink">Customer Capacity Request vs Delivery Trend</h3>
+              <p className="text-sm text-ink/60 mt-1">14-day trend showing nominated capacity vs actual received (MMscf/d)</p>
+            </div>
+          </div>
+
+          <ResponsiveContainer width="100%" height={350}>
+            <LineChart
+              data={timeSeriesData}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#DCDAD2" />
+              <XAxis
+                dataKey="shortDate"
+                tick={{ fontSize: 11 }}
+                height={40}
+              />
+              <YAxis
+                tick={{ fontSize: 12 }}
+                label={{ value: 'Driver gas pressure [MPa]', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#666' } }}
+              />
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload;
+                    return (
+                      <div className="bg-white p-3 border border-line rounded-lg shadow-lg">
+                        <p className="font-semibold text-ink mb-2">{data.date}</p>
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between gap-4">
+                            <span className="text-ink/60">Nominated:</span>
+                            <span className="font-semibold text-alert">{formatNumber(data.nominated, 0)} MMscf/d</span>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-ink/60">Received:</span>
+                            <span className="font-semibold text-primary">{formatNumber(data.received, 0)} MMscf/d</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pt-1 border-t border-line">
+                            <span className="text-ink/60">Gap:</span>
+                            <span className="font-semibold text-flare">{formatNumber(data.gap, 0)} MMscf/d</span>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-ink/60">Fulfillment:</span>
+                            <span className="font-semibold text-primary">
+                              {((data.received / data.nominated) * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Legend
+                wrapperStyle={{ paddingTop: '20px' }}
+                iconType="line"
+              />
+              <Line
+                type="monotone"
+                dataKey="nominated"
+                stroke="#CC3311"
+                strokeWidth={2}
+                name="Nominated (Requested)"
+                dot={{ fill: '#CC3311', r: 3 }}
+                activeDot={{ r: 5 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="received"
+                stroke="#0077BB"
+                strokeWidth={2}
+                name="Received (Delivered)"
+                dot={{ fill: '#0077BB', r: 3 }}
+                activeDot={{ r: 5 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
+              <p className="text-xs text-ink/60 mb-1">Average Fulfillment Rate</p>
+              <p className="text-2xl font-bold text-primary tabular-nums">
+                {(
+                  (timeSeriesData.reduce((sum, d) => sum + d.received, 0) /
+                  timeSeriesData.reduce((sum, d) => sum + d.nominated, 0)) * 100
+                ).toFixed(1)}%
+              </p>
+            </div>
+            <div className="p-3 bg-flare/5 border border-flare/20 rounded-lg">
+              <p className="text-xs text-ink/60 mb-1">Average Daily Gap</p>
+              <p className="text-2xl font-bold text-flare tabular-nums">
+                {formatNumber(timeSeriesData.reduce((sum, d) => sum + d.gap, 0) / timeSeriesData.length, 0)} MMscf/d
+              </p>
+            </div>
+            <div className="p-3 bg-accent/5 border border-accent/20 rounded-lg">
+              <p className="text-xs text-ink/60 mb-1">Total Unfulfilled (14 days)</p>
+              <p className="text-2xl font-bold text-accent tabular-nums">
+                {formatNumber(timeSeriesData.reduce((sum, d) => sum + d.gap, 0), 0)} MMscf
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+            <p className="text-xs text-ink/70">
+              <strong>Analysis:</strong> The red line shows total customer nominated capacity (what they requested). The blue line shows actual received capacity (what was delivered). The gap represents unfulfilled nominations due to capacity constraints, maintenance, or supply issues.
             </p>
           </div>
         </div>
