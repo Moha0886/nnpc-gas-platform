@@ -12,6 +12,7 @@ import {
   Calendar,
   RefreshCw,
   Clock,
+  CheckCircle,
 } from "lucide-react";
 import {
   BarChart,
@@ -402,6 +403,194 @@ export default function ExecutiveOverview() {
           <div className="mt-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
             <p className="text-xs text-ink/70">
               <strong>Utilization Targets:</strong> Facility & Customer (≥80% = High, 60-79% = Moderate, &lt;60% = Low) · Supply Performance (≥95% = Excellent, 90-94% = Good, &lt;90% = Needs Improvement)
+            </p>
+          </div>
+        </div>
+
+        {/* Customer Capacity Performance - DCQ vs Offtaken */}
+        <div className="kpi-card mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-ink">Customer Capacity Performance</h3>
+              <p className="text-sm text-ink/60 mt-1">Daily Contract Quantity vs Actual Offtaken by Customer</p>
+            </div>
+          </div>
+
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart
+              data={offtakers
+                .filter(o => !o.parentOfftakerId) // Only main offtakers
+                .map(offtaker => {
+                  const flow = offtakerFlows.find(f => f.offtakerId === offtaker.id);
+                  const dcq = offtaker.dcq || 0;
+                  const offtaken = flow?.offtaken || 0;
+                  const utilization = dcq > 0 ? (offtaken / dcq) * 100 : 0;
+
+                  return {
+                    name: offtaker.name.length > 20 ? offtaker.name.substring(0, 18) + '...' : offtaker.name,
+                    DCQ: dcq,
+                    Offtaken: offtaken,
+                    Unused: Math.max(0, dcq - offtaken),
+                    utilization,
+                    sector: offtaker.sector,
+                  };
+                })
+                .sort((a, b) => b.DCQ - a.DCQ) // Sort by DCQ descending
+              }
+              layout="vertical"
+              margin={{ top: 5, right: 30, left: 150, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#DCDAD2" />
+              <XAxis type="number" tick={{ fontSize: 12 }} />
+              <YAxis
+                type="category"
+                dataKey="name"
+                tick={{ fontSize: 11 }}
+                width={140}
+              />
+              <Tooltip
+                formatter={(value: number) => formatNumber(value, 0) + ' MMscf/d'}
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload;
+                    return (
+                      <div className="bg-white p-3 border border-line rounded-lg shadow-lg">
+                        <p className="font-semibold text-ink mb-2">{data.name}</p>
+                        <p className="text-xs text-ink/60 mb-2">{data.sector}</p>
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between gap-4">
+                            <span className="text-ink/60">DCQ:</span>
+                            <span className="font-semibold">{formatNumber(data.DCQ, 0)} MMscf/d</span>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-ink/60">Offtaken:</span>
+                            <span className="font-semibold text-primary">{formatNumber(data.Offtaken, 0)} MMscf/d</span>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-ink/60">Unused:</span>
+                            <span className="font-semibold text-alert">{formatNumber(data.Unused, 0)} MMscf/d</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pt-1 border-t border-line">
+                            <span className="text-ink/60">Utilization:</span>
+                            <span className={`font-semibold ${
+                              data.utilization >= 80 ? 'text-primary' :
+                              data.utilization >= 60 ? 'text-flare' : 'text-alert'
+                            }`}>
+                              {data.utilization.toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Legend />
+              <Bar dataKey="Offtaken" stackId="a" fill="#0172CB" name="Offtaken" />
+              <Bar dataKey="Unused" stackId="a" fill="#DCDAD2" name="Unused Capacity" />
+            </BarChart>
+          </ResponsiveContainer>
+
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Top Performers */}
+            <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
+              <h4 className="font-semibold text-ink mb-2 flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-primary" />
+                Top Performers (≥80% Utilization)
+              </h4>
+              <div className="space-y-1 text-xs">
+                {offtakers
+                  .filter(o => !o.parentOfftakerId)
+                  .map(offtaker => {
+                    const flow = offtakerFlows.find(f => f.offtakerId === offtaker.id);
+                    const dcq = offtaker.dcq || 0;
+                    const offtaken = flow?.offtaken || 0;
+                    const utilization = dcq > 0 ? (offtaken / dcq) * 100 : 0;
+                    return { ...offtaker, utilization, dcq, offtaken };
+                  })
+                  .filter(o => o.utilization >= 80)
+                  .sort((a, b) => b.utilization - a.utilization)
+                  .slice(0, 5)
+                  .map(offtaker => (
+                    <div key={offtaker.id} className="flex justify-between items-center py-1">
+                      <span className="text-ink/70">{offtaker.name}</span>
+                      <span className="font-semibold text-primary tabular-nums">
+                        {offtaker.utilization.toFixed(1)}%
+                      </span>
+                    </div>
+                  ))
+                }
+                {offtakers
+                  .filter(o => !o.parentOfftakerId)
+                  .map(offtaker => {
+                    const flow = offtakerFlows.find(f => f.offtakerId === offtaker.id);
+                    const dcq = offtaker.dcq || 0;
+                    const offtaken = flow?.offtaken || 0;
+                    const utilization = dcq > 0 ? (offtaken / dcq) * 100 : 0;
+                    return utilization;
+                  })
+                  .filter(u => u >= 80).length === 0 && (
+                    <p className="text-ink/50 italic">No customers above 80%</p>
+                  )
+                }
+              </div>
+            </div>
+
+            {/* Underutilizers */}
+            <div className="p-3 bg-alert/5 border border-alert/20 rounded-lg">
+              <h4 className="font-semibold text-ink mb-2 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-alert" />
+                Underutilizers (&lt;60% Utilization)
+              </h4>
+              <div className="space-y-1 text-xs">
+                {offtakers
+                  .filter(o => !o.parentOfftakerId)
+                  .map(offtaker => {
+                    const flow = offtakerFlows.find(f => f.offtakerId === offtaker.id);
+                    const dcq = offtaker.dcq || 0;
+                    const offtaken = flow?.offtaken || 0;
+                    const utilization = dcq > 0 ? (offtaken / dcq) * 100 : 0;
+                    const unused = dcq - offtaken;
+                    return { ...offtaker, utilization, dcq, offtaken, unused };
+                  })
+                  .filter(o => o.utilization < 60)
+                  .sort((a, b) => b.unused - a.unused) // Sort by unused capacity
+                  .slice(0, 5)
+                  .map(offtaker => (
+                    <div key={offtaker.id} className="flex justify-between items-center py-1">
+                      <span className="text-ink/70">{offtaker.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-alert/70 tabular-nums">
+                          -{formatNumber(offtaker.unused, 0)} MMscf/d
+                        </span>
+                        <span className="font-semibold text-alert tabular-nums">
+                          ({offtaker.utilization.toFixed(1)}%)
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                }
+                {offtakers
+                  .filter(o => !o.parentOfftakerId)
+                  .map(offtaker => {
+                    const flow = offtakerFlows.find(f => f.offtakerId === offtaker.id);
+                    const dcq = offtaker.dcq || 0;
+                    const offtaken = flow?.offtaken || 0;
+                    const utilization = dcq > 0 ? (offtaken / dcq) * 100 : 0;
+                    return utilization;
+                  })
+                  .filter(u => u < 60).length === 0 && (
+                    <p className="text-ink/50 italic">No customers below 60%</p>
+                  )
+                }
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-xs text-ink/70">
+              <strong>Note:</strong> Unused capacity represents contracted but not utilized DCQ. High unused capacity may indicate overcapacity contracts or customer operational constraints. Consider contract renegotiation for persistent underutilizers.
             </p>
           </div>
         </div>
