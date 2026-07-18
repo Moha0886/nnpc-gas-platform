@@ -37,13 +37,44 @@
 body {
   color: var(--ink);
   background: var(--paper);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography hierarchy */
+h1 {
+  @apply text-4xl font-bold tracking-tight;
+}
+
+h2 {
+  @apply text-3xl font-bold tracking-tight;
+}
+
+h3 {
+  @apply text-2xl font-semibold;
+}
+
+h4 {
+  @apply text-xl font-semibold;
+}
+
+h5 {
+  @apply text-lg font-medium;
+}
+
+h6 {
+  @apply text-base font-medium;
 }
 
 /* All figures use tabular monospace numerals */
 .tabular-nums {
   font-family: 'IBM Plex Mono', 'SF Mono', 'Consolas', monospace;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 
 /* Smooth transitions for all interactive elements */

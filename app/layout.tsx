@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import { Toaster } from "sonner";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "NNPC Gas Performance Platform",
@@ -14,8 +21,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased bg-paper">
+    <html lang="en" className={inter.variable}>
+      <body className="antialiased bg-paper font-sans">
         <div className="flex min-h-screen">
           <Sidebar />
           <main className="flex-1 overflow-auto w-full lg:w-auto">
