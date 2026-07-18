@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -141,7 +141,7 @@ const mockProductionRecords = [
   },
 ];
 
-export default function ProductionReportsPage() {
+function ProductionReportsContent() {
   const searchParams = useSearchParams();
   const fromParam = searchParams.get("from") || "";
   const toParam = searchParams.get("to") || new Date().toISOString().split("T")[0];
@@ -517,5 +517,13 @@ export default function ProductionReportsPage() {
         onUploadSuccess={handleUpload}
       />
     </div>
+  );
+}
+
+export default function ProductionReportsPage() {
+  return (
+    <Suspense fallback={<div className="p-8">Loading...</div>}>
+      <ProductionReportsContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -125,7 +125,7 @@ const mockDeliveryRecords = [
   },
 ];
 
-export default function DeliveriesReportsPage() {
+function DeliveriesReportsContent() {
   const searchParams = useSearchParams();
   const fromParam = searchParams.get("from") || "";
   const toParam = searchParams.get("to") || new Date().toISOString().split("T")[0];
@@ -465,5 +465,13 @@ export default function DeliveriesReportsPage() {
         onUploadSuccess={handleUpload}
       />
     </div>
+  );
+}
+
+export default function DeliveriesReportsPage() {
+  return (
+    <Suspense fallback={<div className="p-8">Loading...</div>}>
+      <DeliveriesReportsContent />
+    </Suspense>
   );
 }

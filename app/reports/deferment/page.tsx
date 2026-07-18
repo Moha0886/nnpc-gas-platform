@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -103,7 +103,7 @@ const mockDefermentRecords = [
   },
 ];
 
-export default function DefermentReportsPage() {
+function DefermentReportsContent() {
   const searchParams = useSearchParams();
 
   // Upload/Export functionality
@@ -440,5 +440,13 @@ export default function DefermentReportsPage() {
         onUploadSuccess={handleUpload}
       />
     </div>
+  );
+}
+
+export default function DefermentReportsPage() {
+  return (
+    <Suspense fallback={<div className="p-8">Loading...</div>}>
+      <DefermentReportsContent />
+    </Suspense>
   );
 }

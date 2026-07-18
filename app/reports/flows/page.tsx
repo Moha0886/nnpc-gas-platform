@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -113,7 +113,7 @@ const mockFlowRecords = [
   },
 ];
 
-export default function FlowReportsPage() {
+function FlowReportsContent() {
   const searchParams = useSearchParams();
   const fromParam = searchParams.get("from") || "";
   const toParam = searchParams.get("to") || new Date().toISOString().split("T")[0];
@@ -433,5 +433,13 @@ export default function FlowReportsPage() {
         onUploadSuccess={handleUpload}
       />
     </div>
+  );
+}
+
+export default function FlowReportsPage() {
+  return (
+    <Suspense fallback={<div className="p-8">Loading...</div>}>
+      <FlowReportsContent />
+    </Suspense>
   );
 }
