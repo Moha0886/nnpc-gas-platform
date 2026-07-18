@@ -33,14 +33,24 @@ export default function PipelineMap({
   const [mapLoaded, setMapLoaded] = useState(false);
   const activeNetworks = externalActiveNetworks || networks.map((n) => n.id);
 
-  // Map styles based on light preset
+  const [baseMapStyle, setBaseMapStyle] = useState<"streets" | "satellite">("streets");
+
+  // Map styles based on light preset and base style
   const mapStyles = {
-    day: "mapbox://styles/mapbox/light-v11",
-    night: "mapbox://styles/mapbox/dark-v11",
-    dusk: "mapbox://styles/mapbox/navigation-night-v1",
-    dawn: "mapbox://styles/mapbox/outdoors-v12",
+    streets: {
+      day: "mapbox://styles/mapbox/light-v11",
+      night: "mapbox://styles/mapbox/dark-v11",
+      dusk: "mapbox://styles/mapbox/navigation-night-v1",
+      dawn: "mapbox://styles/mapbox/outdoors-v12",
+    },
+    satellite: {
+      day: "mapbox://styles/mapbox/satellite-streets-v12",
+      night: "mapbox://styles/mapbox/satellite-streets-v12",
+      dusk: "mapbox://styles/mapbox/satellite-streets-v12",
+      dawn: "mapbox://styles/mapbox/satellite-streets-v12",
+    },
   };
-  const mapStyle = mapStyles[lightPreset];
+  const mapStyle = mapStyles[baseMapStyle][lightPreset];
 
   // Initialize map
   useEffect(() => {
@@ -49,8 +59,8 @@ export default function PipelineMap({
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: mapStyle,
-      center: [6.5, 6.5], // Center on Nigeria
-      zoom: 6,
+      center: [8.6753, 9.0820], // Center on Nigeria (more accurate)
+      zoom: 5.5,
       pitch: 45, // 3D tilt
       bearing: 0,
     });
@@ -77,7 +87,7 @@ export default function PipelineMap({
     };
   }, []);
 
-  // Update map style when light preset changes
+  // Update map style when light preset or base style changes
   useEffect(() => {
     if (map.current && mapLoaded) {
       map.current.setStyle(mapStyle);
@@ -87,7 +97,7 @@ export default function PipelineMap({
         addIncidents();
       });
     }
-  }, [lightPreset, mapStyle, mapLoaded]);
+  }, [lightPreset, baseMapStyle, mapStyle, mapLoaded]);
 
   // Add pipeline layers
   const addPipelines = () => {
@@ -407,6 +417,40 @@ export default function PipelineMap({
     <div className="relative w-full h-full">
       {/* Map Container */}
       <div ref={mapContainer} className="w-full h-full" />
+
+      {/* Map Style Switcher */}
+      <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg overflow-hidden z-10">
+        <button
+          onClick={() => setBaseMapStyle("streets")}
+          className={`px-4 py-2 text-sm font-medium transition-all ${
+            baseMapStyle === "streets"
+              ? "bg-primary text-white"
+              : "bg-white text-ink hover:bg-gray-50"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+            Streets
+          </div>
+        </button>
+        <button
+          onClick={() => setBaseMapStyle("satellite")}
+          className={`px-4 py-2 text-sm font-medium transition-all ${
+            baseMapStyle === "satellite"
+              ? "bg-primary text-white"
+              : "bg-white text-ink hover:bg-gray-50"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Satellite
+          </div>
+        </button>
+      </div>
     </div>
   );
 }
