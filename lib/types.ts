@@ -94,13 +94,22 @@ export interface OfftakerFlow {
   gasDay: string;
   offtakerId: string;
   corridor: Corridor;
-  nominated: number; // what the offtaker requested
-  allocated: number; // what NGML allocated (was "confirmed")
-  forecastSupply: number; // forward projection
-  received: number; // metered delivery to the point
-  offtaken: number; // what the offtaker actually took
-  varianceNomination: number; // nominated − received
-  varianceReceipt: number; // received − offtaken
+  // Plan stage
+  nominated: number; // what the offtaker requested (plan)
+  allocated: number; // what NGML allocated based on capacity (plan)
+  forecastSupply: number; // forward projection (plan)
+  // Actual stage
+  actualSupplied: number; // what was actually put into the transmission system (actual)
+  received: number; // metered delivery at custody transfer point (actual)
+  offtaken: number; // what the offtaker actually consumed (actual)
+  // Variance tracking - complete chain
+  varianceAllocation: number; // nominated − allocated (planning gap)
+  varianceSupply: number; // allocated − actualSupplied (supply gap)
+  varianceTransmission: number; // actualSupplied − received (transmission loss)
+  varianceOfftake: number; // received − offtaken (offtaker gap)
+  // Legacy variance fields (for backward compatibility)
+  varianceNomination: number; // nominated − received (overall plan vs actual delivery)
+  varianceReceipt: number; // received − offtaken (delivery vs consumption)
 }
 
 // ---------- Operations Data ----------

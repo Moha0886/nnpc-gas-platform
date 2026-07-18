@@ -105,8 +105,13 @@ export default function NominationsPage() {
       nominated: acc.nominated + flow.nominated,
       allocated: acc.allocated + flow.allocated,
       forecastSupply: acc.forecastSupply + flow.forecastSupply,
+      actualSupplied: acc.actualSupplied + flow.actualSupplied,
       received: acc.received + flow.received,
       offtaken: acc.offtaken + flow.offtaken,
+      varianceAllocation: acc.varianceAllocation + flow.varianceAllocation,
+      varianceSupply: acc.varianceSupply + flow.varianceSupply,
+      varianceTransmission: acc.varianceTransmission + flow.varianceTransmission,
+      varianceOfftake: acc.varianceOfftake + flow.varianceOfftake,
       varianceNomination: acc.varianceNomination + flow.varianceNomination,
       varianceReceipt: acc.varianceReceipt + flow.varianceReceipt,
     }),
@@ -114,8 +119,13 @@ export default function NominationsPage() {
       nominated: 0,
       allocated: 0,
       forecastSupply: 0,
+      actualSupplied: 0,
       received: 0,
       offtaken: 0,
+      varianceAllocation: 0,
+      varianceSupply: 0,
+      varianceTransmission: 0,
+      varianceOfftake: 0,
       varianceNomination: 0,
       varianceReceipt: 0,
     }
@@ -127,9 +137,9 @@ export default function NominationsPage() {
       <div className="bg-white border-b border-line px-8 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-ink">Nominations & Gaps</h2>
+            <h2 className="text-2xl font-bold text-ink">Nominations & Variance Tracking</h2>
             <p className="text-sm text-ink/60 mt-1">
-              6-stage nomination cycle per delivery point
+              Complete plan-to-actual flow with variance tracking at every stage
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -160,40 +170,64 @@ export default function NominationsPage() {
 
       <div className="p-8">
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           <div className="kpi-card">
             <div className="flex items-center gap-3 mb-2">
               <FileText className="w-5 h-5 text-primary" />
               <span className="text-sm font-medium text-ink/60">Total Nominated</span>
             </div>
-            <p className="text-3xl font-bold text-ink tabular-nums">
+            <p className="text-2xl font-bold text-ink tabular-nums">
               {formatNumber(totals.nominated, 0)}
-              <span className="text-lg text-ink/60 ml-2">MMscf/d</span>
+              <span className="text-sm text-ink/60 ml-1">MMscf/d</span>
             </p>
+          </div>
+
+          <div className="kpi-card">
+            <div className="flex items-center gap-3 mb-2">
+              <AlertCircle className="w-5 h-5 text-amber-500" />
+              <span className="text-sm font-medium text-ink/60">Allocation Gap</span>
+            </div>
+            <p className="text-2xl font-bold text-amber-500 tabular-nums">
+              {formatNumber(totals.varianceAllocation, 0)}
+              <span className="text-sm text-ink/60 ml-1">MMscf/d</span>
+            </p>
+            <p className="text-xs text-ink/50 mt-1">Nom - Alloc</p>
           </div>
 
           <div className="kpi-card">
             <div className="flex items-center gap-3 mb-2">
               <AlertCircle className="w-5 h-5 text-flare" />
-              <span className="text-sm font-medium text-ink/60">
-                Nomination Variance
-              </span>
+              <span className="text-sm font-medium text-ink/60">Supply Gap</span>
             </div>
-            <p className="text-3xl font-bold text-flare tabular-nums">
-              {formatNumber(totals.varianceNomination, 0)}
-              <span className="text-lg text-ink/60 ml-2">MMscf/d</span>
+            <p className="text-2xl font-bold text-flare tabular-nums">
+              {formatNumber(totals.varianceSupply, 0)}
+              <span className="text-sm text-ink/60 ml-1">MMscf/d</span>
             </p>
+            <p className="text-xs text-ink/50 mt-1">Alloc - Supply</p>
+          </div>
+
+          <div className="kpi-card">
+            <div className="flex items-center gap-3 mb-2">
+              <AlertCircle className="w-5 h-5 text-orange-500" />
+              <span className="text-sm font-medium text-ink/60">Transmission Loss</span>
+            </div>
+            <p className="text-2xl font-bold text-orange-500 tabular-nums">
+              {formatNumber(totals.varianceTransmission, 0)}
+              <span className="text-sm text-ink/60 ml-1">MMscf/d</span>
+            </p>
+            <p className="text-xs text-ink/50 mt-1">Supply - Received</p>
           </div>
 
           <div className="kpi-card">
             <div className="flex items-center gap-3 mb-2">
               <AlertCircle className="w-5 h-5 text-alert" />
-              <span className="text-sm font-medium text-ink/60">Receipt Variance</span>
+              <span className="text-sm font-medium text-ink/60">Offtake Gap</span>
             </div>
-            <p className="text-3xl font-bold text-alert tabular-nums">
-              {formatNumber(totals.varianceReceipt, 0)}
-              <span className="text-lg text-ink/60 ml-2">MMscf/d</span>
+            <p className="text-2xl font-bold text-alert tabular-nums">
+              {formatNumber(totals.varianceOfftake, 0)}
+              <span className="text-sm text-ink/60 ml-1">MMscf/d</span>
             </p>
+            <p className="text-xs text-ink/50 mt-1">Received - Offtaken</p>
           </div>
         </div>
 
@@ -216,18 +250,45 @@ export default function NominationsPage() {
                   <th className="text-left">Offtaker</th>
                   <th className="text-left">Sector</th>
                   <th className="text-left">Corridor</th>
-                  <th className="text-right">Nominated</th>
-                  <th className="text-right">Allocated</th>
-                  <th className="text-right">Forecast</th>
-                  <th className="text-right">Received</th>
-                  <th className="text-right">Offtaken</th>
-                  <th className="text-right bg-flare/10">
-                    <div className="font-bold">Nom. Variance</div>
-                    <div className="text-xs font-normal">(Nom − Rec)</div>
+                  <th className="text-right bg-blue-50">
+                    <div className="font-bold">Nominated</div>
+                    <div className="text-xs font-normal">(Plan)</div>
                   </th>
-                  <th className="text-right bg-alert/10">
-                    <div className="font-bold">Receipt Variance</div>
-                    <div className="text-xs font-normal">(Rec − Off)</div>
+                  <th className="text-right bg-blue-50">
+                    <div className="font-bold">Allocated</div>
+                    <div className="text-xs font-normal">(Plan)</div>
+                  </th>
+                  <th className="text-right bg-blue-50">
+                    <div className="font-bold">Forecast</div>
+                    <div className="text-xs font-normal">(Plan)</div>
+                  </th>
+                  <th className="text-right bg-green-50">
+                    <div className="font-bold">Actual Supplied</div>
+                    <div className="text-xs font-normal">(Actual)</div>
+                  </th>
+                  <th className="text-right bg-green-50">
+                    <div className="font-bold">Received</div>
+                    <div className="text-xs font-normal">(Actual)</div>
+                  </th>
+                  <th className="text-right bg-green-50">
+                    <div className="font-bold">Offtaken</div>
+                    <div className="text-xs font-normal">(Actual)</div>
+                  </th>
+                  <th className="text-right bg-amber-100">
+                    <div className="font-bold">Alloc Gap</div>
+                    <div className="text-xs font-normal">(N-A)</div>
+                  </th>
+                  <th className="text-right bg-orange-100">
+                    <div className="font-bold">Supply Gap</div>
+                    <div className="text-xs font-normal">(A-S)</div>
+                  </th>
+                  <th className="text-right bg-yellow-100">
+                    <div className="font-bold">Trans Loss</div>
+                    <div className="text-xs font-normal">(S-R)</div>
+                  </th>
+                  <th className="text-right bg-red-100">
+                    <div className="font-bold">Offtake Gap</div>
+                    <div className="text-xs font-normal">(R-O)</div>
                   </th>
                 </tr>
               </thead>
@@ -239,7 +300,7 @@ export default function NominationsPage() {
                         <Fragment key={`corridor-${corridor}`}>
                           <tr key={`header-${corridor}`} className="bg-gray-50">
                             <td
-                              colSpan={11}
+                              colSpan={14}
                               className="font-semibold text-primary py-2"
                             >
                               {corridor} Corridor
@@ -255,41 +316,66 @@ export default function NominationsPage() {
                                   {flow.corridor}
                                 </span>
                               </td>
-                              <td className="text-right">
+                              <td className="text-right bg-blue-50">
                                 {formatNumber(flow.nominated, 0)}
                               </td>
-                              <td className="text-right">
+                              <td className="text-right bg-blue-50">
                                 {formatNumber(flow.allocated, 0)}
                               </td>
-                              <td className="text-right">
+                              <td className="text-right bg-blue-50">
                                 {formatNumber(flow.forecastSupply, 0)}
                               </td>
-                              <td className="text-right">
+                              <td className="text-right bg-green-50 font-semibold">
+                                {formatNumber(flow.actualSupplied, 0)}
+                              </td>
+                              <td className="text-right bg-green-50">
                                 {formatNumber(flow.received, 0)}
                               </td>
-                              <td className="text-right">
+                              <td className="text-right bg-green-50">
                                 {formatNumber(flow.offtaken, 0)}
                               </td>
-                              <td className="text-right bg-flare/10 font-bold">
+                              <td className="text-right bg-amber-100 font-bold">
                                 <span
                                   className={
-                                    flow.varianceNomination > 5
-                                      ? "text-flare"
+                                    flow.varianceAllocation > 3
+                                      ? "text-amber-700"
                                       : "text-ink"
                                   }
                                 >
-                                  {formatNumber(flow.varianceNomination, 0)}
+                                  {formatNumber(flow.varianceAllocation, 0)}
                                 </span>
                               </td>
-                              <td className="text-right bg-alert/10 font-bold">
+                              <td className="text-right bg-orange-100 font-bold">
                                 <span
                                   className={
-                                    flow.varianceReceipt > 3
-                                      ? "text-alert"
+                                    flow.varianceSupply > 3
+                                      ? "text-orange-700"
                                       : "text-ink"
                                   }
                                 >
-                                  {formatNumber(flow.varianceReceipt, 0)}
+                                  {formatNumber(flow.varianceSupply, 0)}
+                                </span>
+                              </td>
+                              <td className="text-right bg-yellow-100 font-bold">
+                                <span
+                                  className={
+                                    flow.varianceTransmission > 2
+                                      ? "text-yellow-700"
+                                      : "text-ink"
+                                  }
+                                >
+                                  {formatNumber(flow.varianceTransmission, 0)}
+                                </span>
+                              </td>
+                              <td className="text-right bg-red-100 font-bold">
+                                <span
+                                  className={
+                                    flow.varianceOfftake > 3
+                                      ? "text-red-700"
+                                      : "text-ink"
+                                  }
+                                >
+                                  {formatNumber(flow.varianceOfftake, 0)}
                                 </span>
                               </td>
                             </tr>
@@ -304,37 +390,58 @@ export default function NominationsPage() {
                         <td>
                           <span className="badge-operational">{flow.corridor}</span>
                         </td>
-                        <td className="text-right">
+                        <td className="text-right bg-blue-50">
                           {formatNumber(flow.nominated, 0)}
                         </td>
-                        <td className="text-right">
+                        <td className="text-right bg-blue-50">
                           {formatNumber(flow.allocated, 0)}
                         </td>
-                        <td className="text-right">
+                        <td className="text-right bg-blue-50">
                           {formatNumber(flow.forecastSupply, 0)}
                         </td>
-                        <td className="text-right">
+                        <td className="text-right bg-green-50 font-semibold">
+                          {formatNumber(flow.actualSupplied, 0)}
+                        </td>
+                        <td className="text-right bg-green-50">
                           {formatNumber(flow.received, 0)}
                         </td>
-                        <td className="text-right">
+                        <td className="text-right bg-green-50">
                           {formatNumber(flow.offtaken, 0)}
                         </td>
-                        <td className="text-right bg-flare/10 font-bold">
+                        <td className="text-right bg-amber-100 font-bold">
                           <span
                             className={
-                              flow.varianceNomination > 5 ? "text-flare" : "text-ink"
+                              flow.varianceAllocation > 3 ? "text-amber-700" : "text-ink"
                             }
                           >
-                            {formatNumber(flow.varianceNomination, 0)}
+                            {formatNumber(flow.varianceAllocation, 0)}
                           </span>
                         </td>
-                        <td className="text-right bg-alert/10 font-bold">
+                        <td className="text-right bg-orange-100 font-bold">
                           <span
                             className={
-                              flow.varianceReceipt > 3 ? "text-alert" : "text-ink"
+                              flow.varianceSupply > 3 ? "text-orange-700" : "text-ink"
                             }
                           >
-                            {formatNumber(flow.varianceReceipt, 0)}
+                            {formatNumber(flow.varianceSupply, 0)}
+                          </span>
+                        </td>
+                        <td className="text-right bg-yellow-100 font-bold">
+                          <span
+                            className={
+                              flow.varianceTransmission > 2 ? "text-yellow-700" : "text-ink"
+                            }
+                          >
+                            {formatNumber(flow.varianceTransmission, 0)}
+                          </span>
+                        </td>
+                        <td className="text-right bg-red-100 font-bold">
+                          <span
+                            className={
+                              flow.varianceOfftake > 3 ? "text-red-700" : "text-ink"
+                            }
+                          >
+                            {formatNumber(flow.varianceOfftake, 0)}
                           </span>
                         </td>
                       </tr>
@@ -343,18 +450,25 @@ export default function NominationsPage() {
                 {/* Totals Row */}
                 <tr className="bg-primary/5 font-bold border-t-2 border-primary">
                   <td colSpan={4}>TOTAL</td>
-                  <td className="text-right">{formatNumber(totals.nominated, 0)}</td>
-                  <td className="text-right">{formatNumber(totals.allocated, 0)}</td>
-                  <td className="text-right">
+                  <td className="text-right bg-blue-100">{formatNumber(totals.nominated, 0)}</td>
+                  <td className="text-right bg-blue-100">{formatNumber(totals.allocated, 0)}</td>
+                  <td className="text-right bg-blue-100">
                     {formatNumber(totals.forecastSupply, 0)}
                   </td>
-                  <td className="text-right">{formatNumber(totals.received, 0)}</td>
-                  <td className="text-right">{formatNumber(totals.offtaken, 0)}</td>
-                  <td className="text-right bg-flare/20 text-flare">
-                    {formatNumber(totals.varianceNomination, 0)}
+                  <td className="text-right bg-green-100">{formatNumber(totals.actualSupplied, 0)}</td>
+                  <td className="text-right bg-green-100">{formatNumber(totals.received, 0)}</td>
+                  <td className="text-right bg-green-100">{formatNumber(totals.offtaken, 0)}</td>
+                  <td className="text-right bg-amber-200 text-amber-700">
+                    {formatNumber(totals.varianceAllocation, 0)}
                   </td>
-                  <td className="text-right bg-alert/20 text-alert">
-                    {formatNumber(totals.varianceReceipt, 0)}
+                  <td className="text-right bg-orange-200 text-orange-700">
+                    {formatNumber(totals.varianceSupply, 0)}
+                  </td>
+                  <td className="text-right bg-yellow-200 text-yellow-700">
+                    {formatNumber(totals.varianceTransmission, 0)}
+                  </td>
+                  <td className="text-right bg-red-200 text-red-700">
+                    {formatNumber(totals.varianceOfftake, 0)}
                   </td>
                 </tr>
               </tbody>
@@ -365,15 +479,23 @@ export default function NominationsPage() {
         {/* Notes */}
         <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-lg">
           <p className="text-sm text-ink/70">
-            <strong>6-Stage Cycle:</strong> Nominated (offtaker request) → Allocated
-            (NGML allocation) → Forecast supply (forward projection) → Received (metered
-            delivery) → Offtaken (actual consumption).
+            <strong>Complete Nomination-to-Delivery Flow:</strong> This table tracks the entire gas flow from offtaker request to final consumption, separating <span className="font-semibold">PLAN</span> from <span className="font-semibold">ACTUAL</span>.
           </p>
           <p className="text-sm text-ink/70 mt-2">
-            <strong>Variances:</strong> Nomination variance = Nominated − Received.
-            Receipt variance = Received − Offtaken. These are the two critical gaps the
-            nominations desk monitors.
+            <strong>Plan Stage (Blue):</strong> Nominated (offtaker request) → Allocated (what we can service based on capacity) → Forecast Supply (planned supply projection).
           </p>
+          <p className="text-sm text-ink/70 mt-2">
+            <strong>Actual Stage (Green):</strong> Actual Supplied (what we put into the system) → Received (metered at custody transfer point) → Offtaken (what offtaker consumed).
+          </p>
+          <p className="text-sm text-ink/70 mt-2">
+            <strong>Complete Variance Chain:</strong> The system tracks gaps at every stage:
+          </p>
+          <ul className="text-sm text-ink/70 mt-2 ml-6 space-y-1">
+            <li><strong>Allocation Gap</strong> (Nominated − Allocated): Shortfall between request and capacity allocation</li>
+            <li><strong>Supply Gap</strong> (Allocated − Actual Supplied): Difference between planned allocation and actual supply</li>
+            <li><strong>Transmission Loss</strong> (Actual Supplied − Received): Gas lost during transmission</li>
+            <li><strong>Offtake Gap</strong> (Received − Offtaken): Difference between delivery and consumption (line pack or rejection)</li>
+          </ul>
         </div>
 
         {/* Historical Nomination Snapshots */}
