@@ -8,23 +8,25 @@ import {
   FileText,
   Activity,
   Gauge,
-  Flame,
   AlertTriangle,
   Download,
   Calendar,
   Filter,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import type { Corridor } from "@/lib/types";
 
 const reportTypes = [
   {
-    id: "production",
-    name: "Production Reports",
-    description: "Daily production records from upstream facilities",
-    icon: TrendingUp,
-    href: "/reports/production",
+    id: "flows",
+    name: "Flow Readings Reports",
+    description: "Pipeline flow, pressure, and temperature data",
+    icon: Activity,
+    href: "/reports/flows",
     color: "bg-accent/10 text-accent",
-    recordCount: 245,
+    recordCount: 1856,
+    priority: "high", // Most accessed
   },
   {
     id: "nominations",
@@ -34,15 +36,7 @@ const reportTypes = [
     href: "/reports/nominations",
     color: "bg-primary/10 text-primary",
     recordCount: 312,
-  },
-  {
-    id: "flows",
-    name: "Flow Readings Reports",
-    description: "Pipeline flow, pressure, and temperature data",
-    icon: Activity,
-    href: "/reports/flows",
-    color: "bg-accent/10 text-accent",
-    recordCount: 1856,
+    priority: "high",
   },
   {
     id: "deliveries",
@@ -52,15 +46,17 @@ const reportTypes = [
     href: "/reports/deliveries",
     color: "bg-primary/10 text-primary",
     recordCount: 428,
+    priority: "medium",
   },
   {
-    id: "flare",
-    name: "Flare Events Reports",
-    description: "Flare volumes and penalty exposure",
-    icon: Flame,
-    href: "/reports/flare",
-    color: "bg-flare/10 text-flare",
-    recordCount: 67,
+    id: "production",
+    name: "Production Reports",
+    description: "Daily production records from upstream facilities",
+    icon: TrendingUp,
+    href: "/reports/production",
+    color: "bg-accent/10 text-accent",
+    recordCount: 245,
+    priority: "medium",
   },
   {
     id: "deferment",
@@ -70,6 +66,7 @@ const reportTypes = [
     href: "/reports/deferment",
     color: "bg-alert/10 text-alert",
     recordCount: 89,
+    priority: "medium",
   },
 ];
 
@@ -148,43 +145,64 @@ export default function ReportsPage() {
           </p>
         </div>
 
-        {/* Report Types Grid */}
+        {/* Report Types Grid with Visual Hierarchy */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {reportTypes.map((report) => {
             const Icon = report.icon;
+            const isHighPriority = report.priority === "high";
+
             return (
               <Link
                 key={report.id}
                 href={`${report.href}?from=${dateFrom}&to=${dateTo}&corridor=${selectedCorridor}`}
-                className="kpi-card hover:shadow-md transition-shadow cursor-pointer group"
+                className={cn(
+                  "kpi-card cursor-pointer group relative overflow-hidden",
+                  "hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]",
+                  "transition-all duration-200",
+                  isHighPriority && "ring-2 ring-primary/20 shadow-md"
+                )}
               >
+                {/* Priority indicator */}
+                {isHighPriority && (
+                  <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">
+                    FREQUENT
+                  </div>
+                )}
+
                 <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-lg ${report.color}`}>
+                  <div className={cn(
+                    "p-3 rounded-lg transition-all",
+                    report.color,
+                    "group-hover:scale-110 group-hover:shadow-md"
+                  )}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-ink group-hover:text-primary transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-semibold text-ink group-hover:text-primary transition-colors truncate">
                       {report.name}
                     </h3>
-                    <p className="text-sm text-ink/60 mt-1">
+                    <p className="text-sm text-ink/60 mt-1 line-clamp-2">
                       {report.description}
                     </p>
-                    <div className="flex items-center gap-2 mt-3">
+                    <div className="flex items-baseline gap-2 mt-3">
                       <span className="text-2xl font-bold text-primary tabular-nums">
-                        {report.recordCount}
+                        {report.recordCount.toLocaleString()}
                       </span>
                       <span className="text-xs text-ink/60">records</span>
                     </div>
                   </div>
                 </div>
+
+                {/* Hover effect indicator */}
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
               </Link>
             );
           })}
         </div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions with Enhanced Interactions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="kpi-card bg-primary/5">
+          <div className="kpi-card bg-primary/5 hover:bg-primary/10 transition-colors">
             <div className="flex items-center gap-3 mb-2">
               <Calendar className="w-5 h-5 text-primary" />
               <h4 className="font-semibold text-ink">Daily Summary</h4>
@@ -192,12 +210,19 @@ export default function ReportsPage() {
             <p className="text-sm text-ink/60 mb-3">
               Generate consolidated daily operations report
             </p>
-            <button className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary-600 transition-colors w-full">
+            <button
+              onClick={() => {
+                toast.success("Generating daily summary report...", {
+                  description: `For gas day ${new Date().toISOString().split('T')[0]}`,
+                });
+              }}
+              className="btn-primary w-full"
+            >
               Generate Today's Summary
             </button>
           </div>
 
-          <div className="kpi-card bg-accent/5">
+          <div className="kpi-card bg-accent/5 hover:bg-accent/10 transition-colors">
             <div className="flex items-center gap-3 mb-2">
               <BarChart3 className="w-5 h-5 text-accent" />
               <h4 className="font-semibold text-ink">Monthly Dashboard</h4>
@@ -205,12 +230,19 @@ export default function ReportsPage() {
             <p className="text-sm text-ink/60 mb-3">
               Executive monthly performance dashboard
             </p>
-            <button className="px-4 py-2 bg-accent text-white rounded-lg text-sm hover:bg-accent-600 transition-colors w-full">
+            <button
+              onClick={() => {
+                toast.success("Generating monthly dashboard...", {
+                  description: "This may take a few moments",
+                });
+              }}
+              className="px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent-600 active:bg-accent-700 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-accent/50 w-full"
+            >
               Generate Monthly Report
             </button>
           </div>
 
-          <div className="kpi-card bg-flare/5">
+          <div className="kpi-card bg-flare/5 hover:bg-flare/10 transition-colors">
             <div className="flex items-center gap-3 mb-2">
               <Download className="w-5 h-5 text-flare" />
               <h4 className="font-semibold text-ink">Bulk Export</h4>
@@ -218,7 +250,23 @@ export default function ReportsPage() {
             <p className="text-sm text-ink/60 mb-3">
               Export all records within date range
             </p>
-            <button className="px-4 py-2 bg-flare text-white rounded-lg text-sm hover:bg-flare-600 transition-colors w-full">
+            <button
+              onClick={() => {
+                if (!dateFrom || !dateTo) {
+                  toast.error("Please select a date range first");
+                  return;
+                }
+                toast.success("Preparing export...", {
+                  description: `From ${dateFrom} to ${dateTo}`,
+                  action: {
+                    label: "Cancel",
+                    onClick: () => toast.info("Export cancelled"),
+                  },
+                });
+              }}
+              className="px-4 py-2 bg-flare text-white rounded-lg text-sm font-medium hover:bg-flare-dark active:bg-flare-dark transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-flare/50 w-full flex items-center justify-center gap-2"
+            >
+              <Download className="w-4 h-4" />
               Export All Data
             </button>
           </div>

@@ -90,33 +90,6 @@ export const REPORT_CONFIGS = {
     }),
   },
 
-  flare: {
-    templateType: "flare" as const,
-    identifierFields: ["gasDay", "station"],
-    requiredFields: ["Date", "Station", "Gas Flared (MMscf/d)"],
-    transformUploadData: (row: any, index: number) => ({
-      id: `flare-upload-${Date.now()}-${index}`,
-      gasDay: formatDateForCSV(row.Date || row.date),
-      corridor: row.Corridor || row.corridor || "Eastern",
-      station: row.Station || row.station,
-      gasProduced: parseFloat(row["Gas Produced (MMscf/d)"] || row.produced || 0),
-      gasUtilized: parseFloat(row["Gas Utilized (MMscf/d)"] || row.utilized || 0),
-      gasFlared: parseFloat(row["Gas Flared (MMscf/d)"] || row.flared || 0),
-      flareRate: parseFloat(row["Flare Rate (%)"] || row.flareRate || 0),
-      reason: row.Reason || row.reason || "Operational",
-    }),
-    transformExportData: (record: any) => ({
-      Date: record.gasDay,
-      Station: record.station,
-      Corridor: record.corridor,
-      "Gas Produced (MMscf/d)": record.gasProduced,
-      "Gas Utilized (MMscf/d)": record.gasUtilized,
-      "Gas Flared (MMscf/d)": record.gasFlared,
-      "Flare Rate (%)": record.flareRate,
-      Reason: record.reason,
-    }),
-  },
-
   deferment: {
     templateType: "deferment" as const,
     identifierFields: ["gasDay", "facilityName"],

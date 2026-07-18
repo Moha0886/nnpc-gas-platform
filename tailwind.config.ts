@@ -49,12 +49,50 @@ const config: Config = {
           800: "#05254A",
           900: "#031225",
         },
-        // Operational colors
+        // Operational colors - WCAG AA Compliant
         paper: "#FAFAF7",
         ink: "#16211E",
-        flare: "#D98E04",
-        alert: "#B3402A",
+        flare: {
+          DEFAULT: "#B87204",
+          light: "#D98E04",
+          dark: "#8B5503",
+        },
+        alert: {
+          DEFAULT: "#8B2F1F",
+          light: "#B3402A",
+          dark: "#6B1F15",
+        },
+        success: {
+          DEFAULT: "#00AD51",
+          light: "#00C45E",
+          dark: "#008A41",
+        },
         line: "#DCDAD2",
+        // Chart colors - Color-blind safe
+        chart: {
+          primary: "#0077BB",
+          secondary: "#009988",
+          tertiary: "#EE7733",
+          quaternary: "#CC3311",
+          neutral: "#DCDAD2",
+          blue: "#0077BB",
+          cyan: "#33BBEE",
+          teal: "#009988",
+          orange: "#EE7733",
+          red: "#CC3311",
+          magenta: "#EE3377",
+        },
+      },
+      spacing: {
+        'kpi': '24px',
+        'section': '32px',
+        'page': '48px',
+      },
+      boxShadow: {
+        'sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+        'md': '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+        'lg': '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+        'xl': '0 20px 25px -5px rgb(0 0 0 / 0.1)',
       },
       fontFamily: {
         sans: [
@@ -73,6 +111,21 @@ const config: Config = {
       },
       fontVariantNumeric: {
         tabular: "tabular-nums",
+      },
+      animation: {
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'fade-in': 'fadeIn 0.3s ease-in-out',
+        'slide-in': 'slideIn 0.3s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideIn: {
+          '0%': { transform: 'translateY(-10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
       },
     },
   },

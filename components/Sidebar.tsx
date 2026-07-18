@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -8,47 +9,78 @@ import {
   Activity,
   FileText,
   Gauge,
-  Flame,
   AlertTriangle,
   FileCheck,
   Users,
   Database,
   Network,
   BarChart3,
-  Shield,
-  DollarSign,
-  Wallet,
-  Receipt,
   GitBranch,
   Siren,
+  Menu,
+  X,
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const navigation = [
-  { name: "Executive Overview", href: "/", icon: LayoutDashboard },
-  { name: "Volumes & Balancing", href: "/volumes", icon: Activity },
-  { name: "Nominations & Gaps", href: "/nominations", icon: FileText },
-  { name: "Capacity Utilisation", href: "/capacity", icon: Gauge },
-  { name: "Flare Monitoring", href: "/flare", icon: Flame },
-  { name: "Deferment", href: "/deferment", icon: AlertTriangle },
-  { name: "Contract Performance", href: "/contracts", icon: FileCheck },
-  { name: "Customer Scorecard", href: "/customers", icon: Users },
-  { name: "Asset Registry", href: "/assets", icon: Database },
-  { name: "Offtaker Hierarchy", href: "/offtakers", icon: Network },
-  { name: "Reports & Analytics", href: "/reports", icon: BarChart3 },
-  { name: "DSO Compliance", href: "/dso-compliance", icon: Shield },
-  { name: "Gas Pricing", href: "/pricing", icon: DollarSign },
-  { name: "Collections", href: "/collections", icon: Wallet },
-  { name: "Take-or-Pay", href: "/take-or-pay", icon: Receipt },
-  { name: "Pipeline Network", href: "/network", icon: GitBranch },
-  { name: "Incident Reporting", href: "/incidents", icon: Siren },
+// Grouped navigation structure for better information architecture
+const navigationGroups = [
+  {
+    label: "OPERATIONS",
+    items: [
+      { name: "Executive Dashboard", href: "/", icon: LayoutDashboard },
+      { name: "Volumes & Balance", href: "/volumes", icon: Activity },
+      { name: "Nominations", href: "/nominations", icon: FileText },
+      { name: "Capacity", href: "/capacity", icon: Gauge },
+    ],
+  },
+  {
+    label: "ISSUES & TRACKING",
+    items: [
+      { name: "Deferments", href: "/deferment", icon: AlertTriangle },
+      { name: "Incidents", href: "/incidents", icon: Siren },
+    ],
+  },
+  {
+    label: "COMMERCIAL",
+    items: [
+      { name: "Contracts", href: "/contracts", icon: FileCheck },
+      { name: "Customers", href: "/customers", icon: Users },
+    ],
+  },
+  {
+    label: "INFRASTRUCTURE",
+    items: [
+      { name: "Assets", href: "/assets", icon: Database },
+      { name: "Offtakers", href: "/offtakers", icon: Network },
+      { name: "Network Map", href: "/network", icon: GitBranch },
+    ],
+  },
+  {
+    label: "REPORTING",
+    items: [
+      { name: "Reports", href: "/reports", icon: BarChart3 },
+    ],
+  },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
-  return (
-    <aside className="w-64 bg-white min-h-screen flex flex-col border-r border-line">
+  const toggleGroup = (label: string) => {
+    const newCollapsed = new Set(collapsedGroups);
+    if (newCollapsed.has(label)) {
+      newCollapsed.delete(label);
+    } else {
+      newCollapsed.add(label);
+    }
+    setCollapsedGroups(newCollapsed);
+  };
+
+  const SidebarContent = () => (
+    <>
       {/* Logo/Header */}
       <div className="p-6 border-b border-line">
         <div className="flex items-center gap-3 mb-3">
@@ -66,26 +98,54 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1">
-        {navigation.map((item) => {
-          const isActive = pathname === item.href;
-          const Icon = item.icon;
+      {/* Navigation - Grouped */}
+      <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
+        {navigationGroups.map((group) => {
+          const isCollapsed = collapsedGroups.has(group.label);
 
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "sidebar-link",
-                isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-ink/70 hover:bg-primary/10 hover:text-primary"
+            <div key={group.label} className="space-y-1">
+              {/* Group Header */}
+              <button
+                onClick={() => toggleGroup(group.label)}
+                className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-ink/50 hover:text-ink/70 transition-colors"
+              >
+                <span>{group.label}</span>
+                <ChevronDown
+                  className={cn(
+                    "w-3 h-3 transition-transform",
+                    isCollapsed && "-rotate-90"
+                  )}
+                />
+              </button>
+
+              {/* Group Items */}
+              {!isCollapsed && (
+                <div className="space-y-0.5 animate-slide-in">
+                  {group.items.map((item) => {
+                    const isActive = pathname === item.href;
+                    const Icon = item.icon;
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={cn(
+                          "sidebar-link",
+                          isActive
+                            ? "sidebar-link-active"
+                            : "sidebar-link-inactive"
+                        )}
+                      >
+                        <Icon className="w-5 h-5 flex-shrink-0" />
+                        <span className="truncate">{item.name}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
               )}
-            >
-              <Icon className="w-5 h-5" />
-              <span>{item.name}</span>
-            </Link>
+            </div>
           );
         })}
       </nav>
@@ -96,9 +156,47 @@ export default function Sidebar() {
           NGIC · NGML · NLNG
         </p>
         <p className="text-ink/50 text-xs mt-1">
-          Build v0.1 - Prototype
+          Build v0.2 - Enhanced
         </p>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md border border-line hover:bg-gray-50 transition-colors"
+        aria-label="Toggle menu"
+      >
+        {isMobileMenuOpen ? (
+          <X className="w-6 h-6 text-ink" />
+        ) : (
+          <Menu className="w-6 h-6 text-ink" />
+        )}
+      </button>
+
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex w-64 bg-white min-h-screen flex-col border-r border-line">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile Sidebar - Overlay */}
+      {isMobileMenuOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="lg:hidden fixed inset-0 bg-ink/50 z-40 animate-fade-in"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+
+          {/* Sidebar Panel */}
+          <aside className="lg:hidden fixed top-0 left-0 bottom-0 w-64 bg-white z-50 flex flex-col border-r border-line shadow-xl animate-slide-in">
+            <SidebarContent />
+          </aside>
+        </>
+      )}
+    </>
   );
 }

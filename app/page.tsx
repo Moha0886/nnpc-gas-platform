@@ -1,18 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import Header from "@/components/Header";
+import { useState, useEffect } from "react";
 import KPICard from "@/components/KPICard";
 import CorridorFilter from "@/components/CorridorFilter";
 import {
   Activity,
   TrendingUp,
-  Flame,
   AlertTriangle,
   DollarSign,
   Gauge,
   Calendar,
-  Zap,
+  RefreshCw,
+  Clock,
 } from "lucide-react";
 import {
   BarChart,
@@ -35,6 +34,9 @@ import type { Corridor } from "@/lib/types";
 
 export default function ExecutiveOverview() {
   const [selectedCorridor, setSelectedCorridor] = useState<Corridor | "All">("All");
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [timeAgo, setTimeAgo] = useState("just now");
 
   // Get data
   const balance = getGasDayBalance();
@@ -42,56 +44,105 @@ export default function ExecutiveOverview() {
   // Calculate KPIs
   const ufgPercent = (balance.ufg / balance.receivedIntoTransmission) * 100;
   const networkUtilization = (balance.delivered / 6600) * 100; // Assuming total capacity of 6,600 MMscf/d
-  const flareIntensity = 2.4; // Mock value as percentage of production
 
-  // Supply Waterfall Data (starts at production now)
+  // Update time ago display
+  useEffect(() => {
+    const updateTimeAgo = () => {
+      const now = new Date();
+      const diffMs = now.getTime() - lastUpdated.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+
+      if (diffMins < 1) {
+        setTimeAgo("just now");
+      } else if (diffMins === 1) {
+        setTimeAgo("1 min ago");
+      } else if (diffMins < 60) {
+        setTimeAgo(`${diffMins} mins ago`);
+      } else {
+        const diffHours = Math.floor(diffMins / 60);
+        setTimeAgo(diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`);
+      }
+    };
+
+    updateTimeAgo();
+    const interval = setInterval(updateTimeAgo, 30000); // Update every 30 seconds
+    return () => clearInterval(interval);
+  }, [lastUpdated]);
+
+  // Refresh data handler
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+    setLastUpdated(new Date());
+    setIsLoading(false);
+  };
+
+  // Format current gas day
+  const currentGasDay = new Date().toISOString().split('T')[0];
+
+  // Supply Waterfall Data with accessible colors
   const waterfallData = [
-    { name: "Produced", value: balance.produced, color: "#2E6FA3" },
-    { name: "NGL Extracted", value: -balance.nglExtracted, color: "#D98E04" },
+    { name: "Produced", value: balance.produced, color: "#0077BB" }, // chart-primary
+    { name: "NGL Extracted", value: -balance.nglExtracted, color: "#EE7733" }, // chart-tertiary
     {
       name: "Into Transmission",
       value: balance.receivedIntoTransmission,
-      color: "#2E6FA3",
+      color: "#0077BB", // chart-primary
     },
-    { name: "Fuel Gas", value: -balance.fuelGas, color: "#D98E04" },
-    { name: "Line Pack Δ", value: -balance.linePackChange, color: "#DCDAD2" },
-    { name: "Delivered", value: balance.delivered, color: "#0F4C42" },
-    { name: "UFG", value: -balance.ufg, color: "#B3402A" },
+    { name: "Fuel Gas", value: -balance.fuelGas, color: "#EE7733" }, // chart-tertiary
+    { name: "Line Pack Δ", value: -balance.linePackChange, color: "#DCDAD2" }, // chart-neutral
+    { name: "Delivered", value: balance.delivered, color: "#009988" }, // chart-secondary (teal)
+    { name: "UFG", value: -balance.ufg, color: "#CC3311" }, // chart-quaternary
   ];
 
-  // Flare Intensity Trend (mock 7-day trend)
-  const flareTrend = [
-    { day: "Day -6", intensity: 2.8 },
-    { day: "Day -5", intensity: 2.6 },
-    { day: "Day -4", intensity: 2.7 },
-    { day: "Day -3", intensity: 2.5 },
-    { day: "Day -2", intensity: 2.3 },
-    { day: "Day -1", intensity: 2.5 },
-    { day: "Today", intensity: 2.4 },
-  ];
-
-  // Deferment Attribution (mock)
+  // Deferment Attribution with accessible, color-blind safe colors
   const defermentData = [
-    { name: "Planned Maintenance", value: 320, color: "#2E6FA3" },
-    { name: "Unplanned Breakdown", value: 185, color: "#B3402A" },
-    { name: "Third-party", value: 95, color: "#D98E04" },
-    { name: "Upstream Shortfall", value: 142, color: "#DCDAD2" },
-    { name: "Offtaker Rejection", value: 78, color: "#0F4C42" },
+    { name: "Planned Maintenance", value: 320, color: "#0077BB" }, // Blue
+    { name: "Unplanned Breakdown", value: 185, color: "#CC3311" }, // Red
+    { name: "Third-party", value: 95, color: "#EE7733" }, // Orange
+    { name: "Upstream Shortfall", value: 142, color: "#DCDAD2" }, // Neutral
+    { name: "Offtaker Rejection", value: 78, color: "#009988" }, // Teal
   ];
 
   return (
     <div className="min-h-screen">
-      {/* Header with Corridor Filter */}
-      <div className="bg-white border-b border-line px-8 py-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-ink">Executive Overview</h2>
-          <CorridorFilter onChange={setSelectedCorridor} />
+      {/* Enhanced Header with Timestamp and Refresh */}
+      <div className="bg-white border-b border-line px-8 py-4 sticky top-0 z-20 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-ink">Executive Overview</h2>
+            <div className="flex items-center gap-3 mt-1 text-sm">
+              <div className="flex items-center gap-1.5 text-ink/60">
+                <Calendar className="w-4 h-4" />
+                <span>Gas Day: <span className="font-semibold text-ink">{currentGasDay}</span></span>
+              </div>
+              <div className="flex items-center gap-1.5 text-ink/60">
+                <Clock className="w-4 h-4" />
+                <span>Updated <span className="font-semibold text-ink">{timeAgo}</span></span>
+              </div>
+              <span className="pulse-live text-success text-xs font-medium">
+                Live
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <CorridorFilter onChange={setSelectedCorridor} />
+            <button
+              onClick={handleRefresh}
+              disabled={isLoading}
+              className="btn-secondary flex items-center gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="p-8">
-        {/* KPI Strip */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="p-4 sm:p-8">
+        {/* Enhanced KPI Strip with new features */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
           <KPICard
             title="Produced (Gas Day)"
             value={formatNumber(balance.produced, 0)}
@@ -99,6 +150,8 @@ export default function ExecutiveOverview() {
             icon={Activity}
             color="accent"
             trend={{ value: 2.3, isPositive: true }}
+            status={isLoading ? "loading" : "live"}
+            lastUpdated={timeAgo}
           />
           <KPICard
             title="Delivered"
@@ -107,6 +160,8 @@ export default function ExecutiveOverview() {
             icon={TrendingUp}
             color="primary"
             trend={{ value: 1.8, isPositive: true }}
+            status={isLoading ? "loading" : "live"}
+            lastUpdated={timeAgo}
           />
           <KPICard
             title="UFG %"
@@ -115,6 +170,10 @@ export default function ExecutiveOverview() {
             icon={AlertTriangle}
             color="alert"
             trend={{ value: -0.3, isPositive: true }}
+            threshold={{ target: 2.0, tolerance: 0.5 }}
+            contextText="Target: <2.0%"
+            status={isLoading ? "loading" : "live"}
+            lastUpdated={timeAgo}
           />
           <KPICard
             title="Network Utilisation"
@@ -123,24 +182,20 @@ export default function ExecutiveOverview() {
             icon={Gauge}
             color="primary"
             trend={{ value: 0.5, isPositive: true }}
+            status={isLoading ? "loading" : "live"}
+            lastUpdated={timeAgo}
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <KPICard
-            title="Flare Intensity"
-            value={flareIntensity.toFixed(1)}
-            unit="% of production"
-            icon={Flame}
-            color="flare"
-            trend={{ value: -0.4, isPositive: true }}
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
           <KPICard
             title="Deferment QTD"
             value={formatNumber(820, 0)}
             unit="MMscf"
             icon={AlertTriangle}
             color="alert"
+            status={isLoading ? "loading" : "live"}
+            contextText="Quarter to date total"
           />
           <KPICard
             title="Receivables"
@@ -148,6 +203,8 @@ export default function ExecutiveOverview() {
             unit="₦M"
             icon={DollarSign}
             color="alert"
+            status={isLoading ? "loading" : "live"}
+            contextText="Outstanding payments"
           />
           <KPICard
             title="DSO (Power Sector)"
@@ -155,6 +212,8 @@ export default function ExecutiveOverview() {
             unit="days"
             icon={Calendar}
             color="alert"
+            status={isLoading ? "loading" : "live"}
+            contextText="Days sales outstanding"
           />
         </div>
 
@@ -185,32 +244,6 @@ export default function ExecutiveOverview() {
                   ))}
                 </Bar>
               </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Flare Intensity Trend */}
-          <div className="kpi-card">
-            <h3 className="text-lg font-semibold text-ink mb-4">
-              Flare Intensity Trend (% of Production)
-            </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={flareTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#DCDAD2" />
-                <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-                <YAxis
-                  tick={{ fontSize: 12 }}
-                  domain={[0, 4]}
-                  tickFormatter={(value) => `${value}%`}
-                />
-                <Tooltip formatter={(value: number) => `${value.toFixed(2)}%`} />
-                <Line
-                  type="monotone"
-                  dataKey="intensity"
-                  stroke="#D98E04"
-                  strokeWidth={3}
-                  dot={{ fill: "#D98E04", r: 4 }}
-                />
-              </LineChart>
             </ResponsiveContainer>
           </div>
         </div>

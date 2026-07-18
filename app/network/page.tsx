@@ -3,18 +3,22 @@
 import { useState } from "react";
 import PipelineMap from "@/components/PipelineMap";
 import NetworkLegend from "@/components/NetworkLegend";
-import { Network, Download, FileText, AlertTriangle, Activity, TrendingUp, Gauge } from "lucide-react";
+import { Network, Download, FileText, AlertTriangle, Activity, TrendingUp, Gauge, Info, Sun, Moon, Sunrise, Sunset } from "lucide-react";
 import Link from "next/link";
 import {
   allAssets,
   pipelines,
   getTotalDeferment,
   getAssetsByStatus,
+  networks,
 } from "@/lib/pipeline-network-data";
 import { getActiveIncidents } from "@/lib/incident-data";
 
 export default function PipelineNetworkPage() {
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
+  const [legendOpen, setLegendOpen] = useState(false);
+  const [lightPreset, setLightPreset] = useState<"day" | "night" | "dusk" | "dawn">("day");
+  const [activeNetworks, setActiveNetworks] = useState<string[]>(networks.map(n => n.id));
 
   // Calculate network statistics
   const totalCapacity = pipelines.reduce((sum, p) => sum + p.properties.capacity, 0);
@@ -31,6 +35,23 @@ export default function PipelineNetworkPage() {
   // Pipeline operational status
   const operationalPipelines = pipelines.filter((p) => p.properties.status === "operational").length;
   const totalPipelines = pipelines.length;
+
+  // Toggle network visibility
+  const toggleNetwork = (networkId: string) => {
+    setActiveNetworks((prev) =>
+      prev.includes(networkId)
+        ? prev.filter((id) => id !== networkId)
+        : [...prev, networkId]
+    );
+  };
+
+  // Light preset icons
+  const lightPresetIcons = {
+    day: Sun,
+    night: Moon,
+    dusk: Sunset,
+    dawn: Sunrise,
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -152,22 +173,97 @@ export default function PipelineNetworkPage() {
         </div>
       </div>
 
-      {/* Interactive Map + Legend */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Map Container */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden" style={{ height: "calc(100vh - 300px)", minHeight: "700px" }}>
-            <PipelineMap onAssetClick={setSelectedAssetId} />
+      {/* Map Controls */}
+      <div className="bg-white rounded-lg shadow-sm border border-line p-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          {/* Light Preset Selector */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-ink/60">Light:</span>
+            <div className="flex gap-1 border border-line rounded-lg p-1">
+              {(["day", "night", "dusk", "dawn"] as const).map((preset) => {
+                const Icon = lightPresetIcons[preset];
+                return (
+                  <button
+                    key={preset}
+                    onClick={() => setLightPreset(preset)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded flex items-center gap-1.5 transition-colors ${
+                      lightPreset === preset
+                        ? "bg-primary text-white"
+                        : "text-ink/60 hover:text-ink hover:bg-gray-100"
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {preset.charAt(0).toUpperCase() + preset.slice(1)}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        {/* Legend Panel */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-6" style={{ maxHeight: "calc(100vh - 300px)", overflowY: "auto" }}>
-            <NetworkLegend onAssetClick={setSelectedAssetId} />
+          {/* Network Filter Toggles */}
+          <div className="flex items-center gap-2 flex-1">
+            <span className="text-sm font-medium text-ink/60">Networks:</span>
+            <div className="flex gap-1.5 flex-wrap">
+              {networks.map((network) => (
+                <button
+                  key={network.id}
+                  onClick={() => toggleNetwork(network.id)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded border transition-colors ${
+                    activeNetworks.includes(network.id)
+                      ? "bg-primary text-white border-primary"
+                      : "text-ink/60 border-line hover:border-primary/50 hover:text-primary"
+                  }`}
+                >
+                  {network.name}
+                </button>
+              ))}
+            </div>
           </div>
+
+          {/* Legend Toggle */}
+          <button
+            onClick={() => setLegendOpen(!legendOpen)}
+            className="px-4 py-1.5 text-sm font-medium border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2"
+          >
+            <Info className="w-4 h-4" />
+            Legend
+          </button>
         </div>
       </div>
+
+      {/* Fullscreen Map Container */}
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden" style={{ height: "calc(100vh - 450px)", minHeight: "700px" }}>
+        <PipelineMap
+          onAssetClick={setSelectedAssetId}
+          lightPreset={lightPreset}
+          activeNetworks={activeNetworks}
+        />
+      </div>
+
+      {/* Legend Modal/Drawer */}
+      {legendOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setLegendOpen(false)}>
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white border-b border-line p-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-ink">Network Legend</h3>
+              <button
+                onClick={() => setLegendOpen(false)}
+                className="text-ink/60 hover:text-ink transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4">
+              <NetworkLegend onAssetClick={(id) => {
+                setSelectedAssetId(id);
+                setLegendOpen(false);
+              }} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

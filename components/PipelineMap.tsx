@@ -19,17 +19,28 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
 
 interface PipelineMapProps {
   onAssetClick?: (assetId: string) => void;
+  lightPreset?: "day" | "night" | "dusk" | "dawn";
+  activeNetworks?: string[];
 }
 
-export default function PipelineMap({ onAssetClick }: PipelineMapProps) {
+export default function PipelineMap({
+  onAssetClick,
+  lightPreset = "day",
+  activeNetworks: externalActiveNetworks
+}: PipelineMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [activeNetworks, setActiveNetworks] = useState<string[]>(
-    networks.map((n) => n.id)
-  );
-  const [mapStyle, setMapStyle] = useState("mapbox://styles/mapbox/light-v11");
-  const [lightPreset, setLightPreset] = useState<"day" | "night" | "dusk" | "dawn">("day");
+  const activeNetworks = externalActiveNetworks || networks.map((n) => n.id);
+
+  // Map styles based on light preset
+  const mapStyles = {
+    day: "mapbox://styles/mapbox/light-v11",
+    night: "mapbox://styles/mapbox/dark-v11",
+    dusk: "mapbox://styles/mapbox/navigation-night-v1",
+    dawn: "mapbox://styles/mapbox/outdoors-v12",
+  };
+  const mapStyle = mapStyles[lightPreset];
 
   // Initialize map
   useEffect(() => {
@@ -66,7 +77,7 @@ export default function PipelineMap({ onAssetClick }: PipelineMapProps) {
     };
   }, []);
 
-  // Update map style
+  // Update map style when light preset changes
   useEffect(() => {
     if (map.current && mapLoaded) {
       map.current.setStyle(mapStyle);
@@ -76,7 +87,7 @@ export default function PipelineMap({ onAssetClick }: PipelineMapProps) {
         addIncidents();
       });
     }
-  }, [mapStyle]);
+  }, [lightPreset, mapStyle, mapLoaded]);
 
   // Add pipeline layers
   const addPipelines = () => {
@@ -182,12 +193,8 @@ export default function PipelineMap({ onAssetClick }: PipelineMapProps) {
       // Create custom marker element
       const el = document.createElement("div");
       el.className = "asset-marker";
-      el.style.width = "24px";
-      el.style.height = "24px";
-      el.style.borderRadius = "50%";
       el.style.cursor = "pointer";
-      el.style.border = "2px solid white";
-      el.style.boxShadow = "0 2px 4px rgba(0,0,0,0.3)";
+      el.style.transition = "transform 0.2s";
 
       // Color based on status
       const statusColors = {
@@ -196,20 +203,83 @@ export default function PipelineMap({ onAssetClick }: PipelineMapProps) {
         maintenance: "#FFBF00",
         "under-construction": "#BD1B00",
       };
-      el.style.backgroundColor = statusColors[status];
+      const color = statusColors[status];
 
-      // Icon based on asset type
+      // SVG icons based on asset type
       const assetIcons: Record<string, string> = {
-        compressor: "⚙️",
-        "processing-plant": "🏭",
-        "metering-station": "📊",
-        terminal: "🚢",
-        storage: "🛢️",
-        "power-plant": "⚡",
-        "industrial": "🏗️",
-        "city-gate": "🚪",
+        compressor: `
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" fill="${color}" stroke="white" stroke-width="2"/>
+            <path d="M16 10v12m-4-8l4-4 4 4m-4 8l-4-4m8 0l-4 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        `,
+        "processing-plant": `
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="16" fill="${color}" stroke="white" stroke-width="2.5"/>
+            <rect x="10" y="14" width="4" height="10" fill="white" rx="1"/>
+            <rect x="16" y="11" width="4" height="13" fill="white" rx="1"/>
+            <rect x="22" y="14" width="4" height="10" fill="white" rx="1"/>
+            <path d="M12 11v3m4-3v3m4-3v3" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        `,
+        "metering-station": `
+          <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+            <circle cx="15" cy="15" r="13" fill="${color}" stroke="white" stroke-width="2"/>
+            <rect x="9" y="9" width="12" height="12" stroke="white" stroke-width="1.5" fill="none" rx="1"/>
+            <path d="M9 13h12M9 17h12M13 9v12M17 9v12" stroke="white" stroke-width="1"/>
+          </svg>
+        `,
+        terminal: `
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" fill="${color}" stroke="white" stroke-width="2"/>
+            <rect x="8" y="12" width="16" height="8" stroke="white" stroke-width="1.5" fill="none" rx="1"/>
+            <path d="M12 15l2 2-2 2m4-4h4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        `,
+        storage: `
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" fill="${color}" stroke="white" stroke-width="2"/>
+            <ellipse cx="16" cy="13" rx="7" ry="3" fill="white"/>
+            <path d="M9 13v6c0 1.66 3.13 3 7 3s7-1.34 7-3v-6" stroke="white" stroke-width="1.5" fill="none"/>
+          </svg>
+        `,
+        "power-plant": `
+          <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+            <circle cx="17" cy="17" r="15" fill="${color}" stroke="white" stroke-width="2.5"/>
+            <path d="M19 9l-6 10h6l-2 8 8-11h-6l4-7z" fill="white" stroke="white" stroke-width="0.5"/>
+          </svg>
+        `,
+        "industrial": `
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" fill="${color}" stroke="white" stroke-width="2"/>
+            <path d="M10 22V14l4 4V14l4 4V10h4v12H10z" fill="white"/>
+          </svg>
+        `,
+        "city-gate": `
+          <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+            <circle cx="15" cy="15" r="13" fill="${color}" stroke="white" stroke-width="2"/>
+            <path d="M9 20V13l6-4 6 4v7" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <rect x="13" y="16" width="4" height="4" fill="white"/>
+          </svg>
+        `,
       };
-      el.innerHTML = `<div style="font-size: 12px; text-align: center; line-height: 20px;">${assetIcons[assetType] || "📍"}</div>`;
+
+      el.innerHTML = assetIcons[assetType] || `
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="12" fill="${color}" stroke="white" stroke-width="2"/>
+          <circle cx="14" cy="14" r="4" fill="white"/>
+        </svg>
+      `;
+
+      // Add hover effect
+      el.addEventListener("mouseenter", () => {
+        el.style.transform = "scale(1.15)";
+        el.style.zIndex = "1000";
+      });
+      el.addEventListener("mouseleave", () => {
+        el.style.transform = "scale(1)";
+        el.style.zIndex = "auto";
+      });
 
       // Create popup
       const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
@@ -316,31 +386,6 @@ export default function PipelineMap({ onAssetClick }: PipelineMapProps) {
     }
   };
 
-  // Toggle network visibility
-  const toggleNetwork = (networkId: string) => {
-    setActiveNetworks((prev) =>
-      prev.includes(networkId)
-        ? prev.filter((id) => id !== networkId)
-        : [...prev, networkId]
-    );
-  };
-
-  // Fly to network
-  const flyToNetwork = (networkId: string) => {
-    const networkPipelines = pipelines.filter(
-      (p) => p.properties.network === networkId
-    );
-    if (networkPipelines.length > 0 && map.current) {
-      const coords = networkPipelines[0].geometry.coordinates;
-      const midpoint = coords[Math.floor(coords.length / 2)];
-      map.current.flyTo({
-        center: midpoint as [number, number],
-        zoom: 8,
-        duration: 2000,
-      });
-    }
-  };
-
   // Update pipeline visibility based on active networks
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
@@ -356,67 +401,12 @@ export default function PipelineMap({ onAssetClick }: PipelineMapProps) {
         ]);
       }
     });
-  }, [activeNetworks, mapLoaded]);
+  }, [activeNetworks, mapLoaded, externalActiveNetworks]);
 
   return (
     <div className="relative w-full h-full">
       {/* Map Container */}
       <div ref={mapContainer} className="w-full h-full" />
-
-      {/* Map Controls */}
-      <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-4 space-y-4 max-w-xs">
-        <div>
-          <h3 className="font-bold text-sm mb-2">Map Style</h3>
-          <div className="flex gap-2 flex-wrap">
-            {[
-              { name: "Light", value: "mapbox://styles/mapbox/light-v11" },
-              { name: "Dark", value: "mapbox://styles/mapbox/dark-v11" },
-              { name: "Satellite", value: "mapbox://styles/mapbox/satellite-streets-v12" },
-            ].map((style) => (
-              <button
-                key={style.value}
-                onClick={() => setMapStyle(style.value)}
-                className={`px-3 py-1 text-xs rounded ${
-                  mapStyle === style.value
-                    ? "bg-primary text-white"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
-              >
-                {style.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h3 className="font-bold text-sm mb-2">Networks</h3>
-          <div className="space-y-2">
-            {networks.map((network) => (
-              <div key={network.id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id={`network-${network.id}`}
-                  checked={activeNetworks.includes(network.id)}
-                  onChange={() => toggleNetwork(network.id)}
-                  className="rounded"
-                />
-                <label
-                  htmlFor={`network-${network.id}`}
-                  className="text-xs flex-1 cursor-pointer"
-                >
-                  {network.name}
-                </label>
-                <button
-                  onClick={() => flyToNetwork(network.id)}
-                  className="text-xs text-primary hover:underline"
-                >
-                  View
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

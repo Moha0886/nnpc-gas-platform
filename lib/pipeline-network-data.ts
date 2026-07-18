@@ -504,7 +504,7 @@ export const pipelines: PipelineFeature[] = [
       diameter: 16,
       length: 65,
       capacity: 78,
-      currentOutput: 68,
+      currentFlow: 68,
       utilization: 87.2,
       pressure: 890,
       status: "operational",

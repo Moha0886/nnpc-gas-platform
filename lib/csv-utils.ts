@@ -37,14 +37,6 @@ export const CSV_TEMPLATES = {
       ["2026-07-15", "Dangote Industries", "Lagos", "65.0", "65.0", "0.0", "28275000", "Delivered", ""],
     ],
   },
-  flare: {
-    filename: "flare_upload_template.csv",
-    headers: ["Date", "Station", "Corridor", "Gas Produced (MMscf/d)", "Gas Utilized (MMscf/d)", "Gas Flared (MMscf/d)", "Flare Rate (%)", "Reason", "Remarks"],
-    sample: [
-      ["2026-07-15", "Escravos", "Eastern", "480.5", "450.5", "30.0", "6.2", "Planned maintenance", "Compressor offline"],
-      ["2026-07-15", "Oben", "Eastern", "400.2", "380.2", "20.0", "5.0", "Operational constraint", ""],
-    ],
-  },
   deferment: {
     filename: "deferment_upload_template.csv",
     headers: ["Date", "Station/Pipeline", "Corridor", "Planned (MMscf/d)", "Actual (MMscf/d)", "Deferred (MMscf/d)", "Reason", "Category", "Remarks"],
@@ -226,14 +218,6 @@ export const getTemplateInstructions = (templateType: keyof typeof CSV_TEMPLATES
       "Revenue in Nigerian Naira (₦), no commas",
       "Status must be: Delivered, Partial, or Not Delivered",
       "Delivered cannot exceed Contracted quantity",
-    ],
-    flare: [
-      "Date must be in YYYY-MM-DD format",
-      "Station name must match existing stations",
-      "Flare Rate % = (Gas Flared / Gas Produced) × 100",
-      "Gas Flared = Gas Produced - Gas Utilized",
-      "Reason: Planned maintenance, Operational constraint, Emergency, etc.",
-      "Target flare rate should be <5% for compliance",
     ],
     deferment: [
       "Date must be in YYYY-MM-DD format",
