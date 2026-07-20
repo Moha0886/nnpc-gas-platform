@@ -51,6 +51,8 @@ const navigationGroups: NavGroup[] = [
     label: "OPERATIONS",
     items: [
       { name: "Executive Dashboard", href: "/", icon: LayoutDashboard },
+      { name: "Production Dashboard", href: "/operations/production-dashboard", icon: Activity },
+      { name: "Daily Situation Report", href: "/operations/daily-situation", icon: Activity },
       { name: "Volumes & Balance", href: "/volumes", icon: Activity },
       { name: "Allocation", href: "/allocation", icon: PieChart },
       { name: "Nominations", href: "/nominations", icon: FileText },

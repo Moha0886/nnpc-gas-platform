@@ -384,6 +384,200 @@ export default function ExecutiveOverview() {
       </div>
 
       <div className="p-4 sm:p-8">
+        {/* Cross-BU Value Chain - Executive Command Center */}
+        <div className="bg-gradient-to-r from-[#1B5E3E] to-[#2B5F75] rounded-lg p-6 mb-8 text-white">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-2xl font-bold">NNPC Gas Value Chain - Live Operations</h3>
+              <p className="text-white/80 mt-1 text-sm">End-to-end gas flow across all business units</p>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-white/20 rounded-lg backdrop-blur-sm">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium">All Systems Operational</span>
+            </div>
+          </div>
+
+          {/* Flow Visualization */}
+          <div className="grid grid-cols-5 gap-3 mb-6">
+            {/* Step 1: NGPIS Production */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all group">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-[#1B5E3E] flex items-center justify-center text-white font-bold text-sm">
+                  1
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs text-white/70">NGPIS</p>
+                  <p className="font-semibold text-sm">Production</p>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-xs text-white/70">Upstream</span>
+                  <span className="text-lg font-bold tabular-nums">795.3</span>
+                </div>
+                <p className="text-xs text-white/50">MMscfd</p>
+              </div>
+              <a href="/operations/production-dashboard" className="text-xs text-[#F9A825] hover:underline mt-2 inline-block opacity-0 group-hover:opacity-100 transition-opacity">
+                View Dashboard →
+              </a>
+            </div>
+
+            {/* Arrow */}
+            <div className="flex items-center justify-center">
+              <div className="text-white/40 text-2xl">→</div>
+            </div>
+
+            {/* Step 2: NGPIS Processing */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all group">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-[#2B5F75] flex items-center justify-center text-white font-bold text-sm">
+                  2
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs text-white/70">NGPIS</p>
+                  <p className="font-semibold text-sm">Processing</p>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-xs text-white/70">Plants</span>
+                  <span className="text-lg font-bold tabular-nums">780.5</span>
+                </div>
+                <p className="text-xs text-white/50">MMscfd · 98.1% eff</p>
+              </div>
+              <a href="/operations/production-dashboard" className="text-xs text-[#F9A825] hover:underline mt-2 inline-block opacity-0 group-hover:opacity-100 transition-opacity">
+                View Dashboard →
+              </a>
+            </div>
+
+            {/* Arrow */}
+            <div className="flex items-center justify-center">
+              <div className="text-white/40 text-2xl">→</div>
+            </div>
+
+            {/* Step 3: NGIC Transmission */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all group">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-[#F9A825] flex items-center justify-center text-white font-bold text-sm">
+                  3
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs text-white/70">NGIC</p>
+                  <p className="font-semibold text-sm">Transmission</p>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-xs text-white/70">Delivered</span>
+                  <span className="text-lg font-bold tabular-nums">771.5</span>
+                </div>
+                <p className="text-xs text-white/50">MMscfd to network</p>
+              </div>
+              <a href="/operations/daily-situation" className="text-xs text-[#F9A825] hover:underline mt-2 inline-block opacity-0 group-hover:opacity-100 transition-opacity">
+                View Report →
+              </a>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {/* Step 4: NGML Allocation */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all group">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white font-bold text-sm">
+                    4
+                  </div>
+                  <div>
+                    <p className="text-xs text-white/70">NGML</p>
+                    <p className="font-semibold">Allocation Decision</p>
+                  </div>
+                </div>
+                <a href="/allocation" className="text-xs text-[#F9A825] hover:underline opacity-0 group-hover:opacity-100 transition-opacity">
+                  View Performance →
+                </a>
+              </div>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <p className="text-xs text-white/70 mb-1">Nomination</p>
+                  <p className="text-xl font-bold tabular-nums">892.4</p>
+                  <p className="text-xs text-white/50">MMscfd</p>
+                </div>
+                <div>
+                  <p className="text-xs text-white/70 mb-1">Allocated</p>
+                  <p className="text-xl font-bold tabular-nums">771.5</p>
+                  <p className="text-xs text-white/50">MMscfd</p>
+                </div>
+                <div>
+                  <p className="text-xs text-white/70 mb-1">Shortfall</p>
+                  <p className="text-xl font-bold tabular-nums text-yellow-300">120.9</p>
+                  <p className="text-xs text-white/50">MMscfd (13.5%)</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 5: Customer Delivery */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all group">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                    5
+                  </div>
+                  <div>
+                    <p className="text-xs text-white/70">NGIC</p>
+                    <p className="font-semibold">Customer Delivery</p>
+                  </div>
+                </div>
+                <a href="/operations/daily-situation" className="text-xs text-[#F9A825] hover:underline opacity-0 group-hover:opacity-100 transition-opacity">
+                  Daily Report →
+                </a>
+              </div>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <p className="text-xs text-white/70 mb-1">Offtakers</p>
+                  <p className="text-xl font-bold tabular-nums">50</p>
+                  <p className="text-xs text-white/50">Stations</p>
+                </div>
+                <div>
+                  <p className="text-xs text-white/70 mb-1">Actual</p>
+                  <p className="text-xl font-bold tabular-nums">759.2</p>
+                  <p className="text-xs text-white/50">MMscfd</p>
+                </div>
+                <div>
+                  <p className="text-xs text-white/70 mb-1">Performance</p>
+                  <p className="text-xl font-bold tabular-nums text-green-300">98.4%</p>
+                  <p className="text-xs text-white/50">vs Allocation</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Overall Efficiency */}
+          <div className="mt-4 pt-4 border-t border-white/20">
+            <div className="grid grid-cols-4 gap-4 text-center">
+              <div>
+                <p className="text-xs text-white/70 mb-1">End-to-End Efficiency</p>
+                <p className="text-2xl font-bold tabular-nums text-green-300">95.5%</p>
+                <p className="text-xs text-white/50">Production to Delivery</p>
+              </div>
+              <div>
+                <p className="text-xs text-white/70 mb-1">Network Losses (UFG)</p>
+                <p className="text-2xl font-bold tabular-nums">12.3</p>
+                <p className="text-xs text-white/50">MMscfd (1.6%)</p>
+              </div>
+              <div>
+                <p className="text-xs text-white/70 mb-1">Capacity Utilization</p>
+                <p className="text-2xl font-bold tabular-nums">76.2%</p>
+                <p className="text-xs text-white/50">Network-wide</p>
+              </div>
+              <div>
+                <p className="text-xs text-white/70 mb-1">Stations Online</p>
+                <p className="text-2xl font-bold tabular-nums text-green-300">48/50</p>
+                <p className="text-xs text-white/50">96% Availability</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Enhanced KPI Strip with new features */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
           <KPICard
