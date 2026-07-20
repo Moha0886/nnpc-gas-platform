@@ -7,15 +7,15 @@ export default function MORSupplyPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to /supply page which has the complete MOR Supply & Offtake report
-    router.replace("/supply");
+    // Redirect to /volumes page which has the complete MOR Supply & Offtake report
+    router.replace("/volumes");
   }, [router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-        <p className="text-ink/60">Redirecting to MOR Supply Report...</p>
+        <p className="text-ink/60">Redirecting to Volumes & Balance...</p>
       </div>
     </div>
   );

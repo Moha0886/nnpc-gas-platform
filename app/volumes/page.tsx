@@ -135,7 +135,7 @@ export default function VolumesPage() {
               className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
-              Add Record
+              Enter Volume Balance
             </Link>
           </div>
         </div>

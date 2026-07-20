@@ -11,7 +11,6 @@ import {
   Gauge,
   AlertTriangle,
   FileCheck,
-  Users,
   Database,
   Network,
   BarChart3,
@@ -20,7 +19,6 @@ import {
   Menu,
   X,
   ChevronDown,
-  Truck,
   PieChart,
   FileBarChart,
 } from "lucide-react";
@@ -32,9 +30,8 @@ const navigationGroups = [
     label: "OPERATIONS",
     items: [
       { name: "Executive Dashboard", href: "/", icon: LayoutDashboard },
-      { name: "Gas Supply", href: "/supply", icon: Truck },
-      { name: "Allocation", href: "/allocation", icon: PieChart },
       { name: "Volumes & Balance", href: "/volumes", icon: Activity },
+      { name: "Allocation", href: "/allocation", icon: PieChart },
       { name: "Nominations", href: "/nominations", icon: FileText },
       { name: "Capacity", href: "/capacity", icon: Gauge },
     ],
@@ -50,7 +47,6 @@ const navigationGroups = [
     label: "COMMERCIAL",
     items: [
       { name: "Contracts", href: "/contracts", icon: FileCheck },
-      { name: "Customers", href: "/customers", icon: Users },
     ],
   },
   {
