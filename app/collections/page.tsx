@@ -228,7 +228,7 @@ export default function CollectionsPage() {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number) => `₦${(value / 1000).toFixed(1)}B`}
+                  formatter={(value) => `₦${((Number(value) || 0) / 1000).toFixed(1)}B`}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -245,7 +245,7 @@ export default function CollectionsPage() {
                 <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip
-                  formatter={(value: number) => `₦${(value / 1000).toFixed(1)}B`}
+                  formatter={(value) => `₦${((Number(value) || 0) / 1000).toFixed(1)}B`}
                 />
                 <Legend />
                 <Bar dataKey="billed" fill="#B3402A" name="Billed" />
