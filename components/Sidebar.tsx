@@ -86,32 +86,37 @@ const navigationGroups: NavGroup[] = [
         name: "Production Records",
         href: "/records/production",
         icon: Activity,
-        businessUnits: ["NGPIS"], // NGPIS creates production records
+        businessUnits: ["NGPIS", "NGIC"], // NGPIS creates, NGIC needs visibility
       },
       {
         name: "Delivery Records",
         href: "/records/deliveries",
         icon: FileText,
-        businessUnits: ["NGIC"], // NGIC tracks deliveries
+        businessUnits: ["NGIC", "NGML"], // NGIC creates, NGML needs to see vs allocation
       },
       {
         name: "Nomination Records",
         href: "/records/nominations",
         icon: PieChart,
-        businessUnits: ["NGML"], // NGML manages nominations
+        businessUnits: ["NGML", "NGIC"], // NGML creates, NGIC needs to see demand
       },
-      { name: "Volume Records", href: "/records/volumes", icon: Gauge }, // All can see
+      {
+        name: "Volume Records",
+        href: "/records/volumes",
+        icon: Gauge,
+        // All BUs can see volumes
+      },
       {
         name: "Flow Records",
         href: "/records/flows",
         icon: Activity,
-        businessUnits: ["NGIC"], // NGIC tracks flows
+        businessUnits: ["NGIC", "NGPIS", "NGML"], // NGIC creates, others need visibility
       },
       {
         name: "Deferment Records",
         href: "/records/deferment",
         icon: AlertTriangle,
-        businessUnits: ["NGPIS", "NGIC"], // NGPIS and NGIC track deferments
+        // All BUs need to see deferments - affects entire value chain
       },
     ],
   },
@@ -125,7 +130,13 @@ const navigationGroups: NavGroup[] = [
   {
     label: "COMMERCIAL",
     items: [
-      { name: "Contracts", href: "/contracts", icon: FileCheck },
+      {
+        name: "Contracts",
+        href: "/contracts",
+        icon: FileCheck,
+        businessUnits: ["NGML"], // NGML manages commercial contracts
+        excludeRoles: ["operator"], // Operators don't need contract access
+      },
     ],
   },
   {
@@ -144,31 +155,40 @@ const navigationGroups: NavGroup[] = [
         href: "/nnpc-reports/ngic-daily",
         icon: FileBarChart,
         businessUnits: ["NGIC"], // NGIC submits this report
+        excludeRoles: ["operator"], // Management-level report
       },
       {
         name: "NGML Daily Report",
         href: "/nnpc-reports/ngml-daily",
         icon: FileBarChart,
         businessUnits: ["NGML"], // NGML submits this report
+        excludeRoles: ["operator"], // Management-level report
       },
       {
         name: "Weekly MOR Supply",
         href: "/nnpc-reports/mor-supply",
         icon: FileBarChart,
         businessUnits: ["NGIC", "NGML"], // Both NGIC and NGML contribute
+        excludeRoles: ["operator"], // Management-level report
       },
       {
         name: "Weekly MOR Volume/Pressure",
         href: "/nnpc-reports/mor-volume-pressure",
         icon: FileBarChart,
         businessUnits: ["NGIC"], // NGIC tracks this
+        excludeRoles: ["operator"], // Management-level report
       },
     ],
   },
   {
     label: "REPORTING",
     items: [
-      { name: "Reports", href: "/reports", icon: BarChart3 },
+      {
+        name: "Reports",
+        href: "/reports",
+        icon: BarChart3,
+        excludeRoles: ["operator"], // Operators focus on data entry, not reporting
+      },
     ],
   },
 ];
