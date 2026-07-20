@@ -52,6 +52,18 @@ const config: Config = {
         // Operational colors - WCAG AA Compliant
         paper: "#FAFAF7",
         ink: "#16211E",
+        // Pine - primary operational color (delivered gas, operational status)
+        pine: {
+          DEFAULT: "#0F4C42",
+          light: "#1A6B5E",
+          dark: "#0A3630",
+        },
+        // Gasblue - gas received into network
+        gasblue: {
+          DEFAULT: "#2E6FA3",
+          light: "#4A8BC4",
+          dark: "#1E4D72",
+        },
         flare: {
           DEFAULT: "#B87204",
           light: "#D98E04",

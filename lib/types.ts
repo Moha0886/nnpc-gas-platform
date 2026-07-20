@@ -5,9 +5,20 @@
 
 // ---------- Core Types ----------
 
-export type Corridor = "Eastern" | "Western" | "Northern" | "Lagos";
+// Legacy - keep for backward compatibility during migration
+export type Corridor = "Eastern" | "Western" | "Northern" | "Lagos" | "Interconnector";
 
-export type Subsidiary = "NGIC" | "NGML";
+// New three-level geography hierarchy
+export type Network = "Western Network" | "Eastern Network";
+export type Region = "AOW" | "AOE"; // Area of Operation West | East
+export type GasDistributionZone =
+  | "REGIONAL GAS DISTRIBUTION LAGOS"
+  | "REGIONAL GAS DISTRIBUTION NORTH"
+  | "REGIONAL GAS DISTRIBUTION DELTA"
+  | "REGIONAL GAS DISTRIBUTION EAST"
+  | "AGOT GDZ";
+
+export type Subsidiary = "NGIC" | "NGML" | "NGPIS";
 
 export type AssetClass =
   | "Pipeline"
@@ -36,6 +47,15 @@ export type CustomerStatus = "active" | "inactive" | "suspended" | "pending";
 
 export type GasType = "AG" | "NAG" | "Both";
 
+export type PressureUnit = "barg" | "bar" | "psi" | "kPa";
+
+// ---------- Pressure Type ----------
+
+export interface Pressure {
+  value: number;
+  unit: PressureUnit;
+}
+
 // ---------- Master Data ----------
 
 export interface Asset {
@@ -47,18 +67,41 @@ export interface Asset {
   nameplate: number; // MMscf/d
   diameterIn?: number; // pipelines
   lengthKm?: number; // pipelines
-  designPressure?: string; // e.g. "98 barg"
-  inletPressure?: number; // PSI - for pipelines
-  outletPressure?: number; // PSI - for pipelines
+  // Design pressure (MAOP - Maximum Allowable Operating Pressure)
+  designPressure?: Pressure;
+  // Operating pressure (actual, typically 70-85% of MAOP)
+  operatingPressure?: {
+    inlet?: Pressure;
+    outlet?: Pressure;
+  };
   status: AssetStatus;
   commissioned?: number;
   source?: string; // provenance for seed data
+  asOfDate?: string; // Date of data provenance
 }
 
 export interface ProcessingPlant extends Asset {
   gasType: GasType;
   products: string[]; // ["Lean gas", "LPG", "Condensate"]
   pipelineConnection: string;
+}
+
+// ---------- Producers (Supply Sources) ----------
+
+export interface Producer {
+  id: string;
+  name: string; // e.g., "CNL-Escravos", "NEPL Oredo FST3"
+  network: "Western Network" | "Eastern Network";
+  plantCapacity: number; // MMscf/d
+  productionForecast: number; // MMscf/d
+  averageDailyProduction: number; // MMscf/d
+  excessShortfall?: number; // derived: averageDailyProduction - productionForecast
+  contractualPressureRange?: {
+    min: number; // barg
+    max: number; // barg
+  };
+  contractualPressureRangeStr?: string; // e.g., "80 - 85" for display
+  remarks?: string;
 }
 
 // ---------- Offtaker Hierarchy ----------
@@ -73,8 +116,38 @@ export interface Offtaker {
   productType?: ProductType; // Type of gas product they take
   parentOfftakerId?: string; // null = main offtaker; set = sub-offtaker
   deliveryPointId: string; // custody-transfer point that meters it
-  dcq?: number; // Daily Contract Quantity, MMscf/d
+  // Contract volumes - replacing single DCQ
+  designCapacity?: number; // MMscfd (station design capacity)
+  contractualDemand?: number; // MMscfd (what contract entitles them to)
+  firmAndEffective?: number; // MMscfd (contracted, GSA in force)
+  firmNotEffective?: number; // MMscfd (contracted, GSA not yet effective)
+  interruptible?: number; // MMscfd (interruptible supply)
+  estimatedDemand?: number; // MMscfd (expected demand)
   contractId?: string;
+  customerClass?: "Sales" | "Secondary tariff / tolling"; // Transport-only vs sales
+  franchiseId?: string; // For NGML customers - links to Franchise/UJV
+  gdz?: GasDistributionZone; // For NGML customers
+  aliases?: string[]; // Name variants for normalization (e.g., ["WAPCO SHAG", "WAPCO Sagamu"])
+}
+
+// ---------- Franchises / UJVs ----------
+
+export interface Franchise {
+  id: string;
+  name: string; // e.g., "NGML-NIPCO UJV"
+  type: "UJV" | "Franchise" | "Direct";
+  gdz: GasDistributionZone;
+  memberOfftakerIds: string[];
+}
+
+// ---------- Source of Allocation (many-to-many) ----------
+
+export interface AllocationSource {
+  offtakerId: string;
+  producerIds: string[]; // many-to-many relationship
+  allocation: number; // MMscf or MMscf/d
+  actualOfftake: number; // MMscf or MMscf/d
+  sourceLabel?: string; // e.g., "CNL, NPDC JV" for display
 }
 
 // ---------- Volumetric - Gas Day Chain ----------
@@ -97,11 +170,15 @@ export interface OfftakerFlow {
   // Plan stage
   nominated: number; // what the offtaker requested (plan)
   allocated: number; // what NGML allocated based on capacity (plan)
-  forecastSupply: number; // forward projection (plan)
+  forecastSupply: number; // forward projection (plan) - NETWORK level, not per-offtaker
   // Actual stage
   actualSupplied: number; // what was actually put into the transmission system (actual)
   received: number; // metered delivery at custody transfer point (actual)
   offtaken: number; // what the offtaker actually consumed (actual)
+  // Performance metrics
+  perf: number; // Perf = Actual Offtake ÷ Allocation (0.80-1.05 typical, avg 0.92)
+  pctDiffAllocationVsActualSupply?: number; // % Diff (Allocation vs Actual Supply)
+  pctDiffAllocationVsActualOfftake?: number; // % Diff (Allocation vs Actual Offtake)
   // Variance tracking - complete chain
   varianceAllocation: number; // nominated − allocated (planning gap)
   varianceSupply: number; // allocated − actualSupplied (supply gap)
@@ -110,6 +187,9 @@ export interface OfftakerFlow {
   // Legacy variance fields (for backward compatibility)
   varianceNomination: number; // nominated − received (overall plan vs actual delivery)
   varianceReceipt: number; // received − offtaken (delivery vs consumption)
+  // Power generation (for power sector offtakers)
+  megawatts?: number; // MW generated from this gas offtake
+  megawattsPerMMscfd?: number; // Derived: megawatts / offtaken (efficiency metric)
 }
 
 // ---------- Operations Data ----------
@@ -170,9 +250,18 @@ export interface Contract {
   startDate: string;
   endDate: string;
   status: "active" | "expired" | "terminated" | "suspended";
-  dcq: number; // Daily Contract Quantity, MMscf/d
+  gsaStatus?: "effective" | "not-effective" | "pending-renewal" | "executed-not-effective" | "no-agreement"; // GSA effectiveness status
+  gsaStatusRemark?: string; // e.g., "The GSA is not effective", "Contract to be Renewed"
+
+  // Contract volume tiers (replaces single DCQ)
+  firmAndEffective: number; // MMscfd - Contracted, GSA in force
+  firmNotEffective: number; // MMscfd - Contracted, GSA not yet effective
+  interruptible: number; // MMscfd - Interruptible supply
+  estimatedDemand: number; // MMscfd - Expected customer demand
+  contractualDemand: number; // MMscfd - What contract entitles them to
+
   acq?: number; // Annual Contract Quantity, BCF
-  dcqDeliveryPercent?: number; // Delivery percentage against DCQ
+  dcqDeliveryPercent?: number; // Delivery percentage against contractual demand
   takeOrPay?: number; // percentage
   shipOrPay?: number; // percentage
   dso?: number; // Days Sales Outstanding

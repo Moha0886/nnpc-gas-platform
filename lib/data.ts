@@ -51,7 +51,7 @@ export const assets: Asset[] = [
     name: "OB3 (Obiafu-Obrikom to Oben)",
     subsidiary: "NGIC",
     cls: "Pipeline",
-    corridor: "Eastern",
+    corridor: "Interconnector", // East-West connector
     nameplate: 2000,
     diameterIn: 48,
     lengthKm: 130,
@@ -61,6 +61,22 @@ export const assets: Asset[] = [
     status: "Operational",
     commissioned: 2010,
     source: "NNPC Gas Asset Inventory",
+  },
+  {
+    id: "oben-geregu-001",
+    name: "Oben-Geregu Pipeline",
+    subsidiary: "NGIC",
+    cls: "Pipeline",
+    corridor: "Northern", // Key northern supply route
+    nameplate: 1200,
+    diameterIn: 36,
+    lengthKm: 196,
+    designPressure: "85 barg",
+    inletPressure: 1233, // PSI (85 barg design, ~70-80% operating)
+    outletPressure: 1050, // PSI (~15% pressure drop over 196km)
+    status: "Operational",
+    commissioned: 2011,
+    source: "Nigerian Gas Infrastructure Report",
   },
   {
     id: "akk-001",
@@ -101,7 +117,7 @@ export const processingPlants: ProcessingPlant[] = [
     name: "Oben Gas Plant",
     subsidiary: "NGIC",
     cls: "Processing plant",
-    corridor: "Eastern",
+    corridor: "Western", // Western terminus of OB3, key ELPS supply point
     nameplate: 300,
     designPressure: "70 barg",
     status: "Operational",
