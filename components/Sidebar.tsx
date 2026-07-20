@@ -45,29 +45,74 @@ interface NavGroup {
   excludeRoles?: UserRole[]; // Which roles cannot see this entire group
 }
 
-// Grouped navigation structure - ALL USERS SEE ALL MENUS
+// Grouped navigation structure - BU-SPECIFIC MENUS
 const navigationGroups: NavGroup[] = [
   {
     label: "OPERATIONS",
     items: [
-      { name: "Executive Dashboard", href: "/", icon: LayoutDashboard },
-      { name: "Production Dashboard", href: "/operations/production-dashboard", icon: Activity },
-      { name: "Daily Situation Report", href: "/operations/daily-situation", icon: Activity },
+      { name: "Executive Dashboard", href: "/", icon: LayoutDashboard }, // All users
+      {
+        name: "Production Dashboard",
+        href: "/operations/production-dashboard",
+        icon: Activity,
+        businessUnits: ["NGPIS"], // Only NGPIS users
+      },
+      {
+        name: "Daily Situation Report",
+        href: "/operations/daily-situation",
+        icon: Activity,
+        businessUnits: ["NGIC"], // Only NGIC users
+      },
       { name: "Volumes & Balance", href: "/volumes", icon: Activity },
-      { name: "Allocation", href: "/allocation", icon: PieChart },
-      { name: "Nominations", href: "/nominations", icon: FileText },
+      {
+        name: "Allocation",
+        href: "/allocation",
+        icon: PieChart,
+        businessUnits: ["NGML"], // Only NGML users
+      },
+      {
+        name: "Nominations",
+        href: "/nominations",
+        icon: FileText,
+        businessUnits: ["NGML"], // Only NGML users
+      },
       { name: "Capacity", href: "/capacity", icon: Gauge },
     ],
   },
   {
     label: "DATA ENTRY",
     items: [
-      { name: "Production Records", href: "/records/production", icon: Activity },
-      { name: "Delivery Records", href: "/records/deliveries", icon: FileText },
-      { name: "Nomination Records", href: "/records/nominations", icon: PieChart },
-      { name: "Volume Records", href: "/records/volumes", icon: Gauge },
-      { name: "Flow Records", href: "/records/flows", icon: Activity },
-      { name: "Deferment Records", href: "/records/deferment", icon: AlertTriangle },
+      {
+        name: "Production Records",
+        href: "/records/production",
+        icon: Activity,
+        businessUnits: ["NGPIS"], // NGPIS creates production records
+      },
+      {
+        name: "Delivery Records",
+        href: "/records/deliveries",
+        icon: FileText,
+        businessUnits: ["NGIC"], // NGIC tracks deliveries
+      },
+      {
+        name: "Nomination Records",
+        href: "/records/nominations",
+        icon: PieChart,
+        businessUnits: ["NGML"], // NGML manages nominations
+      },
+      { name: "Volume Records", href: "/records/volumes", icon: Gauge }, // All can see
+      {
+        name: "Flow Records",
+        href: "/records/flows",
+        icon: Activity,
+        businessUnits: ["NGIC"], // NGIC tracks flows
+      },
+      {
+        name: "Deferment Records",
+        href: "/records/deferment",
+        icon: AlertTriangle,
+        businessUnits: ["NGPIS", "NGIC"], // NGPIS and NGIC track deferments
+      },
     ],
   },
   {
@@ -94,10 +139,30 @@ const navigationGroups: NavGroup[] = [
   {
     label: "NNPC REPORTS",
     items: [
-      { name: "NGIC Daily Report", href: "/nnpc-reports/ngic-daily", icon: FileBarChart },
-      { name: "NGML Daily Report", href: "/nnpc-reports/ngml-daily", icon: FileBarChart },
-      { name: "Weekly MOR Supply", href: "/nnpc-reports/mor-supply", icon: FileBarChart },
-      { name: "Weekly MOR Volume/Pressure", href: "/nnpc-reports/mor-volume-pressure", icon: FileBarChart },
+      {
+        name: "NGIC Daily Report",
+        href: "/nnpc-reports/ngic-daily",
+        icon: FileBarChart,
+        businessUnits: ["NGIC"], // NGIC submits this report
+      },
+      {
+        name: "NGML Daily Report",
+        href: "/nnpc-reports/ngml-daily",
+        icon: FileBarChart,
+        businessUnits: ["NGML"], // NGML submits this report
+      },
+      {
+        name: "Weekly MOR Supply",
+        href: "/nnpc-reports/mor-supply",
+        icon: FileBarChart,
+        businessUnits: ["NGIC", "NGML"], // Both NGIC and NGML contribute
+      },
+      {
+        name: "Weekly MOR Volume/Pressure",
+        href: "/nnpc-reports/mor-volume-pressure",
+        icon: FileBarChart,
+        businessUnits: ["NGIC"], // NGIC tracks this
+      },
     ],
   },
   {
@@ -124,8 +189,46 @@ export default function Sidebar() {
     setCollapsedGroups(newCollapsed);
   };
 
-  // Show all navigation items to all users (no filtering)
-  const filteredGroups = navigationGroups;
+  // Filter navigation based on user's BU and role
+  const filteredGroups = navigationGroups
+    .map((group) => {
+      // Check if entire group is restricted
+      if (group.businessUnits && user) {
+        // Executives can see all groups
+        if (user.role === "executive" || user.permissions.canViewCrossBU) {
+          // Skip group-level filtering for executives
+        } else if (!group.businessUnits.includes(user.businessUnit)) {
+          return null; // Hide entire group
+        }
+      }
+
+      // Filter items within the group
+      const filteredItems = group.items.filter((item) => {
+        // Check if item is restricted to specific BUs
+        if (item.businessUnits && user) {
+          // Executives and cross-BU users can see everything
+          if (user.role === "executive" || user.permissions.canViewCrossBU) {
+            return true;
+          }
+          // Check if user's BU is in the allowed list
+          return item.businessUnits.includes(user.businessUnit);
+        }
+
+        // Check if item is excluded for specific roles
+        if (item.excludeRoles && user) {
+          return !item.excludeRoles.includes(user.role);
+        }
+
+        // No restrictions, show item
+        return true;
+      });
+
+      // Return group with filtered items
+      return filteredItems.length > 0
+        ? { ...group, items: filteredItems }
+        : null;
+    })
+    .filter((group) => group !== null) as NavGroup[];
 
   const SidebarContent = () => (
     <>
@@ -209,7 +312,7 @@ export default function Sidebar() {
         )}
         <UserMenu />
         <p className="text-ink/50 text-xs text-center">
-          Build v0.4 - RBAC & BU Segregation
+          Build v0.5 - Complete BU Integration
         </p>
       </div>
     </>
