@@ -1,12 +1,43 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, Save, Send, Activity } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Save, Send, Activity, Upload as UploadIcon } from "lucide-react";
 import Link from "next/link";
 import { assets } from "@/lib/data";
 import type { Corridor } from "@/lib/types";
+import FileUpload from "@/components/FileUpload";
 
 export default function FlowsRecordPage() {
+  const [activeTab, setActiveTab] = useState<"upload" | "manual">("upload");
+  const [existingData, setExistingData] = useState<any[]>([]);
+
+  // Load existing data from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('flow-records');
+    if (saved) {
+      setExistingData(JSON.parse(saved));
+    } else {
+      // Initialize with sample data
+      const sampleData = [
+        { Week: "Week 29 (Jul 15-21)", Producer: "Escravos-Lagos Pipeline", "Avg Volume (MMscf/d)": "750.5", "Pressure (barg)": "65.3", status: "approved" },
+        { Week: "Week 29 (Jul 15-21)", Producer: "OB3 Pipeline", "Avg Volume (MMscf/d)": "450.2", "Pressure (barg)": "58.7", status: "approved" },
+        { Week: "Week 30 (Jul 22-28)", Producer: "Escravos-Lagos Pipeline", "Avg Volume (MMscf/d)": "720.8", "Pressure (barg)": "64.1", status: "pending" },
+        { Week: "Week 30 (Jul 22-28)", Producer: "OB3 Pipeline", "Avg Volume (MMscf/d)": "425.5", "Pressure (barg)": "57.2", status: "pending" },
+      ];
+      setExistingData(sampleData);
+      localStorage.setItem('flow-records', JSON.stringify(sampleData));
+    }
+  }, []);
+
+  const handleUploadSuccess = (data: any[], overwriteDuplicates: boolean) => {
+    console.log("Uploaded weekly volume & pressure records:", data);
+    alert(`Successfully uploaded ${data.length} weekly volume & pressure records!`);
+    const newData = data.map(d => ({ ...d, status: "pending" }));
+    const updated = [...existingData, ...newData];
+    setExistingData(updated);
+    localStorage.setItem('flow-records', JSON.stringify(updated));
+  };
+
   const [formData, setFormData] = useState({
     timestamp: new Date().toISOString().slice(0, 16),
     pipelineId: "",
@@ -65,7 +96,7 @@ export default function FlowsRecordPage() {
     : "—";
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-line px-8 py-4">
         <div className="flex items-center gap-4">
@@ -73,16 +104,70 @@ export default function FlowsRecordPage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h2 className="text-2xl font-bold text-ink">Pipeline Flow Reading</h2>
+            <h2 className="text-2xl font-bold text-ink">Weekly Volume & Pressure Report</h2>
             <p className="text-sm text-ink/60 mt-1">
-              Record current flow, pressure, and temperature in pipelines
+              {activeTab === "upload"
+                ? "Upload weekly volume and pressure data from producers"
+                : "Record current flow, pressure, and temperature in pipelines"}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="p-8 max-w-4xl">
-        <form onSubmit={(e) => handleSubmit(e, "submit")}>
+      <div className="p-8 max-w-4xl mx-auto">
+        {/* Tab Navigation */}
+        <div className="bg-white rounded-lg shadow-sm border border-line mb-6">
+          <div className="flex border-b border-line">
+            <button
+              onClick={() => setActiveTab("upload")}
+              className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${
+                activeTab === "upload"
+                  ? "text-primary border-b-2 border-primary bg-primary/5"
+                  : "text-ink/60 hover:text-ink hover:bg-gray-50"
+              }`}
+            >
+              <UploadIcon className="w-5 h-5" />
+              Bulk Upload (Recommended)
+            </button>
+            <button
+              onClick={() => setActiveTab("manual")}
+              className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${
+                activeTab === "manual"
+                  ? "text-primary border-b-2 border-primary bg-primary/5"
+                  : "text-ink/60 hover:text-ink hover:bg-gray-50"
+              }`}
+            >
+              <Activity className="w-5 h-5" />
+              Manual Entry
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === "upload" ? (
+          <div className="kpi-card">
+            <h3 className="text-lg font-semibold text-ink mb-4">Upload Weekly Volume & Pressure Data</h3>
+            <p className="text-sm text-ink/60 mb-6">
+              Upload weekly volume and pressure data from all producers. This matches the format of "Weekly MOR Volume & Pressure" Excel file.
+            </p>
+
+            <FileUpload
+              templateType="flows"
+              existingData={existingData}
+              identifierFields={["Week", "Producer"]}
+              requiredFields={["Week", "Producer", "Avg Volume (MMscf/d)", "Pressure (barg)"]}
+              onUploadSuccess={handleUploadSuccess}
+            />
+
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-ink/70">
+                <strong className="text-gasblue">Tip:</strong> Upload weekly volume and pressure data for all gas producers at once.
+                The template matches your existing Weekly MOR Excel report format.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={(e) => handleSubmit(e, "submit")}>
           {/* Reading Information */}
           <div className="kpi-card mb-6">
             <div className="flex items-center gap-3 mb-4">
@@ -339,6 +424,69 @@ export default function FlowsRecordPage() {
             </p>
           </div>
         </form>
+        )}
+
+        {/* Recent Records Table */}
+        {existingData.length > 0 && (
+          <div className="kpi-card mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-ink">
+                Recent Flow Records ({existingData.length})
+              </h3>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-line">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink uppercase tracking-wider">
+                      Week/Time
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink uppercase tracking-wider">
+                      Producer/Pipeline
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-ink uppercase tracking-wider">
+                      Avg Volume (MMscf/d)
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-ink uppercase tracking-wider">
+                      Pressure (barg)
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink uppercase tracking-wider">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {existingData.map((record, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-sm text-ink">
+                        {record.Week || record.timestamp || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink font-medium">
+                        {record.Producer || record.pipelineId || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink text-right tabular-nums">
+                        {record["Avg Volume (MMscf/d)"] || record.currentFlow || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink text-right tabular-nums">
+                        {record["Pressure (barg)"] || record.inletPressure || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                          record.status === "approved"
+                            ? "bg-success/10 text-success"
+                            : "bg-primary/10 text-primary"
+                        }`}>
+                          {record.status === "approved" ? "Approved" : "Pending Approval"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -23,9 +23,30 @@ import {
   FileBarChart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import UserMenu from "@/components/UserMenu";
+import { useAuth } from "@/contexts/AuthContext";
+import type { Subsidiary } from "@/lib/types";
+import type { UserRole } from "@/lib/auth-types";
 
-// Grouped navigation structure for better information architecture
-const navigationGroups = [
+// Navigation item type with access control
+interface NavItem {
+  name: string;
+  href: string;
+  icon: any;
+  requirePermission?: string;
+  businessUnits?: Subsidiary[]; // Which BUs can see this
+  excludeRoles?: UserRole[]; // Which roles cannot see this
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+  businessUnits?: Subsidiary[]; // Which BUs can see this entire group
+  excludeRoles?: UserRole[]; // Which roles cannot see this entire group
+}
+
+// Grouped navigation structure - ALL USERS SEE ALL MENUS
+const navigationGroups: NavGroup[] = [
   {
     label: "OPERATIONS",
     items: [
@@ -34,6 +55,17 @@ const navigationGroups = [
       { name: "Allocation", href: "/allocation", icon: PieChart },
       { name: "Nominations", href: "/nominations", icon: FileText },
       { name: "Capacity", href: "/capacity", icon: Gauge },
+    ],
+  },
+  {
+    label: "DATA ENTRY",
+    items: [
+      { name: "Production Records", href: "/records/production", icon: Activity },
+      { name: "Delivery Records", href: "/records/deliveries", icon: FileText },
+      { name: "Nomination Records", href: "/records/nominations", icon: PieChart },
+      { name: "Volume Records", href: "/records/volumes", icon: Gauge },
+      { name: "Flow Records", href: "/records/flows", icon: Activity },
+      { name: "Deferment Records", href: "/records/deferment", icon: AlertTriangle },
     ],
   },
   {
@@ -76,6 +108,7 @@ const navigationGroups = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { user, activeBU } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
@@ -88,6 +121,9 @@ export default function Sidebar() {
     }
     setCollapsedGroups(newCollapsed);
   };
+
+  // Show all navigation items to all users (no filtering)
+  const filteredGroups = navigationGroups;
 
   const SidebarContent = () => (
     <>
@@ -110,7 +146,7 @@ export default function Sidebar() {
 
       {/* Navigation - Grouped */}
       <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
-        {navigationGroups.map((group) => {
+        {filteredGroups.map((group) => {
           const isCollapsed = collapsedGroups.has(group.label);
 
           return (
@@ -160,13 +196,18 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-line">
-        <p className="text-ink/50 text-xs">
-          NGIC · NGML · NGPIS
-        </p>
-        <p className="text-ink/50 text-xs mt-1">
-          Build v0.3 - NNPC Conformance
+      {/* Footer - User Menu */}
+      <div className="p-4 border-t border-line space-y-3">
+        {user && user.permissions.canViewCrossBU && (
+          <div className="px-3 py-2 bg-primary/5 border border-primary/20 rounded-lg">
+            <p className="text-xs font-medium text-primary text-center">
+              Viewing: {activeBU}
+            </p>
+          </div>
+        )}
+        <UserMenu />
+        <p className="text-ink/50 text-xs text-center">
+          Build v0.4 - RBAC & BU Segregation
         </p>
       </div>
     </>

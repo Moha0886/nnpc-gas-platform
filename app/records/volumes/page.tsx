@@ -1,10 +1,31 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, Save, Send, Activity } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Save, Send, Activity, Upload as UploadIcon } from "lucide-react";
 import Link from "next/link";
+import FileUpload from "@/components/FileUpload";
 
 export default function VolumeRecordPage() {
+  const [activeTab, setActiveTab] = useState<"upload" | "manual">("upload");
+  const [existingData, setExistingData] = useState<any[]>([]);
+
+  // Load existing data from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('volume-records');
+    if (saved) {
+      setExistingData(JSON.parse(saved));
+    } else {
+      // Initialize with sample data
+      const sampleData = [
+        { Date: "2024-07-18", "Produced (MMscf/d)": "2850.5", "NGL Extracted (MMscf/d)": "320.3", "Fuel Gas (MMscf/d)": "85.5", "Delivered (MMscf/d)": "2420.5", status: "approved" },
+        { Date: "2024-07-19", "Produced (MMscf/d)": "2780.2", "NGL Extracted (MMscf/d)": "315.8", "Fuel Gas (MMscf/d)": "82.3", "Delivered (MMscf/d)": "2360.1", status: "approved" },
+        { Date: "2024-07-20", "Produced (MMscf/d)": "2920.8", "NGL Extracted (MMscf/d)": "325.5", "Fuel Gas (MMscf/d)": "88.2", "Delivered (MMscf/d)": "2485.3", status: "pending" },
+      ];
+      setExistingData(sampleData);
+      localStorage.setItem('volume-records', JSON.stringify(sampleData));
+    }
+  }, []);
+
   const [formData, setFormData] = useState({
     gasDay: new Date().toISOString().split("T")[0],
     produced: "",
@@ -18,6 +39,20 @@ export default function VolumeRecordPage() {
   });
 
   const [status, setStatus] = useState<"draft" | "submitting" | "submitted">("draft");
+
+  const handleUploadSuccess = (data: any[], overwriteDuplicates: boolean) => {
+    console.log("Uploaded volume records:", data);
+    console.log("Overwrite duplicates:", overwriteDuplicates);
+
+    // In production, send to API
+    alert(`Successfully uploaded ${data.length} volume balance records!`);
+
+    // Update existing data
+    const newData = data.map(d => ({ ...d, status: "pending" }));
+    const updated = [...existingData, ...newData];
+    setExistingData(updated);
+    localStorage.setItem('volume-records', JSON.stringify(updated));
+  };
 
   const handleSubmit = async (e: React.FormEvent, saveType: "draft" | "submit") => {
     e.preventDefault();
@@ -71,14 +106,69 @@ export default function VolumeRecordPage() {
           <div>
             <h2 className="text-2xl font-bold text-ink">Volume Balance Record</h2>
             <p className="text-sm text-ink/60 mt-1">
-              Record daily gas balance across the value chain
+              {activeTab === "upload"
+                ? "Upload bulk volume data from CSV file"
+                : "Record daily gas balance across the value chain"}
             </p>
           </div>
         </div>
       </div>
 
       <div className="p-8 max-w-4xl mx-auto">
-        <form onSubmit={(e) => e.preventDefault()}>
+        {/* Tab Navigation */}
+        <div className="bg-white rounded-lg shadow-sm border border-line mb-6">
+          <div className="flex border-b border-line">
+            <button
+              onClick={() => setActiveTab("upload")}
+              className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${
+                activeTab === "upload"
+                  ? "text-primary border-b-2 border-primary bg-primary/5"
+                  : "text-ink/60 hover:text-ink hover:bg-gray-50"
+              }`}
+            >
+              <UploadIcon className="w-5 h-5" />
+              Bulk Upload (Recommended)
+            </button>
+            <button
+              onClick={() => setActiveTab("manual")}
+              className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${
+                activeTab === "manual"
+                  ? "text-primary border-b-2 border-primary bg-primary/5"
+                  : "text-ink/60 hover:text-ink hover:bg-gray-50"
+              }`}
+            >
+              <Activity className="w-5 h-5" />
+              Manual Entry
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === "upload" ? (
+          <div className="kpi-card">
+            <h3 className="text-lg font-semibold text-ink mb-4">Upload Volume Balance Data</h3>
+            <p className="text-sm text-ink/60 mb-6">
+              Upload daily or monthly volume balance records in bulk using a CSV file.
+              Download the template, fill it with your data, and upload it here.
+            </p>
+
+            <FileUpload
+              templateType="volumes"
+              existingData={existingData}
+              identifierFields={["Date"]}
+              requiredFields={["Date", "Produced (MMscf/d)", "NGL Extracted (MMscf/d)", "Fuel Gas (MMscf/d)", "Delivered (MMscf/d)"]}
+              onUploadSuccess={handleUploadSuccess}
+            />
+
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-ink/70">
+                <strong className="text-gasblue">Tip:</strong> You can upload up to 31 days of data at once.
+                The system will automatically validate all records and detect any duplicates.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={(e) => e.preventDefault()}>
           {/* Gas Day */}
           <div className="kpi-card mb-6">
             <h3 className="text-lg font-semibold text-ink mb-4">Gas Day</h3>
@@ -300,6 +390,75 @@ export default function VolumeRecordPage() {
             </button>
           </div>
         </form>
+        )}
+
+        {/* Recent Records Table */}
+        {existingData.length > 0 && (
+          <div className="kpi-card mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-ink">
+                Recent Volume Records ({existingData.length})
+              </h3>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-line">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-ink uppercase tracking-wider">
+                      Produced (MMscf/d)
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-ink uppercase tracking-wider">
+                      NGL Extracted
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-ink uppercase tracking-wider">
+                      Fuel Gas
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-ink uppercase tracking-wider">
+                      Delivered
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink uppercase tracking-wider">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {existingData.map((record, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-sm text-ink">
+                        {record.Date || record.gasDay || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink text-right tabular-nums">
+                        {record["Produced (MMscf/d)"] || record.produced || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink text-right tabular-nums">
+                        {record["NGL Extracted (MMscf/d)"] || record.nglExtracted || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink text-right tabular-nums">
+                        {record["Fuel Gas (MMscf/d)"] || record.fuelGas || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink text-right tabular-nums">
+                        {record["Delivered (MMscf/d)"] || record.delivered || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                          record.status === "approved"
+                            ? "bg-success/10 text-success"
+                            : "bg-primary/10 text-primary"
+                        }`}>
+                          {record.status === "approved" ? "Approved" : "Pending Approval"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

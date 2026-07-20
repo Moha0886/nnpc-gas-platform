@@ -1,12 +1,43 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, Save, Send, Gauge } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Save, Send, Gauge, Upload as UploadIcon } from "lucide-react";
 import Link from "next/link";
 import { offtakers } from "@/lib/data";
 import type { Corridor } from "@/lib/types";
+import FileUpload from "@/components/FileUpload";
 
 export default function DeliveriesRecordPage() {
+  const [activeTab, setActiveTab] = useState<"upload" | "manual">("upload");
+  const [existingData, setExistingData] = useState<any[]>([]);
+
+  // Load existing data from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('delivery-records');
+    if (saved) {
+      setExistingData(JSON.parse(saved));
+    } else {
+      // Initialize with sample data
+      const sampleData = [
+        { Date: "2024-07-19", Station: "Egbin Power", "Allocation (MMscf)": "150.5", "Offtake (MMscf)": "148.2", Pressure: "650", status: "approved" },
+        { Date: "2024-07-19", Station: "Olorunsogo Power", "Allocation (MMscf)": "85.3", "Offtake (MMscf)": "84.1", Pressure: "620", status: "approved" },
+        { Date: "2024-07-20", Station: "Egbin Power", "Allocation (MMscf)": "152.0", "Offtake (MMscf)": "150.5", Pressure: "655", status: "pending" },
+        { Date: "2024-07-20", Station: "Olorunsogo Power", "Allocation (MMscf)": "87.0", "Offtake (MMscf)": "85.8", Pressure: "625", status: "pending" },
+      ];
+      setExistingData(sampleData);
+      localStorage.setItem('delivery-records', JSON.stringify(sampleData));
+    }
+  }, []);
+
+  const handleUploadSuccess = (data: any[], overwriteDuplicates: boolean) => {
+    console.log("Uploaded delivery/offtake records:", data);
+    alert(`Successfully uploaded ${data.length} daily offtake records!`);
+    const newData = data.map(d => ({ ...d, status: "pending" }));
+    const updated = [...existingData, ...newData];
+    setExistingData(updated);
+    localStorage.setItem('delivery-records', JSON.stringify(updated));
+  };
+
   const [formData, setFormData] = useState({
     gasDay: new Date().toISOString().split("T")[0],
     offtakerId: "",
@@ -63,7 +94,7 @@ export default function DeliveriesRecordPage() {
     : "—";
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-line px-8 py-4">
         <div className="flex items-center gap-4">
@@ -71,16 +102,70 @@ export default function DeliveriesRecordPage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h2 className="text-2xl font-bold text-ink">Delivery Point Record</h2>
+            <h2 className="text-2xl font-bold text-ink">Daily Gas Offtake Report</h2>
             <p className="text-sm text-ink/60 mt-1">
-              Record metered volumes delivered to offtakers
+              {activeTab === "upload"
+                ? "Upload bulk daily offtake data from CSV file"
+                : "Record metered volumes delivered to offtakers"}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="p-8 max-w-4xl">
-        <form onSubmit={(e) => handleSubmit(e, "submit")}>
+      <div className="p-8 max-w-4xl mx-auto">
+        {/* Tab Navigation */}
+        <div className="bg-white rounded-lg shadow-sm border border-line mb-6">
+          <div className="flex border-b border-line">
+            <button
+              onClick={() => setActiveTab("upload")}
+              className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${
+                activeTab === "upload"
+                  ? "text-primary border-b-2 border-primary bg-primary/5"
+                  : "text-ink/60 hover:text-ink hover:bg-gray-50"
+              }`}
+            >
+              <UploadIcon className="w-5 h-5" />
+              Bulk Upload (Recommended)
+            </button>
+            <button
+              onClick={() => setActiveTab("manual")}
+              className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${
+                activeTab === "manual"
+                  ? "text-primary border-b-2 border-primary bg-primary/5"
+                  : "text-ink/60 hover:text-ink hover:bg-gray-50"
+              }`}
+            >
+              <Gauge className="w-5 h-5" />
+              Manual Entry
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === "upload" ? (
+          <div className="kpi-card">
+            <h3 className="text-lg font-semibold text-ink mb-4">Upload Daily Offtake Data</h3>
+            <p className="text-sm text-ink/60 mb-6">
+              Upload daily gas offtake data in bulk. This matches the format of "DAILY GAS OFFTAKE REPORT" Excel file.
+            </p>
+
+            <FileUpload
+              templateType="deliveries"
+              existingData={existingData}
+              identifierFields={["Date", "Station"]}
+              requiredFields={["Date", "Station", "Allocation (MMscf)", "Offtake (MMscf)", "Pressure"]}
+              onUploadSuccess={handleUploadSuccess}
+            />
+
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-ink/70">
+                <strong className="text-gasblue">Tip:</strong> You can upload a full day or month of offtake data.
+                The template matches your existing Daily Gas Offtake Excel report format.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={(e) => handleSubmit(e, "submit")}>
           {/* Delivery Point Information */}
           <div className="kpi-card mb-6">
             <div className="flex items-center gap-3 mb-4">
@@ -384,6 +469,75 @@ export default function DeliveriesRecordPage() {
             </p>
           </div>
         </form>
+        )}
+
+        {/* Recent Records Table */}
+        {existingData.length > 0 && (
+          <div className="kpi-card mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-ink">
+                Recent Delivery Records ({existingData.length})
+              </h3>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-line">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink uppercase tracking-wider">
+                      Station/Customer
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-ink uppercase tracking-wider">
+                      Allocation (MMscf)
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-ink uppercase tracking-wider">
+                      Offtake (MMscf)
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-ink uppercase tracking-wider">
+                      Pressure (PSI)
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink uppercase tracking-wider">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {existingData.map((record, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-sm text-ink">
+                        {record.Date || record.gasDay || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink font-medium">
+                        {record.Station || record.offtakerId || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink text-right tabular-nums">
+                        {record["Allocation (MMscf)"] || record.receivedVolume || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink text-right tabular-nums">
+                        {record["Offtake (MMscf)"] || record.offtakenVolume || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink text-right tabular-nums">
+                        {record.Pressure || record.pressure || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                          record.status === "approved"
+                            ? "bg-success/10 text-success"
+                            : "bg-primary/10 text-primary"
+                        }`}>
+                          {record.status === "approved" ? "Approved" : "Pending Approval"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

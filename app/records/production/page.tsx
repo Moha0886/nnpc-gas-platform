@@ -1,12 +1,43 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, Save, Send, TrendingUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Save, Send, TrendingUp, Upload as UploadIcon } from "lucide-react";
 import Link from "next/link";
 import { processingPlants } from "@/lib/data";
 import type { Corridor } from "@/lib/types";
+import FileUpload from "@/components/FileUpload";
 
 export default function ProductionRecordPage() {
+  const [activeTab, setActiveTab] = useState<"upload" | "manual">("upload");
+  const [existingData, setExistingData] = useState<any[]>([]);
+
+  // Load existing data from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('production-records');
+    if (saved) {
+      setExistingData(JSON.parse(saved));
+    } else {
+      // Initialize with sample data
+      const sampleData = [
+        { Week: "Week 29 (Jul 15-21)", Producer: "Shell Petroleum", "Volume (MMscf)": "850.5", status: "approved" },
+        { Week: "Week 29 (Jul 15-21)", Producer: "NLNG Supply", "Volume (MMscf)": "1250.3", status: "approved" },
+        { Week: "Week 30 (Jul 22-28)", Producer: "Shell Petroleum", "Volume (MMscf)": "820.2", status: "pending" },
+        { Week: "Week 30 (Jul 22-28)", Producer: "NLNG Supply", "Volume (MMscf)": "1180.7", status: "pending" },
+      ];
+      setExistingData(sampleData);
+      localStorage.setItem('production-records', JSON.stringify(sampleData));
+    }
+  }, []);
+
+  const handleUploadSuccess = (data: any[], overwriteDuplicates: boolean) => {
+    console.log("Uploaded weekly supply records:", data);
+    alert(`Successfully uploaded ${data.length} weekly gas supply records!`);
+    const newData = data.map(d => ({ ...d, status: "pending" }));
+    const updated = [...existingData, ...newData];
+    setExistingData(updated);
+    localStorage.setItem('production-records', JSON.stringify(updated));
+  };
+
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split("T")[0],
     facilityId: "",
@@ -51,7 +82,7 @@ export default function ProductionRecordPage() {
     : "—";
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-line px-8 py-4">
         <div className="flex items-center gap-4">
@@ -59,16 +90,70 @@ export default function ProductionRecordPage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h2 className="text-2xl font-bold text-ink">Daily Production Record</h2>
+            <h2 className="text-2xl font-bold text-ink">Weekly Gas Supply Report</h2>
             <p className="text-sm text-ink/60 mt-1">
-              Record gas production received from upstream facilities
+              {activeTab === "upload"
+                ? "Upload weekly gas supply data from producers"
+                : "Record gas production received from upstream facilities"}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="p-8 max-w-4xl">
-        <form onSubmit={(e) => handleSubmit(e, "submit")}>
+      <div className="p-8 max-w-4xl mx-auto">
+        {/* Tab Navigation */}
+        <div className="bg-white rounded-lg shadow-sm border border-line mb-6">
+          <div className="flex border-b border-line">
+            <button
+              onClick={() => setActiveTab("upload")}
+              className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${
+                activeTab === "upload"
+                  ? "text-primary border-b-2 border-primary bg-primary/5"
+                  : "text-ink/60 hover:text-ink hover:bg-gray-50"
+              }`}
+            >
+              <UploadIcon className="w-5 h-5" />
+              Bulk Upload (Recommended)
+            </button>
+            <button
+              onClick={() => setActiveTab("manual")}
+              className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${
+                activeTab === "manual"
+                  ? "text-primary border-b-2 border-primary bg-primary/5"
+                  : "text-ink/60 hover:text-ink hover:bg-gray-50"
+              }`}
+            >
+              <TrendingUp className="w-5 h-5" />
+              Manual Entry
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === "upload" ? (
+          <div className="kpi-card">
+            <h3 className="text-lg font-semibold text-ink mb-4">Upload Weekly Gas Supply Data</h3>
+            <p className="text-sm text-ink/60 mb-6">
+              Upload weekly gas supply data from all producers. This matches the format of "Weekly MOR Gas Supply & Offtake" Excel file.
+            </p>
+
+            <FileUpload
+              templateType="production"
+              existingData={existingData}
+              identifierFields={["Week", "Producer"]}
+              requiredFields={["Week", "Producer", "Volume (MMscf)"]}
+              onUploadSuccess={handleUploadSuccess}
+            />
+
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-ink/70">
+                <strong className="text-gasblue">Tip:</strong> Upload weekly supply data for all gas producers at once.
+                The template matches your existing Weekly MOR Excel report format.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={(e) => handleSubmit(e, "submit")}>
           {/* Date & Facility Information */}
           <div className="kpi-card mb-6">
             <div className="flex items-center gap-3 mb-4">
@@ -291,6 +376,63 @@ export default function ProductionRecordPage() {
             </p>
           </div>
         </form>
+        )}
+
+        {/* Recent Records Table */}
+        {existingData.length > 0 && (
+          <div className="kpi-card mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-ink">
+                Recent Production Records ({existingData.length})
+              </h3>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-line">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink uppercase tracking-wider">
+                      Week/Date
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink uppercase tracking-wider">
+                      Producer/Facility
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-ink uppercase tracking-wider">
+                      Volume (MMscf)
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink uppercase tracking-wider">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {existingData.map((record, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-sm text-ink">
+                        {record.Week || record.date || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink font-medium">
+                        {record.Producer || record.facilityId || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink text-right tabular-nums">
+                        {record["Volume (MMscf)"] || record.production || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                          record.status === "approved"
+                            ? "bg-success/10 text-success"
+                            : "bg-primary/10 text-primary"
+                        }`}>
+                          {record.status === "approved" ? "Approved" : "Pending Approval"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

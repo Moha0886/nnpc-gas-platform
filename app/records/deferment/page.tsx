@@ -1,12 +1,42 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, Save, Send, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Save, Send, AlertTriangle, Upload as UploadIcon } from "lucide-react";
 import Link from "next/link";
 import { assets, processingPlants } from "@/lib/data";
 import type { Corridor } from "@/lib/types";
+import FileUpload from "@/components/FileUpload";
 
 export default function DefermentRecordPage() {
+  const [activeTab, setActiveTab] = useState<"upload" | "manual">("upload");
+  const [existingData, setExistingData] = useState<any[]>([]);
+
+  // Load existing data from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('deferment-records');
+    if (saved) {
+      setExistingData(JSON.parse(saved));
+    } else {
+      // Initialize with sample data
+      const sampleData = [
+        { Date: "2024-07-18", Facility: "Obiafu Gas Plant", Cause: "Compressor Failure", "Volume Deferred (MMscf/d)": "150.5", status: "approved" },
+        { Date: "2024-07-19", Facility: "Escravos Pipeline", Cause: "Scheduled Maintenance", "Volume Deferred (MMscf/d)": "85.2", status: "approved" },
+        { Date: "2024-07-20", Facility: "Obite Gas Plant", Cause: "Power Outage", "Volume Deferred (MMscf/d)": "120.8", status: "pending" },
+      ];
+      setExistingData(sampleData);
+      localStorage.setItem('deferment-records', JSON.stringify(sampleData));
+    }
+  }, []);
+
+  const handleUploadSuccess = (data: any[], overwriteDuplicates: boolean) => {
+    console.log("Uploaded deferment records:", data);
+    alert(`Successfully uploaded ${data.length} deferment records!`);
+    const newData = data.map(d => ({ ...d, status: "pending" }));
+    const updated = [...existingData, ...newData];
+    setExistingData(updated);
+    localStorage.setItem('deferment-records', JSON.stringify(updated));
+  };
+
   const [formData, setFormData] = useState({
     facilityId: "",
     facilityName: "",
@@ -67,7 +97,7 @@ export default function DefermentRecordPage() {
     : "—";
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-line px-8 py-4">
         <div className="flex items-center gap-4">
@@ -77,14 +107,68 @@ export default function DefermentRecordPage() {
           <div>
             <h2 className="text-2xl font-bold text-ink">Deferment Event Record</h2>
             <p className="text-sm text-ink/60 mt-1">
-              Record deferments, causes, and impact
+              {activeTab === "upload"
+                ? "Upload bulk deferment event data"
+                : "Record deferments, causes, and impact"}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="p-8 max-w-4xl">
-        <form onSubmit={(e) => handleSubmit(e, "submit")}>
+      <div className="p-8 max-w-4xl mx-auto">
+        {/* Tab Navigation */}
+        <div className="bg-white rounded-lg shadow-sm border border-line mb-6">
+          <div className="flex border-b border-line">
+            <button
+              onClick={() => setActiveTab("upload")}
+              className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${
+                activeTab === "upload"
+                  ? "text-primary border-b-2 border-primary bg-primary/5"
+                  : "text-ink/60 hover:text-ink hover:bg-gray-50"
+              }`}
+            >
+              <UploadIcon className="w-5 h-5" />
+              Bulk Upload (Recommended)
+            </button>
+            <button
+              onClick={() => setActiveTab("manual")}
+              className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${
+                activeTab === "manual"
+                  ? "text-primary border-b-2 border-primary bg-primary/5"
+                  : "text-ink/60 hover:text-ink hover:bg-gray-50"
+              }`}
+            >
+              <AlertTriangle className="w-5 h-5" />
+              Manual Entry
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === "upload" ? (
+          <div className="kpi-card">
+            <h3 className="text-lg font-semibold text-ink mb-4">Upload Deferment Event Data</h3>
+            <p className="text-sm text-ink/60 mb-6">
+              Upload deferment events in bulk. Track volume impacts from planned maintenance, breakdowns, and supply issues.
+            </p>
+
+            <FileUpload
+              templateType="deferment"
+              existingData={existingData}
+              identifierFields={["Date", "Facility"]}
+              requiredFields={["Date", "Facility", "Planned (MMscf/d)", "Actual (MMscf/d)", "Deferred (MMscf/d)"]}
+              onUploadSuccess={handleUploadSuccess}
+            />
+
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-ink/70">
+                <strong className="text-gasblue">Tip:</strong> Upload deferment events for all facilities at once.
+                The system will automatically calculate volume impacts and financial losses.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={(e) => handleSubmit(e, "submit")}>
           {/* Event Information */}
           <div className="kpi-card mb-6">
             <div className="flex items-center gap-3 mb-4">
@@ -400,6 +484,69 @@ export default function DefermentRecordPage() {
             </p>
           </div>
         </form>
+        )}
+
+        {/* Recent Records Table */}
+        {existingData.length > 0 && (
+          <div className="kpi-card mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-ink">
+                Recent Deferment Records ({existingData.length})
+              </h3>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-line">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink uppercase tracking-wider">
+                      Facility
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink uppercase tracking-wider">
+                      Cause
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-ink uppercase tracking-wider">
+                      Volume Deferred (MMscf/d)
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink uppercase tracking-wider">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {existingData.map((record, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-sm text-ink">
+                        {record.Date || record.startDate || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink font-medium">
+                        {record.Facility || record.facilityId || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink">
+                        {record.Cause || record.reason || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-ink text-right tabular-nums">
+                        {record["Volume Deferred (MMscf/d)"] || record.deferredVolume || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                          record.status === "approved"
+                            ? "bg-success/10 text-success"
+                            : "bg-alert/10 text-alert"
+                        }`}>
+                          {record.status === "approved" ? "Approved" : "Pending Approval"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

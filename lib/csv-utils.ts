@@ -3,48 +3,61 @@
 import Papa from "papaparse";
 import { saveAs } from "file-saver";
 
-// CSV Templates for each data type
+// CSV Templates for each data type - ALIGNED WITH ACTUAL NNPC EXCEL REPORTS
 export const CSV_TEMPLATES = {
-  production: {
-    filename: "production_upload_template.csv",
-    headers: ["Date", "Station", "Corridor", "Oil (bopd)", "Gas (MMscf/d)", "Condensate (bopd)", "Water (bopd)", "BSW (%)", "Remarks"],
+  // DAILY OFFTAKE REPORT (matches "DAILY GAS OFFTAKE REPORT AUGUST XXXX.xlsx")
+  deliveries: {
+    filename: "daily_offtake_upload_template.csv",
+    headers: ["Date", "Region", "Customer Type", "Station", "Allocation (MMscf)", "Offtake (MMscf)", "Pressure", "Remarks", "Megawatts (MW)"],
     sample: [
-      ["2026-07-15", "Escravos Gas Plant", "Eastern", "5230", "450.5", "320", "850", "14.2", "Normal operations"],
-      ["2026-07-15", "Oben Gas Plant", "Eastern", "3850", "380.2", "280", "620", "13.8", ""],
+      ["2026-07-15", "Western", "NPDC Power Customers", "Transcorp Ughelli", "47.6", "51.548", "24", "STATION ON STREAM", "193.54"],
+      ["2026-07-15", "Western", "NIPP", "NIPP Olorunsogo", "27", "26.858", "33/31", "STATION ON STREAM", "103.73"],
+      ["2026-07-15", "Western", "Independent Power", "Azura Power West Africa", "97.24", "95.004", "53/23", "STATION ON STREAM", "400.24"],
+      ["2026-07-15", "Western", "Industrial", "WAPCO Sagamu", "", "0.021", "32/8", "STATION ON STREAM", ""],
     ],
   },
+  // WEEKLY SUPPLY REPORT (matches "Weekly MOR gas supply offtake reporting.xlsx")
+  production: {
+    filename: "weekly_supply_upload_template.csv",
+    headers: ["Week", "Producer", "Volume (MMscf)", "Source of Allocation", "Remarks"],
+    sample: [
+      ["Week 1 (01/07/2026 - 07/07/2026)", "CNL- Escravos", "2310.625", "CNL, NPDC JV", "Normal operations"],
+      ["Week 1 (01/07/2026 - 07/07/2026)", "NEPL/NDW Utorogu", "1286.12", "CNL, NPDC JV, NPDC Oredo", ""],
+      ["Week 1 (01/07/2026 - 07/07/2026)", "Seplat Oben", "2104.108", "", ""],
+      ["Week 1 (01/07/2026 - 07/07/2026)", "AHL", "1905.12", "NPDC JV, CNL, Seplat", ""],
+    ],
+  },
+  // NOMINATIONS (Simplified based on allocation patterns)
   nominations: {
     filename: "nominations_upload_template.csv",
-    headers: ["Date", "Customer", "Corridor", "DCQ (MMscf/d)", "Nominated (MMscf/d)", "Confirmed (MMscf/d)", "Status", "Remarks"],
+    headers: ["Date", "Offtaker", "Source", "Allocation (MMscf)", "Actual Offtake (MMscf)", "Remarks"],
     sample: [
-      ["2026-07-15", "Egbin Power Station", "Lagos", "125.0", "118.5", "118.5", "Confirmed", ""],
-      ["2026-07-15", "Geregu Power Plant", "Northern", "85.0", "75.0", "75.0", "Confirmed", "Reduced due to maintenance"],
+      ["2026-07-15", "Egbin Power", "CNL, NPDC JV", "852", "720.835", ""],
+      ["2026-07-15", "Olorunsogo Power", "CNL, NPDC JV, NPDC Oredo", "3694", "2760.11", ""],
+      ["2026-07-15", "Paras Energy", "CNL, NPDC Oredo, Tunu", "1018", "1093.686", ""],
     ],
   },
+  // WEEKLY VOLUME & PRESSURE (matches "Weekly MOR volume and pressure reporting.xlsx")
   flows: {
-    filename: "flows_upload_template.csv",
-    headers: ["Date", "Pipeline", "Corridor", "Inlet Pressure (PSI)", "Outlet Pressure (PSI)", "Flow Rate (MMscf/d)", "Temperature (°C)", "Status", "Remarks"],
+    filename: "weekly_volume_pressure_template.csv",
+    headers: ["Week", "Producer", "Avg Volume (MMscf/d)", "Pressure (barg)", "Contractual Pressure Range", "Remarks"],
     sample: [
-      ["2026-07-15", "ELPS", "Eastern", "1233", "1050", "850.5", "28", "Operational", ""],
-      ["2026-07-15", "OB3", "Eastern", "1305", "1200", "720.3", "26", "Operational", ""],
+      ["Week 1 (01/07 - 07/07)", "CNL- Escravos", "330.089", "82.099", "80 - 85", "Volume dropped with slight improved pressure"],
+      ["Week 1 (01/07 - 07/07)", "NEPL/NDW Utorogu", "183.731", "54.076", "72 - 76.9", "Volume dropped with slight improved pressure"],
+      ["Week 1 (01/07 - 07/07)", "Seplat Oben", "300.587", "56.314", "57 - 75", "Volume and pressure improved"],
     ],
   },
-  deliveries: {
-    filename: "deliveries_upload_template.csv",
-    headers: ["Date", "Customer", "Corridor", "Contracted (MMscf/d)", "Delivered (MMscf/d)", "Shortfall (MMscf/d)", "Revenue (₦)", "Status", "Remarks"],
-    sample: [
-      ["2026-07-15", "Egbin Power Station", "Lagos", "125.0", "118.5", "6.5", "25850000", "Delivered", ""],
-      ["2026-07-15", "Dangote Industries", "Lagos", "65.0", "65.0", "0.0", "28275000", "Delivered", ""],
-    ],
-  },
+  // DEFERMENT (Simplified - focus on volume impact)
   deferment: {
     filename: "deferment_upload_template.csv",
-    headers: ["Date", "Station/Pipeline", "Corridor", "Planned (MMscf/d)", "Actual (MMscf/d)", "Deferred (MMscf/d)", "Reason", "Category", "Remarks"],
+    headers: ["Date", "Facility", "Planned (MMscf/d)", "Actual (MMscf/d)", "Deferred (MMscf/d)", "Reason", "Remarks"],
     sample: [
-      ["2026-07-15", "Trans-Niger Pipeline", "Eastern", "350.0", "285.2", "64.8", "Pipeline vandalism", "Security", "Hot tap at KP 125"],
-      ["2026-07-15", "Bonny Plant", "Eastern", "2500.0", "2450.0", "50.0", "Compressor failure", "Maintenance", "CS-02 bearing replacement"],
+      ["2026-07-15", "Trans-Niger Pipeline", "350.0", "285.2", "64.8", "Pipeline vandalism", "Hot tap at KP 125"],
+      ["2026-07-15", "Bonny Plant", "2500.0", "2450.0", "50.0", "Compressor failure", "CS-02 bearing replacement"],
+      ["2026-07-15", "Escravos", "330.0", "310.0", "20.0", "Planned maintenance", ""],
     ],
   },
+  // VOLUME BALANCE - Keep this as-is, it's already aligned with needs
   volumes: {
     filename: "volumes_upload_template.csv",
     headers: ["Date", "Produced (MMscf/d)", "NGL Extracted (MMscf/d)", "Into Transmission (MMscf/d)", "Fuel Gas (MMscf/d)", "Line Pack Δ (MMscf/d)", "Delivered (MMscf/d)", "UFG (MMscf/d)", "UFG %", "Remarks"],
@@ -53,12 +66,14 @@ export const CSV_TEMPLATES = {
       ["2026-07-14", "2780.2", "315.8", "2464.4", "82.8", "-8.5", "2380.1", "10.0", "0.41", ""],
     ],
   },
+  // INCIDENTS (Simplified - focus on operational impact)
   incidents: {
     filename: "incidents_upload_template.csv",
-    headers: ["Date Occurred", "Date Reported", "Title", "Description", "Facility", "Facility Type", "Corridor", "Category", "Severity", "Status", "Deferment (MMscf/d)", "Estimated Loss ($)", "Reported By", "Assigned To", "Remarks"],
+    headers: ["Date", "Facility", "Category", "Severity", "Description", "Deferment (MMscf/d)", "Status", "Remarks"],
     sample: [
-      ["2026-07-15", "2026-07-15", "Pipeline Leak at KP 125", "Hot tap vandalism detected on Trans-Niger Pipeline", "Trans-Niger Pipeline", "pipeline", "Eastern", "pipeline-leak", "critical", "under-investigation", "64.8", "226800", "John Eze", "HSE Manager", "Security team dispatched"],
-      ["2026-07-14", "2026-07-15", "Compressor Failure CS-02", "Bearing failure on main compressor", "Obite Station", "compressor", "Lagos", "equipment-failure", "high", "open", "50.0", "175000", "Victor Amadi", "Maintenance Team", "Spare parts ordered"],
+      ["2026-07-15", "Trans-Niger Pipeline", "Pipeline Leak", "Critical", "Hot tap vandalism at KP 125", "64.8", "Under Investigation", "Security team dispatched"],
+      ["2026-07-14", "Obite Station", "Equipment Failure", "High", "Compressor CS-02 bearing failure", "50.0", "Open", "Spare parts ordered"],
+      ["2026-07-15", "Escravos", "Planned Maintenance", "Low", "Routine maintenance shutdown", "20.0", "Scheduled", ""],
     ],
   },
 };
@@ -184,62 +199,62 @@ export const formatDateForCSV = (date: Date | string): string => {
   return `${year}-${month}-${day}`;
 };
 
-// Get template instructions
+// Get template instructions - ALIGNED WITH NNPC EXCEL REPORTS
 export const getTemplateInstructions = (templateType: keyof typeof CSV_TEMPLATES) => {
   const instructions: Record<keyof typeof CSV_TEMPLATES, string[]> = {
     production: [
-      "Date must be in YYYY-MM-DD format (e.g., 2026-07-15)",
-      "Station name must match existing stations in the system",
-      "Corridor must be: Eastern, Western, Northern, or Lagos",
-      "Numeric values should not include commas or currency symbols",
-      "BSW (Basic Sediment and Water) is in percentage",
-      "Leave Remarks blank if no comments",
+      "Week format: 'Week 1 (DD/MM/YYYY - DD/MM/YYYY)'",
+      "Producer names: CNL-Escravos, NEPL/NDW Utorogu, Seplat Oben, AHL, Pan Ocean, etc.",
+      "Volume in MMscf (not MMscf/d for weekly totals)",
+      "Source of Allocation: List contributing sources separated by commas",
+      "Leave Remarks blank if no issues to report",
     ],
     nominations: [
       "Date must be in YYYY-MM-DD format",
-      "Customer name must match existing customers",
-      "DCQ = Daily Contract Quantity",
-      "Nominated volume cannot exceed DCQ",
-      "Status must be: Pending, Confirmed, or Rejected",
-      "All volumes in MMscf/d (Million Standard Cubic Feet per Day)",
+      "Offtaker name: Power station or industrial customer",
+      "Source: Gas producer(s) supplying this offtaker",
+      "Allocation and Offtake in MMscf",
+      "All volumes should be positive numbers",
     ],
     flows: [
-      "Date must be in YYYY-MM-DD format",
-      "Pipeline name must match existing pipelines",
-      "Pressure values in PSI (Pounds per Square Inch)",
-      "Temperature in Celsius",
-      "Status must be: Operational, Partial-Outage, or Maintenance",
-      "Inlet pressure should be higher than outlet pressure",
+      "Week format: 'Week 1 (DD/MM - DD/MM)'",
+      "Producer names must match supply data",
+      "Average Volume in MMscf/d (daily average for the week)",
+      "Pressure in barg (bar gauge)",
+      "Contractual range format: 'XX - YY' (e.g., '80 - 85')",
+      "Remarks should note volume or pressure trends",
     ],
     deliveries: [
       "Date must be in YYYY-MM-DD format",
-      "Customer name must match existing customers",
-      "Shortfall = Contracted - Delivered",
-      "Revenue in Nigerian Naira (₦), no commas",
-      "Status must be: Delivered, Partial, or Not Delivered",
-      "Delivered cannot exceed Contracted quantity",
+      "Region: Western, Eastern, Northern, Lagos",
+      "Customer Type: NPDC Power, NIPP, Independent Power, Industrial",
+      "Station: Full power station or industrial facility name",
+      "Pressure can be single value or range (e.g., '24' or '33/31')",
+      "Remarks: STATION ON STREAM, STATION ON STANDBY, or specific notes",
+      "MW (Megawatts): Leave blank for industrial customers",
     ],
     deferment: [
       "Date must be in YYYY-MM-DD format",
-      "Station/Pipeline name must match existing facilities",
-      "Deferred = Planned - Actual",
-      "Category: Maintenance, Security, Operational, Technical, Force Majeure",
-      "Reason should explain root cause",
+      "Facility: Station or pipeline name",
+      "Deferred = Planned - Actual (in MMscf/d)",
+      "Reason: Pipeline vandalism, Compressor failure, Planned maintenance, etc.",
       "All volumes in MMscf/d",
     ],
     volumes: [
-      "Date must be in YYYY-MM-DD format",
-      "All volumes in MMscf/d",
-      "Customer name must match existing customers",
-      "Delivered cannot exceed Received",
-      "Include meter readings if available",
+      "Date must be in YYYY-MM-DD format (e.g., 2026-07-15)",
+      "All volumes in MMscf/d (Million Standard Cubic Feet per Day)",
+      "Into Transmission = Produced - NGL Extracted",
+      "Delivered = Into Transmission - Fuel Gas - UFG ± Line Pack",
+      "UFG % will be calculated automatically",
+      "Line Pack Δ: Use + for increase, - for decrease",
     ],
     incidents: [
       "Date must be in YYYY-MM-DD format",
-      "Incident type: Pipeline Rupture, Gas Leak, Equipment Failure, Outage, Other",
+      "Category: Pipeline Leak, Equipment Failure, Planned Maintenance, etc.",
       "Severity: Critical, High, Medium, Low",
-      "Location must be specific (e.g., station name, pipeline segment)",
-      "Include estimated impact volume if applicable",
+      "Deferment: Volume impact in MMscf/d",
+      "Status: Open, Under Investigation, Scheduled, Resolved",
+      "Description should be concise but specific",
     ],
   };
 

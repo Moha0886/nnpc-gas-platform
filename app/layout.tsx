@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
+import { AuthProvider } from "@/contexts/AuthContext";
+import AppLayout from "@/components/AppLayout";
 import { Toaster } from "sonner";
 
 const inter = Inter({
@@ -23,14 +24,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="antialiased bg-paper font-sans">
-        <div className="flex min-h-screen">
-          <Sidebar />
-          <main className="flex-1 overflow-auto w-full lg:w-auto">
-            <div className="pt-16 lg:pt-0">
-              {children}
-            </div>
-          </main>
-        </div>
+        <AuthProvider>
+          <AppLayout>
+            {children}
+          </AppLayout>
+        </AuthProvider>
         <Toaster
           position="top-right"
           toastOptions={{

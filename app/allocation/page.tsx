@@ -328,7 +328,7 @@ export default function AllocationPage() {
             </div>
 
             {/* Metadata */}
-            <div className="text-xs text-ink/50 text-center">
+            <div className="text-xs text-ink/50 text-center" suppressHydrationWarning>
               Computed at {new Date(output.computedAt).toLocaleString()} · Config version:{" "}
               {output.configVersion}
             </div>
