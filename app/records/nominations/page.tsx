@@ -41,7 +41,7 @@ export default function NominationsRecordPage() {
       allocated: parseFloat(formData.allocated),
       forecastSupply: parseFloat(formData.forecastSupply),
       offtakerName: selectedOfftaker?.name,
-      dcq: selectedOfftaker?.dcq,
+      dcq: selectedOfftaker?.contractualDemand || selectedOfftaker?.firmAndEffective,
       saveType,
     });
 
@@ -49,8 +49,8 @@ export default function NominationsRecordPage() {
     alert(saveType === "draft" ? "Saved as draft" : "Submitted for approval");
   };
 
-  const allocationPercent = selectedOfftaker?.dcq && formData.allocated
-    ? ((parseFloat(formData.allocated) / selectedOfftaker.dcq) * 100).toFixed(1)
+  const allocationPercent = selectedOfftaker?.contractualDemand || selectedOfftaker?.firmAndEffective && formData.allocated
+    ? ((parseFloat(formData.allocated) / (selectedOfftaker.contractualDemand || selectedOfftaker.firmAndEffective || 1)) * 100).toFixed(1)
     : "—";
 
   return (
@@ -160,7 +160,7 @@ export default function NominationsRecordPage() {
                 </select>
                 {selectedOfftaker && (
                   <p className="text-xs text-ink/60 mt-1">
-                    DCQ: {selectedOfftaker.dcq} MMscf/d
+                    DCQ: {selectedOfftaker.contractualDemand || selectedOfftaker.firmAndEffective || 0} MMscf/d
                   </p>
                 )}
               </div>
@@ -244,7 +244,7 @@ export default function NominationsRecordPage() {
                       {allocationPercent}% of DCQ
                     </span>
                     <span className="text-ink/60 text-sm ml-2">
-                      ({formData.allocated || "0"} / {selectedOfftaker.dcq} MMscf/d)
+                      ({formData.allocated || "0"} / {selectedOfftaker.contractualDemand || selectedOfftaker.firmAndEffective || 0} MMscf/d)
                     </span>
                   </div>
                 </div>

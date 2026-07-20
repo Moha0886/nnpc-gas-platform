@@ -109,7 +109,7 @@ export function calculateAllocation(
   let firmTotal = 0;
   const firmNominations = new Map<string, number>();
 
-  for (const customerId of firmCustomers) {
+  for (const customerId of Array.from(firmCustomers)) {
     const customer = customerMaster.get(customerId);
     if (!customer) continue;
 
@@ -125,7 +125,7 @@ export function calculateAllocation(
 
   // Step 3: Calculate total demand weight for non-firm customers
   let totalWeight = 0;
-  for (const [customerId, weight] of demandWeights.entries()) {
+  for (const [customerId, weight] of Array.from(demandWeights.entries())) {
     if (!firmCustomers.has(customerId)) {
       totalWeight += weight;
     }
@@ -139,7 +139,7 @@ export function calculateAllocation(
   let totalNomination = 0;
   let totalAllocation = 0;
 
-  for (const [customerId, weight] of demandWeights.entries()) {
+  for (const [customerId, weight] of Array.from(demandWeights.entries())) {
     const customer = customerMaster.get(customerId);
     if (!customer) continue;
 

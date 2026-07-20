@@ -39,9 +39,11 @@ export const assets: Asset[] = [
     nameplate: 2200,
     diameterIn: 36,
     lengthKm: 514,
-    designPressure: "85 barg",
-    inletPressure: 1233, // PSI (85 barg)
-    outletPressure: 1050, // PSI (~15% pressure drop over 514km)
+    designPressure: { value: 85, unit: "barg" },
+    operatingPressure: {
+      inlet: { value: 1233, unit: "psi" }, // 85 barg
+      outlet: { value: 1050, unit: "psi" }, // ~15% pressure drop over 514km
+    },
     status: "Operational",
     commissioned: 1989,
     source: "NNPC Gas Asset Inventory",
@@ -55,9 +57,11 @@ export const assets: Asset[] = [
     nameplate: 2000,
     diameterIn: 48,
     lengthKm: 130,
-    designPressure: "90 barg",
-    inletPressure: 1305, // PSI (90 barg)
-    outletPressure: 1200, // PSI (~8% pressure drop over 130km)
+    designPressure: { value: 90, unit: "barg" },
+    operatingPressure: {
+      inlet: { value: 1305, unit: "psi" }, // 90 barg
+      outlet: { value: 1200, unit: "psi" }, // ~8% pressure drop over 130km
+    },
     status: "Operational",
     commissioned: 2010,
     source: "NNPC Gas Asset Inventory",
@@ -71,9 +75,11 @@ export const assets: Asset[] = [
     nameplate: 1200,
     diameterIn: 36,
     lengthKm: 196,
-    designPressure: "85 barg",
-    inletPressure: 1233, // PSI (85 barg design, ~70-80% operating)
-    outletPressure: 1050, // PSI (~15% pressure drop over 196km)
+    designPressure: { value: 85, unit: "barg" },
+    operatingPressure: {
+      inlet: { value: 1233, unit: "psi" }, // 85 barg design, ~70-80% operating
+      outlet: { value: 1050, unit: "psi" }, // ~15% pressure drop over 196km
+    },
     status: "Operational",
     commissioned: 2011,
     source: "Nigerian Gas Infrastructure Report",
@@ -87,9 +93,11 @@ export const assets: Asset[] = [
     nameplate: 2200,
     diameterIn: 40,
     lengthKm: 614,
-    designPressure: "98 barg",
-    inletPressure: 1421, // PSI (98 barg)
-    outletPressure: 1180, // PSI (~17% pressure drop over 614km)
+    designPressure: { value: 98, unit: "barg" },
+    operatingPressure: {
+      inlet: { value: 1421, unit: "psi" }, // 98 barg
+      outlet: { value: 1180, unit: "psi" }, // ~17% pressure drop over 614km
+    },
     status: "Under construction",
     commissioned: 2025,
     source: "NNPC Gas Asset Inventory",
@@ -104,7 +112,7 @@ export const processingPlants: ProcessingPlant[] = [
     cls: "Processing plant",
     corridor: "Eastern",
     nameplate: 1000,
-    designPressure: "75 barg",
+    designPressure: { value: 75, unit: "barg" },
     status: "Operational",
     commissioned: 2003,
     gasType: "AG",
@@ -119,7 +127,7 @@ export const processingPlants: ProcessingPlant[] = [
     cls: "Processing plant",
     corridor: "Western", // Western terminus of OB3, key ELPS supply point
     nameplate: 300,
-    designPressure: "70 barg",
+    designPressure: { value: 70, unit: "barg" },
     status: "Operational",
     commissioned: 1998,
     gasType: "AG",
@@ -134,7 +142,7 @@ export const processingPlants: ProcessingPlant[] = [
     cls: "Processing plant",
     corridor: "Western",
     nameplate: 510,
-    designPressure: "72 barg",
+    designPressure: { value: 72, unit: "barg" },
     status: "Operational",
     commissioned: 1991,
     gasType: "AG",
@@ -157,7 +165,7 @@ export const offtakers: Offtaker[] = [
     sector: "Power",
     productType: "Lean gas",
     deliveryPointId: "dp-egbin",
-    dcq: 215,
+    contractualDemand: 215,
     contractId: "gsa-egbin-001",
   },
   {
@@ -167,7 +175,7 @@ export const offtakers: Offtaker[] = [
     sector: "Power",
     productType: "Lean gas",
     deliveryPointId: "dp-olorunsogo",
-    dcq: 140,
+    contractualDemand: 140,
     contractId: "gsa-olorunsogo-001",
   },
   {
@@ -177,7 +185,7 @@ export const offtakers: Offtaker[] = [
     sector: "Power",
     productType: "Lean gas",
     deliveryPointId: "dp-omotosho",
-    dcq: 125,
+    contractualDemand: 125,
     contractId: "gsa-omotosho-001",
   },
 
@@ -189,7 +197,7 @@ export const offtakers: Offtaker[] = [
     sector: "Power",
     productType: "Lean gas",
     deliveryPointId: "dp-okpai",
-    dcq: 78,
+    contractualDemand: 78,
     contractId: "gsa-okpai-001",
   },
   {
@@ -199,7 +207,7 @@ export const offtakers: Offtaker[] = [
     sector: "Power",
     productType: "Lean gas",
     deliveryPointId: "dp-afam-vi",
-    dcq: 102,
+    contractualDemand: 102,
     contractId: "gsa-afam-vi-001",
   },
   {
@@ -209,7 +217,7 @@ export const offtakers: Offtaker[] = [
     sector: "Power",
     productType: "Lean gas",
     deliveryPointId: "dp-alaoji",
-    dcq: 175,
+    contractualDemand: 175,
     contractId: "gsa-alaoji-001",
   },
 
@@ -221,7 +229,7 @@ export const offtakers: Offtaker[] = [
     sector: "Fertiliser",
     productType: "Lean gas",
     deliveryPointId: "dp-dangote-fert",
-    dcq: 195,
+    contractualDemand: 195,
     contractId: "gsa-dangote-001",
   },
 
@@ -233,7 +241,7 @@ export const offtakers: Offtaker[] = [
     sector: "Fertiliser",
     productType: "Lean gas",
     deliveryPointId: "dp-indorama",
-    dcq: 145,
+    contractualDemand: 145,
     contractId: "gsa-indorama-001",
   },
   {
@@ -243,7 +251,7 @@ export const offtakers: Offtaker[] = [
     sector: "Fertiliser",
     productType: "Lean gas",
     deliveryPointId: "dp-notore",
-    dcq: 35,
+    contractualDemand: 35,
     contractId: "gsa-notore-001",
   },
 
@@ -255,7 +263,7 @@ export const offtakers: Offtaker[] = [
     sector: "LDC / distributor",
     productType: "Lean gas",
     deliveryPointId: "dp-shell-ldc",
-    dcq: 85,
+    contractualDemand: 85,
     contractId: "gsa-shell-ldc-001",
   },
   {
@@ -266,7 +274,7 @@ export const offtakers: Offtaker[] = [
     productType: "Lean gas",
     parentOfftakerId: "off-shell-ldc",
     deliveryPointId: "dp-shell-sub-01",
-    dcq: 22,
+    contractualDemand: 22,
   },
   {
     id: "off-shell-sub-02",
@@ -276,7 +284,7 @@ export const offtakers: Offtaker[] = [
     productType: "Lean gas",
     parentOfftakerId: "off-shell-ldc",
     deliveryPointId: "dp-shell-sub-02",
-    dcq: 18,
+    contractualDemand: 18,
   },
   {
     id: "off-shell-sub-03",
@@ -286,7 +294,7 @@ export const offtakers: Offtaker[] = [
     productType: "Lean gas",
     parentOfftakerId: "off-shell-ldc",
     deliveryPointId: "dp-shell-sub-03",
-    dcq: 15,
+    contractualDemand: 15,
   },
 
   // Axxela LDC (Main offtaker with sub-offtakers)
@@ -297,7 +305,7 @@ export const offtakers: Offtaker[] = [
     sector: "LDC / distributor",
     productType: "Lean gas",
     deliveryPointId: "dp-axxela-ldc",
-    dcq: 72,
+    contractualDemand: 72,
     contractId: "gsa-axxela-ldc-001",
   },
   {
@@ -308,7 +316,7 @@ export const offtakers: Offtaker[] = [
     productType: "Lean gas",
     parentOfftakerId: "off-axxela-ldc",
     deliveryPointId: "dp-axxela-sub-01",
-    dcq: 28,
+    contractualDemand: 28,
   },
   {
     id: "off-axxela-sub-02",
@@ -318,7 +326,7 @@ export const offtakers: Offtaker[] = [
     productType: "Lean gas",
     parentOfftakerId: "off-axxela-ldc",
     deliveryPointId: "dp-axxela-sub-02",
-    dcq: 19,
+    contractualDemand: 19,
   },
 ];
 
@@ -345,7 +353,7 @@ export const getGasDayBalance = (gasDay: string = TODAY): GasDayBalance => {
 
 export const getOfftakerFlows = (
   gasDay: string = TODAY,
-  corridor?: Corridor
+  corridor?: Corridor | "All"
 ): OfftakerFlow[] => {
   const flows: OfftakerFlow[] = [
     // Western corridor
@@ -359,6 +367,7 @@ export const getOfftakerFlows = (
       actualSupplied: 207,
       received: 205,
       offtaken: 198,
+      perf: 0.943, // offtaken / allocated = 198 / 210
       varianceAllocation: 5, // nominated - allocated
       varianceSupply: 3, // allocated - actualSupplied
       varianceTransmission: 2, // actualSupplied - received (transmission loss)
@@ -376,6 +385,7 @@ export const getOfftakerFlows = (
       actualSupplied: 137,
       received: 136,
       offtaken: 134,
+      perf: 0.971, // offtaken / allocated = 134 / 138
       varianceAllocation: 2,
       varianceSupply: 1,
       varianceTransmission: 1,
@@ -393,6 +403,7 @@ export const getOfftakerFlows = (
       actualSupplied: 195,
       received: 195,
       offtaken: 195,
+      perf: 1.000, // offtaken / allocated = 195 / 195
       varianceAllocation: 0,
       varianceSupply: 0,
       varianceTransmission: 0,
@@ -412,6 +423,7 @@ export const getOfftakerFlows = (
       actualSupplied: 73,
       received: 72,
       offtaken: 70,
+      perf: 0.933, // offtaken / allocated = 70 / 75
       varianceAllocation: 3,
       varianceSupply: 2,
       varianceTransmission: 1,
@@ -429,6 +441,7 @@ export const getOfftakerFlows = (
       actualSupplied: 97,
       received: 96,
       offtaken: 94,
+      perf: 0.940, // offtaken / allocated = 94 / 100
       varianceAllocation: 2,
       varianceSupply: 3,
       varianceTransmission: 1,
@@ -446,6 +459,7 @@ export const getOfftakerFlows = (
       actualSupplied: 145,
       received: 145,
       offtaken: 145,
+      perf: 1.000, // offtaken / allocated = 145 / 145
       varianceAllocation: 0,
       varianceSupply: 0,
       varianceTransmission: 0,
@@ -465,6 +479,7 @@ export const getOfftakerFlows = (
       actualSupplied: 80,
       received: 79,
       offtaken: 76,
+      perf: 0.927, // offtaken / allocated = 76 / 82
       varianceAllocation: 3,
       varianceSupply: 2,
       varianceTransmission: 1,
@@ -482,6 +497,7 @@ export const getOfftakerFlows = (
       actualSupplied: 68,
       received: 67,
       offtaken: 65,
+      perf: 0.929, // offtaken / allocated = 65 / 70
       varianceAllocation: 2,
       varianceSupply: 2,
       varianceTransmission: 1,

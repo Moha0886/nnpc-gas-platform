@@ -206,7 +206,7 @@ export default function DSOCompliancePage() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(1)}%`}
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="value"
@@ -216,7 +216,7 @@ export default function DSOCompliancePage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number) => `${value.toFixed(1)} MMscf/d`}
+                    formatter={(value) => `${(Number(value) || 0).toFixed(1)} MMscf/d`}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -237,7 +237,7 @@ export default function DSOCompliancePage() {
                   domain={[50, 70]}
                   tickFormatter={(value) => `${value}%`}
                 />
-                <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
+                <Tooltip formatter={(value) => `${(Number(value) || 0).toFixed(1)}%`} />
                 <Legend />
                 {/* Reference line at 60% */}
                 <Line

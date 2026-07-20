@@ -71,7 +71,7 @@ export default function OfftakersPage() {
   const utilizationMetrics = mainOfftakers.reduce(
     (acc, offtaker) => {
       const flow = getFlowData(offtaker.id);
-      const dcq = offtaker.dcq || 0;
+      const dcq = offtaker.contractualDemand || offtaker.firmAndEffective || 0;
       const offtaken = flow?.offtaken || 0;
 
       acc.totalDCQ += dcq;
@@ -219,7 +219,7 @@ export default function OfftakersPage() {
                       </div>
                       <div className="flex items-center gap-6 text-sm">
                         <span className="text-ink/60">
-                          DCQ: <span className="tabular-nums font-medium">{main.dcq}</span>{" "}
+                          DCQ: <span className="tabular-nums font-medium">{main.contractualDemand || main.firmAndEffective}</span>{" "}
                           MMscf/d
                         </span>
                         <span className="text-ink/60">
@@ -251,7 +251,7 @@ export default function OfftakersPage() {
                     <div className="text-right min-w-[120px]">
                       <p className="text-xs text-ink/60 mb-1">Capacity Utilization</p>
                       {(() => {
-                        const dcq = main.dcq || 0;
+                        const dcq = main.contractualDemand || main.firmAndEffective || 0;
                         const offtaken = mainFlow?.offtaken || 0;
                         const utilization = dcq > 0 ? (offtaken / dcq) * 100 : 0;
                         const utilizationColor =
@@ -301,7 +301,7 @@ export default function OfftakersPage() {
                                 </span>
                               </div>
                               <p className="text-xs text-ink/60 ml-7">
-                                DCQ: {sub.dcq} MMscf/d · {sub.deliveryPointId}
+                                DCQ: {sub.contractualDemand || sub.firmAndEffective || 0} MMscf/d · {sub.deliveryPointId}
                               </p>
                             </div>
 

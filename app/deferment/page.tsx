@@ -227,7 +227,7 @@ export default function DefermentPage() {
               <XAxis dataKey="day" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} label={{ value: 'MMscf/d', angle: -90, position: 'insideLeft' }} />
               <Tooltip
-                formatter={(value: number) => formatNumber(value, 0) + " MMscf/d"}
+                formatter={(value) => formatNumber(Number(value) || 0, 0) + " MMscf/d"}
                 contentStyle={{ backgroundColor: 'white', border: '1px solid #DCDAD2' }}
               />
               <Legend />
@@ -288,7 +288,7 @@ export default function DefermentPage() {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number) => formatNumber(value, 0) + " MMscf/d"} />
+                  <Tooltip formatter={(value) => formatNumber(Number(value) || 0, 0) + " MMscf/d"} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex-1 space-y-2">

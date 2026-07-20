@@ -227,6 +227,20 @@ export const getTemplateInstructions = (templateType: keyof typeof CSV_TEMPLATES
       "Reason should explain root cause",
       "All volumes in MMscf/d",
     ],
+    volumes: [
+      "Date must be in YYYY-MM-DD format",
+      "All volumes in MMscf/d",
+      "Customer name must match existing customers",
+      "Delivered cannot exceed Received",
+      "Include meter readings if available",
+    ],
+    incidents: [
+      "Date must be in YYYY-MM-DD format",
+      "Incident type: Pipeline Rupture, Gas Leak, Equipment Failure, Outage, Other",
+      "Severity: Critical, High, Medium, Low",
+      "Location must be specific (e.g., station name, pipeline segment)",
+      "Include estimated impact volume if applicable",
+    ],
   };
 
   return instructions[templateType];

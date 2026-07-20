@@ -239,7 +239,7 @@ export default function PricingPage() {
                 domain={[0, 6]}
                 tickFormatter={(value) => `$${value}`}
               />
-              <Tooltip formatter={(value: number) => `$${value.toFixed(2)}/MMBtu`} />
+              <Tooltip formatter={(value) => `$${(Number(value) || 0).toFixed(2)}/MMBtu`} />
               <Legend />
               <Line
                 type="monotone"

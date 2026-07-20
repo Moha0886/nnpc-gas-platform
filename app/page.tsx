@@ -75,7 +75,7 @@ export default function ExecutiveOverview() {
   // 2. Customer Capacity Utilization
   const customerCapacity = offtakers.reduce((acc, offtaker) => {
     const flow = offtakerFlows.find(f => f.offtakerId === offtaker.id);
-    acc.dcq += offtaker.dcq || 0;
+    acc.dcq += offtaker.contractualDemand || offtaker.firmAndEffective || 0;
     acc.offtaken += flow?.offtaken || 0;
     return acc;
   }, { dcq: 0, offtaken: 0 });
@@ -621,7 +621,7 @@ export default function ExecutiveOverview() {
                 .filter(o => !o.parentOfftakerId) // Only main offtakers
                 .map(offtaker => {
                   const flow = offtakerFlows.find(f => f.offtakerId === offtaker.id);
-                  const dcq = offtaker.dcq || 0;
+                  const dcq = offtaker.contractualDemand || offtaker.firmAndEffective || 0;
                   const offtaken = flow?.offtaken || 0;
                   const utilization = dcq > 0 ? (offtaken / dcq) * 100 : 0;
 
@@ -648,7 +648,7 @@ export default function ExecutiveOverview() {
                 width={140}
               />
               <Tooltip
-                formatter={(value: number) => formatNumber(value, 0) + ' MMscf/d'}
+                formatter={(value) => formatNumber(Number(value) || 0, 0) + ' MMscf/d'}
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
                     const data = payload[0].payload;
@@ -703,7 +703,7 @@ export default function ExecutiveOverview() {
                   .filter(o => !o.parentOfftakerId)
                   .map(offtaker => {
                     const flow = offtakerFlows.find(f => f.offtakerId === offtaker.id);
-                    const dcq = offtaker.dcq || 0;
+                    const dcq = offtaker.contractualDemand || offtaker.firmAndEffective || 0;
                     const offtaken = flow?.offtaken || 0;
                     const utilization = dcq > 0 ? (offtaken / dcq) * 100 : 0;
                     return { ...offtaker, utilization, dcq, offtaken };
@@ -724,7 +724,7 @@ export default function ExecutiveOverview() {
                   .filter(o => !o.parentOfftakerId)
                   .map(offtaker => {
                     const flow = offtakerFlows.find(f => f.offtakerId === offtaker.id);
-                    const dcq = offtaker.dcq || 0;
+                    const dcq = offtaker.contractualDemand || offtaker.firmAndEffective || 0;
                     const offtaken = flow?.offtaken || 0;
                     const utilization = dcq > 0 ? (offtaken / dcq) * 100 : 0;
                     return utilization;
@@ -747,7 +747,7 @@ export default function ExecutiveOverview() {
                   .filter(o => !o.parentOfftakerId)
                   .map(offtaker => {
                     const flow = offtakerFlows.find(f => f.offtakerId === offtaker.id);
-                    const dcq = offtaker.dcq || 0;
+                    const dcq = offtaker.contractualDemand || offtaker.firmAndEffective || 0;
                     const offtaken = flow?.offtaken || 0;
                     const utilization = dcq > 0 ? (offtaken / dcq) * 100 : 0;
                     const unused = dcq - offtaken;
@@ -774,7 +774,7 @@ export default function ExecutiveOverview() {
                   .filter(o => !o.parentOfftakerId)
                   .map(offtaker => {
                     const flow = offtakerFlows.find(f => f.offtakerId === offtaker.id);
-                    const dcq = offtaker.dcq || 0;
+                    const dcq = offtaker.contractualDemand || offtaker.firmAndEffective || 0;
                     const offtaken = flow?.offtaken || 0;
                     const utilization = dcq > 0 ? (offtaken / dcq) * 100 : 0;
                     return utilization;
@@ -926,7 +926,7 @@ export default function ExecutiveOverview() {
                 />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip
-                  formatter={(value: number) => formatNumber(Math.abs(value), 0)}
+                  formatter={(value) => formatNumber(Math.abs(Number(value) || 0), 0)}
                 />
                 <Bar dataKey="value">
                   {waterfallData.map((entry, index) => (
@@ -959,7 +959,7 @@ export default function ExecutiveOverview() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => formatNumber(value, 0)} />
+                <Tooltip formatter={(value) => formatNumber(Number(value) || 0, 0)} />
               </PieChart>
             </ResponsiveContainer>
 

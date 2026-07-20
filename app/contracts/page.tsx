@@ -30,7 +30,7 @@ export default function ContractsPage() {
         counterparty: offtaker.name,
         corridor: offtaker.corridor,
         sector: offtaker.sector,
-        dcq: offtaker.dcq || 0,
+        dcq: offtaker.contractualDemand || offtaker.firmAndEffective || 0,
         deliveryPercent,
         takeOrPay: 80,
         dso: Math.round(dso),

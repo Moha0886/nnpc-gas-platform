@@ -100,7 +100,7 @@ export default function VolumesPage() {
       return {
         ...flow,
         offtakerName: offtaker?.name || "Unknown",
-        dcq: offtaker?.dcq || 0,
+        dcq: offtaker?.contractualDemand || offtaker?.firmAndEffective || 0,
       };
     });
 

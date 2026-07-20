@@ -54,8 +54,8 @@ export default function DeliveriesRecordPage() {
     alert(saveType === "draft" ? "Saved as draft" : "Submitted for approval");
   };
 
-  const dcqPercent = selectedOfftaker?.dcq && formData.receivedVolume
-    ? ((parseFloat(formData.receivedVolume) / selectedOfftaker.dcq) * 100).toFixed(1)
+  const dcqPercent = (selectedOfftaker?.contractualDemand || selectedOfftaker?.firmAndEffective) && formData.receivedVolume
+    ? ((parseFloat(formData.receivedVolume) / (selectedOfftaker.contractualDemand || selectedOfftaker.firmAndEffective || 1)) * 100).toFixed(1)
     : "—";
 
   const varianceReceipt = formData.receivedVolume && formData.offtakenVolume
@@ -177,7 +177,7 @@ export default function DeliveriesRecordPage() {
                 </select>
                 {selectedOfftaker && (
                   <p className="text-xs text-ink/60 mt-1">
-                    DCQ: {selectedOfftaker.dcq} MMscf/d | Delivery Point: {selectedOfftaker.deliveryPointId}
+                    DCQ: {selectedOfftaker.contractualDemand || selectedOfftaker.firmAndEffective || 0} MMscf/d | Delivery Point: {selectedOfftaker.deliveryPointId}
                   </p>
                 )}
               </div>
