@@ -55,7 +55,7 @@ export default function AllocationPage() {
           <h1 className="text-3xl font-bold text-ink">Gas Allocation Engine</h1>
           <p className="text-ink/70 mt-2">
             NGML daily allocation computation — the decision that determines who gets gas when
-            there isn't enough
+            there isn&apos;t enough
           </p>
         </div>
 
@@ -64,7 +64,7 @@ export default function AllocationPage() {
           <div>
             <h2 className="text-xl font-semibold text-ink mb-4">What-If Analysis</h2>
             <p className="text-sm text-ink/70 mb-6">
-              Adjust allocation from NGIC and watch every customer's allocation recompute live
+              Adjust allocation from NGIC and watch every customer&apos;s allocation recompute live
             </p>
           </div>
 
@@ -307,7 +307,7 @@ export default function AllocationPage() {
                     3
                   </div>
                   <p>
-                    <strong>Pro-rata nominations:</strong> Each non-firm customer's nomination is
+                    <strong>Pro-rata nominations:</strong> Each non-firm customer&apos;s nomination is
                     proportional to their demand weight
                   </p>
                 </div>

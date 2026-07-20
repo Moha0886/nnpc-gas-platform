@@ -193,11 +193,6 @@ export default function SupplyPage() {
   const supplyData = mockWeeklySupplyData;
   const { gasSupply, allocationOfftake, materialBalance } = supplyData;
 
-  // Calculate key metrics
-  const shortfall = allocationOfftake.total.allocation - allocationOfftake.total.actualOfftake;
-  const shortfallPct =
-    ((shortfall / allocationOfftake.total.allocation) * 100).toFixed(2);
-
   return (
     <div className="min-h-screen bg-paper p-8">
       <div className="max-w-[1800px] mx-auto space-y-8">
@@ -460,7 +455,7 @@ export default function SupplyPage() {
               </ul>
               <p className="text-sm text-blue-800 mt-3">
                 Click{" "}
-                <span className="font-semibold">"+ Upload Production Records"</span> to import
+                <span className="font-semibold">&quot;+ Upload Production Records&quot;</span> to import
                 weekly production data from upstream operators.
               </p>
             </div>
@@ -487,7 +482,7 @@ export default function SupplyPage() {
                 2
               </div>
               <p>
-                <strong>NGIC receives gas into transmission network</strong> — the "Volume (MMscf)"
+                <strong>NGIC receives gas into transmission network</strong> — the &quot;Volume (MMscf)&quot;
                 column shows what NGIC took from each operator. Example: SPDC supplied 540.00 MMscf,
                 CNL supplied 2,310.63 MMscf
               </p>
@@ -498,8 +493,8 @@ export default function SupplyPage() {
               </div>
               <p>
                 <strong>Source of Allocation tracks the flow</strong> — shows which producer
-                sources supply which customer groups. Example: "CNL, NPDC JV, NPDC Oredo, POOC,
-                Seplat, AHL, Platform, Gashub, Xenergi" means these 9 producers collectively supply
+                sources supply which customer groups. Example: &quot;CNL, NPDC JV, NPDC Oredo, POOC,
+                Seplat, AHL, Platform, Gashub, Xenergi&quot; means these 9 producers collectively supply
                 that customer group
               </p>
             </div>
