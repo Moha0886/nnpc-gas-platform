@@ -20,6 +20,9 @@ import {
   Menu,
   X,
   ChevronDown,
+  Truck,
+  PieChart,
+  FileBarChart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +32,8 @@ const navigationGroups = [
     label: "OPERATIONS",
     items: [
       { name: "Executive Dashboard", href: "/", icon: LayoutDashboard },
+      { name: "Gas Supply", href: "/supply", icon: Truck },
+      { name: "Allocation", href: "/allocation", icon: PieChart },
       { name: "Volumes & Balance", href: "/volumes", icon: Activity },
       { name: "Nominations", href: "/nominations", icon: FileText },
       { name: "Capacity", href: "/capacity", icon: Gauge },
@@ -54,6 +59,15 @@ const navigationGroups = [
       { name: "Assets", href: "/assets", icon: Database },
       { name: "Offtakers", href: "/offtakers", icon: Network },
       { name: "Network Map", href: "/network", icon: GitBranch },
+    ],
+  },
+  {
+    label: "NNPC REPORTS",
+    items: [
+      { name: "NGIC Daily Report", href: "/nnpc-reports/ngic-daily", icon: FileBarChart },
+      { name: "NGML Daily Report", href: "/nnpc-reports/ngml-daily", icon: FileBarChart },
+      { name: "Weekly MOR Supply", href: "/nnpc-reports/mor-supply", icon: FileBarChart },
+      { name: "Weekly MOR Volume/Pressure", href: "/nnpc-reports/mor-volume-pressure", icon: FileBarChart },
     ],
   },
   {
@@ -153,10 +167,10 @@ export default function Sidebar() {
       {/* Footer */}
       <div className="p-4 border-t border-line">
         <p className="text-ink/50 text-xs">
-          NGIC · NGML · NLNG
+          NGIC · NGML · NGPIS
         </p>
         <p className="text-ink/50 text-xs mt-1">
-          Build v0.2 - Enhanced
+          Build v0.3 - NNPC Conformance
         </p>
       </div>
     </>
