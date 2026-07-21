@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import {
   calculateAllocation,
   AllocationOutput,
+  CustomerAllocation,
   EXAMPLE_CONFIG_NOV_2024,
 } from "@/lib/allocation-engine";
 import { Download, Printer, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
@@ -603,7 +604,7 @@ function AllocationEngineView({
                     </tr>
                   </thead>
                   <tbody>
-                    {output.customerAllocations.map((customer) => (
+                    {output.customerAllocations.map((customer: CustomerAllocation) => (
                       <tr
                         key={customer.customerId}
                         className={`border-t border-line/30 hover:bg-pine/5 transition-colors ${
