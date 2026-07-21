@@ -12,7 +12,9 @@ import {
   Clock,
   AlertCircle,
   Download,
-  Calendar
+  Calendar,
+  Plus,
+  X
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -21,7 +23,8 @@ import type { Corridor } from "@/lib/types";
 import FileUpload from "@/components/FileUpload";
 
 export default function ProductionRecordPage() {
-  const [activeTab, setActiveTab] = useState<"upload" | "manual">("upload");
+  const [showModal, setShowModal] = useState(false);
+  const [selectedMethod, setSelectedMethod] = useState<"upload" | "manual" | null>(null);
   const [existingData, setExistingData] = useState<any[]>([]);
 
   // Load existing data from localStorage on mount
@@ -44,6 +47,20 @@ export default function ProductionRecordPage() {
     }
   }, []);
 
+  const openCreateModal = () => {
+    setShowModal(true);
+    setSelectedMethod(null);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedMethod(null);
+  };
+
+  const selectMethod = (method: "upload" | "manual") => {
+    setSelectedMethod(method);
+  };
+
   const handleUploadSuccess = (data: any[], overwriteDuplicates: boolean) => {
     console.log("Uploaded weekly supply records:", data);
     alert(`Successfully uploaded ${data.length} weekly gas supply records!`);
@@ -51,6 +68,7 @@ export default function ProductionRecordPage() {
     const updated = [...existingData, ...newData];
     setExistingData(updated);
     localStorage.setItem('production-records', JSON.stringify(updated));
+    closeModal();
   };
 
   const [formData, setFormData] = useState({
@@ -90,6 +108,10 @@ export default function ProductionRecordPage() {
 
     setStatus("submitted");
     alert(saveType === "draft" ? "Saved as draft" : "Submitted for approval");
+
+    if (saveType === "submit") {
+      closeModal();
+    }
   };
 
   const utilization = formData.production && formData.capacity
@@ -134,6 +156,13 @@ export default function ProductionRecordPage() {
             <button className="flex items-center gap-2 px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors">
               <Download className="w-4 h-4" />
               <span className="text-sm font-medium">Export Records</span>
+            </button>
+            <button
+              onClick={openCreateModal}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#1B5E3E] text-white rounded-lg font-semibold hover:bg-[#1B5E3E]/90 transition-colors shadow-md"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Create Record</span>
             </button>
           </div>
         </div>
@@ -184,331 +213,408 @@ export default function ProductionRecordPage() {
           </div>
         </div>
 
-        {/* Tab Navigation - Enhanced */}
-        <div className="bg-white rounded-lg border border-line mb-6 overflow-hidden">
-          <div className="flex border-b border-line bg-gray-50">
-            <button
-              onClick={() => setActiveTab("upload")}
-              className={`flex-1 px-8 py-4 font-semibold transition-all flex items-center justify-center gap-3 ${
-                activeTab === "upload"
-                  ? "text-[#1B5E3E] border-b-3 border-[#1B5E3E] bg-white -mb-px"
-                  : "text-ink/60 hover:text-ink"
-              }`}
-            >
-              <UploadIcon className="w-5 h-5" />
-              <div className="text-left">
-                <div className="font-semibold">Bulk Upload</div>
-                <div className="text-xs font-normal text-ink/50">Recommended for multiple records</div>
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab("manual")}
-              className={`flex-1 px-8 py-4 font-semibold transition-all flex items-center justify-center gap-3 ${
-                activeTab === "manual"
-                  ? "text-[#1B5E3E] border-b-3 border-[#1B5E3E] bg-white -mb-px"
-                  : "text-ink/60 hover:text-ink"
-              }`}
-            >
-              <FileText className="w-5 h-5" />
-              <div className="text-left">
-                <div className="font-semibold">Manual Entry</div>
-                <div className="text-xs font-normal text-ink/50">Single record input</div>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* Tab Content */}
-        {activeTab === "upload" ? (
-          <div className="bg-white border border-line rounded-lg p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 rounded-lg bg-[#1B5E3E]/10">
-                <UploadIcon className="w-6 h-6 text-[#1B5E3E]" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-ink">Upload Weekly Gas Supply Data</h3>
-                <p className="text-sm text-ink/60 mt-1">
-                  Upload production records from all upstream operators. Supports CSV and Excel formats.
-                </p>
-              </div>
-            </div>
-
-            <FileUpload
-              templateType="production"
-              existingData={existingData}
-              identifierFields={["Week", "Producer"]}
-              requiredFields={["Week", "Producer", "Volume (MMscf)"]}
-              onUploadSuccess={handleUploadSuccess}
-            />
-
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-blue-100">
-                    <FileText className="w-5 h-5 text-blue-600" />
+        {/* Create Record Modal */}
+        {showModal && (
+          <div className="fixed inset-0 bg-ink/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between px-8 py-6 border-b border-line bg-gradient-to-r from-[#1B5E3E]/5 to-[#2B5F75]/5">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-lg bg-[#1B5E3E]/10">
+                    <Plus className="w-6 h-6 text-[#1B5E3E]" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-blue-900 mb-1">Weekly MOR Format</p>
-                    <p className="text-xs text-blue-700">
-                      Upload using your existing Weekly MOR Gas Supply & Offtake Excel template.
+                    <h2 className="text-2xl font-bold text-ink">
+                      {selectedMethod === null ? "Create Production Record" : selectedMethod === "upload" ? "Bulk Upload" : "Manual Entry"}
+                    </h2>
+                    <p className="text-sm text-ink/60">
+                      {selectedMethod === null ? "Choose how you'd like to add records" : "Enter production data for approval"}
                     </p>
                   </div>
                 </div>
+                <button
+                  onClick={closeModal}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <X className="w-6 h-6 text-ink/60" />
+                </button>
               </div>
 
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-green-100">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-green-900 mb-1">Auto-Validation</p>
-                    <p className="text-xs text-green-700">
-                      System automatically validates data and highlights any errors before upload.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <form onSubmit={(e) => handleSubmit(e, "submit")}>
-            {/* Date & Facility Information */}
-            <div className="bg-white border border-line rounded-lg p-6 mb-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-lg bg-[#2B5F75]/10">
-                  <TrendingUp className="w-5 h-5 text-[#2B5F75]" />
-                </div>
-                <h3 className="text-lg font-semibold text-ink">Facility Information</h3>
-              </div>
+              {/* Modal Content */}
+              <div className="overflow-y-auto max-h-[calc(90vh-100px)]">
+                {selectedMethod === null ? (
+                  /* Method Selection */
+                  <div className="p-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Bulk Upload Option */}
+                      <button
+                        onClick={() => selectMethod("upload")}
+                        className="group text-left p-8 border-2 border-line rounded-xl hover:border-[#1B5E3E] hover:shadow-lg transition-all bg-white"
+                      >
+                        <div className="p-4 rounded-xl bg-[#1B5E3E]/10 w-fit mb-4 group-hover:bg-[#1B5E3E] transition-colors">
+                          <UploadIcon className="w-8 h-8 text-[#1B5E3E] group-hover:text-white transition-colors" />
+                        </div>
+                        <h3 className="text-xl font-bold text-ink mb-2">Bulk Upload</h3>
+                        <p className="text-sm text-ink/60 mb-4">Recommended for multiple records</p>
+                        <ul className="space-y-2 mb-6">
+                          <li className="flex items-start gap-2 text-sm text-ink/70">
+                            <CheckCircle className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
+                            <span>Upload CSV or Excel files</span>
+                          </li>
+                          <li className="flex items-start gap-2 text-sm text-ink/70">
+                            <CheckCircle className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
+                            <span>Weekly MOR format supported</span>
+                          </li>
+                          <li className="flex items-start gap-2 text-sm text-ink/70">
+                            <CheckCircle className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
+                            <span>Auto-validation & error checking</span>
+                          </li>
+                        </ul>
+                        <div className="flex items-center gap-2 text-[#1B5E3E] font-semibold group-hover:gap-3 transition-all">
+                          <span>Select this method</span>
+                          <ArrowLeft className="w-4 h-4 rotate-180" />
+                        </div>
+                      </button>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-ink mb-2">
-                    Gas Day Date <span className="text-alert">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      required
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className="w-full px-4 py-3 pl-10 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E]"
+                      {/* Manual Entry Option */}
+                      <button
+                        onClick={() => selectMethod("manual")}
+                        className="group text-left p-8 border-2 border-line rounded-xl hover:border-[#2B5F75] hover:shadow-lg transition-all bg-white"
+                      >
+                        <div className="p-4 rounded-xl bg-[#2B5F75]/10 w-fit mb-4 group-hover:bg-[#2B5F75] transition-colors">
+                          <FileText className="w-8 h-8 text-[#2B5F75] group-hover:text-white transition-colors" />
+                        </div>
+                        <h3 className="text-xl font-bold text-ink mb-2">Manual Entry</h3>
+                        <p className="text-sm text-ink/60 mb-4">Single record input</p>
+                        <ul className="space-y-2 mb-6">
+                          <li className="flex items-start gap-2 text-sm text-ink/70">
+                            <CheckCircle className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
+                            <span>Guided form interface</span>
+                          </li>
+                          <li className="flex items-start gap-2 text-sm text-ink/70">
+                            <CheckCircle className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
+                            <span>Real-time field validation</span>
+                          </li>
+                          <li className="flex items-start gap-2 text-sm text-ink/70">
+                            <CheckCircle className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
+                            <span>Save as draft or submit</span>
+                          </li>
+                        </ul>
+                        <div className="flex items-center gap-2 text-[#2B5F75] font-semibold group-hover:gap-3 transition-all">
+                          <span>Select this method</span>
+                          <ArrowLeft className="w-4 h-4 rotate-180" />
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                ) : selectedMethod === "upload" ? (
+                  /* Bulk Upload Content */
+                  <div className="p-8">
+                    <div className="mb-6">
+                      <button
+                        onClick={() => setSelectedMethod(null)}
+                        className="flex items-center gap-2 text-ink/60 hover:text-ink transition-colors text-sm font-medium"
+                      >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to options
+                      </button>
+                    </div>
+
+                    <FileUpload
+                      templateType="production"
+                      existingData={existingData}
+                      identifierFields={["Week", "Producer"]}
+                      requiredFields={["Week", "Producer", "Volume (MMscf)"]}
+                      onUploadSuccess={handleUploadSuccess}
                     />
-                    <Calendar className="w-4 h-4 text-ink/40 absolute left-3 top-1/2 -translate-y-1/2" />
+
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-blue-100">
+                            <FileText className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-blue-900 mb-1">Weekly MOR Format</p>
+                            <p className="text-xs text-blue-700">
+                              Upload using your existing Weekly MOR Gas Supply & Offtake Excel template.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-green-100">
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-green-900 mb-1">Auto-Validation</p>
+                            <p className="text-xs text-green-700">
+                              System automatically validates data and highlights any errors before upload.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  /* Manual Entry Content */
+                  <div className="p-8">
+                    <div className="mb-6">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMethod(null)}
+                        className="flex items-center gap-2 text-ink/60 hover:text-ink transition-colors text-sm font-medium"
+                      >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to options
+                      </button>
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-ink mb-2">
-                    Facility Type <span className="text-alert">*</span>
-                  </label>
-                  <select
-                    required
-                    value={formData.facilityType}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        facilityType: e.target.value as "field" | "well" | "plant",
-                      })
-                    }
-                    className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E]"
-                  >
-                    <option value="field">Gas Field</option>
-                    <option value="well">Production Well</option>
-                    <option value="plant">Processing Plant</option>
-                  </select>
-                </div>
+                    <form onSubmit={(e) => handleSubmit(e, "submit")}>
+                      {/* Date & Facility Information */}
+                      <div className="bg-gray-50 border border-line rounded-lg p-6 mb-6">
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className="p-2 rounded-lg bg-[#2B5F75]/10">
+                            <TrendingUp className="w-5 h-5 text-[#2B5F75]" />
+                          </div>
+                          <h3 className="text-lg font-semibold text-ink">Facility Information</h3>
+                        </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-ink mb-2">
-                    Facility ID <span className="text-alert">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g., OB3-OBIAFU"
-                    value={formData.facilityId}
-                    onChange={(e) => setFormData({ ...formData, facilityId: e.target.value })}
-                    className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E]"
-                  />
-                </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-sm font-semibold text-ink mb-2">
+                              Gas Day Date <span className="text-alert">*</span>
+                            </label>
+                            <div className="relative">
+                              <input
+                                type="date"
+                                required
+                                value={formData.date}
+                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                className="w-full px-4 py-3 pl-10 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E] bg-white"
+                              />
+                              <Calendar className="w-4 h-4 text-ink/40 absolute left-3 top-1/2 -translate-y-1/2" />
+                            </div>
+                          </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-ink mb-2">
-                    Operator <span className="text-alert">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g., Shell Petroleum, NAOC, Total"
-                    value={formData.operator}
-                    onChange={(e) => setFormData({ ...formData, operator: e.target.value })}
-                    className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E]"
-                  />
-                </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-ink mb-2">
+                              Facility Type <span className="text-alert">*</span>
+                            </label>
+                            <select
+                              required
+                              value={formData.facilityType}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  facilityType: e.target.value as "field" | "well" | "plant",
+                                })
+                              }
+                              className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E] bg-white"
+                            >
+                              <option value="field">Gas Field</option>
+                              <option value="well">Production Well</option>
+                              <option value="plant">Processing Plant</option>
+                            </select>
+                          </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-ink mb-2">
-                    Corridor
-                  </label>
-                  <select
-                    value={formData.corridor}
-                    onChange={(e) =>
-                      setFormData({ ...formData, corridor: e.target.value as Corridor })
-                    }
-                    className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E]"
-                  >
-                    <option value="">Select corridor...</option>
-                    {corridors.map((corridor) => (
-                      <option key={corridor} value={corridor}>
-                        {corridor}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-ink mb-2">
+                              Facility ID <span className="text-alert">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              placeholder="e.g., OB3-OBIAFU"
+                              value={formData.facilityId}
+                              onChange={(e) => setFormData({ ...formData, facilityId: e.target.value })}
+                              className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E] bg-white"
+                            />
+                          </div>
 
-            {/* Production Volumes */}
-            <div className="bg-white border border-line rounded-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold text-ink mb-6">Production Volumes</h3>
+                          <div>
+                            <label className="block text-sm font-semibold text-ink mb-2">
+                              Operator <span className="text-alert">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              placeholder="e.g., Shell Petroleum, NAOC, Total"
+                              value={formData.operator}
+                              onChange={(e) => setFormData({ ...formData, operator: e.target.value })}
+                              className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E] bg-white"
+                            />
+                          </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-ink mb-2">
-                    Gas Production (MMscf/d) <span className="text-alert">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    step="0.01"
-                    placeholder="0.00"
-                    value={formData.production}
-                    onChange={(e) => setFormData({ ...formData, production: e.target.value })}
-                    className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E] tabular-nums text-right"
-                  />
-                </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-ink mb-2">
+                              Corridor
+                            </label>
+                            <select
+                              value={formData.corridor}
+                              onChange={(e) =>
+                                setFormData({ ...formData, corridor: e.target.value as Corridor })
+                              }
+                              className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E] bg-white"
+                            >
+                              <option value="">Select corridor...</option>
+                              {corridors.map((corridor) => (
+                                <option key={corridor} value={corridor}>
+                                  {corridor}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-ink mb-2">
-                    Facility Capacity (MMscf/d) <span className="text-alert">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    step="0.01"
-                    placeholder="0.00"
-                    value={formData.capacity}
-                    onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                    className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E] tabular-nums text-right"
-                  />
-                </div>
+                      {/* Production Volumes */}
+                      <div className="bg-gray-50 border border-line rounded-lg p-6 mb-6">
+                        <h3 className="text-lg font-semibold text-ink mb-6">Production Volumes</h3>
 
-                <div>
-                  <label className="block text-sm font-semibold text-ink mb-2">
-                    NGL Production (barrels/day)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={formData.nglProduction}
-                    onChange={(e) => setFormData({ ...formData, nglProduction: e.target.value })}
-                    className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E] tabular-nums text-right"
-                  />
-                </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-sm font-semibold text-ink mb-2">
+                              Gas Production (MMscf/d) <span className="text-alert">*</span>
+                            </label>
+                            <input
+                              type="number"
+                              required
+                              step="0.01"
+                              placeholder="0.00"
+                              value={formData.production}
+                              onChange={(e) => setFormData({ ...formData, production: e.target.value })}
+                              className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E] tabular-nums text-right bg-white"
+                            />
+                          </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-ink mb-2">
-                    LPG Production (MT/day)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={formData.lpgProduction}
-                    onChange={(e) => setFormData({ ...formData, lpgProduction: e.target.value })}
-                    className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E] tabular-nums text-right"
-                  />
-                </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-ink mb-2">
+                              Facility Capacity (MMscf/d) <span className="text-alert">*</span>
+                            </label>
+                            <input
+                              type="number"
+                              required
+                              step="0.01"
+                              placeholder="0.00"
+                              value={formData.capacity}
+                              onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+                              className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E] tabular-nums text-right bg-white"
+                            />
+                          </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-ink mb-2">
-                    Flare Volume (MMscf/d)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={formData.flareVolume}
-                    onChange={(e) => setFormData({ ...formData, flareVolume: e.target.value })}
-                    className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E] tabular-nums text-right"
-                  />
-                </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-ink mb-2">
+                              NGL Production (barrels/day)
+                            </label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              value={formData.nglProduction}
+                              onChange={(e) => setFormData({ ...formData, nglProduction: e.target.value })}
+                              className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E] tabular-nums text-right bg-white"
+                            />
+                          </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-ink mb-2">
-                    Capacity Utilization
-                  </label>
-                  <div className="px-4 py-3 border-2 border-[#1B5E3E]/20 rounded-lg bg-[#1B5E3E]/5">
-                    <span className="text-2xl font-bold text-[#1B5E3E] tabular-nums">
-                      {utilization}%
-                    </span>
+                          <div>
+                            <label className="block text-sm font-semibold text-ink mb-2">
+                              LPG Production (MT/day)
+                            </label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              value={formData.lpgProduction}
+                              onChange={(e) => setFormData({ ...formData, lpgProduction: e.target.value })}
+                              className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E] tabular-nums text-right bg-white"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-semibold text-ink mb-2">
+                              Flare Volume (MMscf/d)
+                            </label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              value={formData.flareVolume}
+                              onChange={(e) => setFormData({ ...formData, flareVolume: e.target.value })}
+                              className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B5E3E] focus:border-[#1B5E3E] tabular-nums text-right bg-white"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-semibold text-ink mb-2">
+                              Capacity Utilization
+                            </label>
+                            <div className="px-4 py-3 border-2 border-[#1B5E3E]/20 rounded-lg bg-[#1B5E3E]/5">
+                              <span className="text-2xl font-bold text-[#1B5E3E] tabular-nums">
+                                {utilization}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center justify-between bg-gray-50 border border-line rounded-lg p-6">
+                        <button
+                          type="button"
+                          onClick={closeModal}
+                          className="px-6 py-3 border-2 border-line rounded-lg text-ink font-semibold hover:bg-gray-100 transition-colors"
+                        >
+                          Cancel
+                        </button>
+
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={(e) => handleSubmit(e as any, "draft")}
+                            disabled={status === "submitting"}
+                            className="px-6 py-3 border-2 border-[#2B5F75] text-[#2B5F75] rounded-lg font-semibold hover:bg-[#2B5F75]/5 transition-colors flex items-center gap-2 disabled:opacity-50"
+                          >
+                            <Save className="w-5 h-5" />
+                            Save as Draft
+                          </button>
+
+                          <button
+                            type="submit"
+                            disabled={status === "submitting"}
+                            className="px-6 py-3 bg-[#1B5E3E] text-white rounded-lg font-semibold hover:bg-[#1B5E3E]/90 transition-colors flex items-center gap-2 disabled:opacity-50"
+                          >
+                            <Send className="w-5 h-5" />
+                            {status === "submitting" ? "Submitting..." : "Submit for Approval"}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Workflow Notice */}
+                      <div className="mt-6 p-5 bg-gradient-to-r from-[#1B5E3E]/10 to-[#2B5F75]/10 border-l-4 border-[#1B5E3E] rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <AlertCircle className="w-5 h-5 text-[#1B5E3E] flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-sm font-semibold text-ink mb-1">Maker-Checker Approval Workflow</p>
+                            <p className="text-sm text-ink/70">
+                              This record will be submitted for review by a checker. Once approved, it will appear in operational dashboards and reports. You will receive a notification when the review is complete.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </form>
                   </div>
-                </div>
+                )}
               </div>
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center justify-between bg-white border border-line rounded-lg p-6">
-              <Link
-                href="/"
-                className="px-6 py-3 border-2 border-line rounded-lg text-ink font-semibold hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </Link>
-
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={(e) => handleSubmit(e as any, "draft")}
-                  disabled={status === "submitting"}
-                  className="px-6 py-3 border-2 border-[#2B5F75] text-[#2B5F75] rounded-lg font-semibold hover:bg-[#2B5F75]/5 transition-colors flex items-center gap-2 disabled:opacity-50"
-                >
-                  <Save className="w-5 h-5" />
-                  Save as Draft
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={status === "submitting"}
-                  className="px-6 py-3 bg-[#1B5E3E] text-white rounded-lg font-semibold hover:bg-[#1B5E3E]/90 transition-colors flex items-center gap-2 disabled:opacity-50"
-                >
-                  <Send className="w-5 h-5" />
-                  {status === "submitting" ? "Submitting..." : "Submit for Approval"}
-                </button>
-              </div>
-            </div>
-
-            {/* Workflow Notice */}
-            <div className="mt-6 p-5 bg-gradient-to-r from-[#1B5E3E]/10 to-[#2B5F75]/10 border-l-4 border-[#1B5E3E] rounded-lg">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-[#1B5E3E] flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold text-ink mb-1">Maker-Checker Approval Workflow</p>
-                  <p className="text-sm text-ink/70">
-                    This record will be submitted for review by a checker. Once approved, it will appear in operational dashboards and reports. You will receive a notification when the review is complete.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </form>
+          </div>
         )}
 
         {/* Recent Records Table - Enhanced */}
         {existingData.length > 0 && (
-          <div className="bg-white border border-line rounded-lg overflow-hidden mt-8">
+          <div className="bg-white border border-line rounded-lg overflow-hidden">
             <div className="px-6 py-4 border-b border-line bg-gray-50">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-ink">
