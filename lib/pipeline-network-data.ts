@@ -2,7 +2,8 @@
 // Based on NNPC/NGPTC infrastructure as of 2026
 
 export type AssetStatus = "operational" | "partial-outage" | "under-construction" | "maintenance";
-export type PipelineType = "trunk" | "flow" | "export" | "delivery";
+export type PipelineType = "trunk" | "flow" | "export" | "delivery" | "spur";
+export type OperationalArea = "AOW" | "AON" | "AOMW" | "AOD" | "AOE" | "AME";
 export type AssetType =
   | "compressor"
   | "processing-plant"
@@ -26,6 +27,7 @@ export interface PipelineProperties {
   pressure: number; // PSI
   status: AssetStatus;
   corridor: string;
+  operationalArea?: OperationalArea; // NGIC operational area
   deferment: number; // MMscf/d
 }
 
@@ -38,6 +40,7 @@ export interface AssetProperties {
   utilization: number;
   status: AssetStatus;
   corridor: string;
+  operationalArea?: OperationalArea; // NGIC operational area
   deferment: number;
   operator: string;
 }
@@ -915,6 +918,544 @@ export const pipelines: PipelineFeature[] = [
     },
   },
 
+  // ============================================================================
+  // NGIC PIPELINE NETWORK SEGMENTS (L1-L68)
+  // Based on NGIC-ELPS Pipeline Network infrastructure map
+  // ============================================================================
+
+  // AOE (Area of East) - Obigbo Node Segments
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.3500, 5.0600], // Obigbo Node
+        [7.3700, 5.0700],
+      ],
+    },
+    properties: {
+      id: "ngic-l1",
+      name: "L1 (Obigbo Segment)",
+      network: "Eastern",
+      pipelineType: "flow",
+      diameter: 16,
+      length: 3.7,
+      capacity: 120,
+      currentFlow: 95,
+      utilization: 79.2,
+      pressure: 900,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.3500, 5.0600], // Obigbo
+        [7.3600, 5.0500],
+      ],
+    },
+    properties: {
+      id: "ngic-l2",
+      name: "L2 (Obigbo Connection)",
+      network: "Eastern",
+      pipelineType: "flow",
+      diameter: 8,
+      length: 4.5,
+      capacity: 45,
+      currentFlow: 38,
+      utilization: 84.4,
+      pressure: 850,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.3500, 5.0600],
+        [7.3650, 5.0550],
+      ],
+    },
+    properties: {
+      id: "ngic-l3",
+      name: "L3 (Obigbo Spur)",
+      network: "Eastern",
+      pipelineType: "spur",
+      diameter: 8,
+      length: 5.8,
+      capacity: 48,
+      currentFlow: 40,
+      utilization: 83.3,
+      pressure: 855,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.0100, 4.7500], // Alakiri
+        [7.3500, 5.0600], // To Obigbo
+      ],
+    },
+    properties: {
+      id: "ngic-l4",
+      name: "L4 (Alakiri-Obigbo Main)",
+      network: "Eastern",
+      pipelineType: "trunk",
+      diameter: 20,
+      length: 28.0,
+      capacity: 280,
+      currentFlow: 235,
+      utilization: 83.9,
+      pressure: 1050,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.1200, 4.7800], // Indorama area
+        [7.1400, 4.8000],
+      ],
+    },
+    properties: {
+      id: "ngic-l5",
+      name: "L5 (Eleme Industrial)",
+      network: "Eastern",
+      pipelineType: "delivery",
+      diameter: 8,
+      length: 14.1,
+      capacity: 75,
+      currentFlow: 65,
+      utilization: 86.7,
+      pressure: 880,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.0100, 4.7500], // Alakiri
+        [7.1616, 4.4184], // NLNG Bonny
+      ],
+    },
+    properties: {
+      id: "ngic-l6",
+      name: "L6 (Alakiri-NLNG)",
+      network: "Eastern",
+      pipelineType: "export",
+      diameter: 24,
+      length: 28.4,
+      capacity: 1900,
+      currentFlow: 1650,
+      utilization: 86.8,
+      pressure: 1200,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.2400, 4.9400], // Afam area
+        [7.2450, 4.9450],
+      ],
+    },
+    properties: {
+      id: "ngic-l7",
+      name: "L7 (Afam Spur)",
+      network: "Eastern",
+      pipelineType: "delivery",
+      diameter: 8,
+      length: 1.5,
+      capacity: 22,
+      currentFlow: 19,
+      utilization: 86.4,
+      pressure: 840,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [6.8200, 5.2800], // OB3 CTMS
+        [7.0100, 4.7500], // Alakiri
+      ],
+    },
+    properties: {
+      id: "ngic-l8",
+      name: "L8 (OB3-Alakiri Main)",
+      network: "Eastern",
+      pipelineType: "trunk",
+      diameter: 30,
+      length: 35.6,
+      capacity: 1400,
+      currentFlow: 1180,
+      utilization: 84.3,
+      pressure: 1150,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.5400, 4.5700], // Ikot Abasi
+        [7.5500, 4.5800],
+      ],
+    },
+    properties: {
+      id: "ngic-l9",
+      name: "L9 (Ikot Abasi Connection)",
+      network: "Eastern",
+      pipelineType: "delivery",
+      diameter: 12,
+      length: 3.4,
+      capacity: 58,
+      currentFlow: 48,
+      utilization: 82.8,
+      pressure: 870,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.5400, 4.5700],
+        [7.5350, 4.5650],
+      ],
+    },
+    properties: {
+      id: "ngic-l10",
+      name: "L10 (Ikot Abasi Spur)",
+      network: "Eastern",
+      pipelineType: "spur",
+      diameter: 12,
+      length: 3.5,
+      capacity: 55,
+      currentFlow: 45,
+      utilization: 81.8,
+      pressure: 865,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+
+  // AOD (Area of Delta) - Major Western Network Segments
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.9000, 5.7000], // Oben
+        [6.2400, 5.8500], // Okpai area
+      ],
+    },
+    properties: {
+      id: "ngic-l25",
+      name: "L25 (Oben-Okpai Trunk)",
+      network: "OB3",
+      pipelineType: "trunk",
+      diameter: 36,
+      length: 50.0,
+      capacity: 1850,
+      currentFlow: 1560,
+      utilization: 84.3,
+      pressure: 1220,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOD",
+      deferment: 0,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.9938, 5.5002], // Ughelli/Delta
+        [5.9000, 5.7000], // Oben
+      ],
+    },
+    properties: {
+      id: "ngic-l28",
+      name: "L28 (Ughelli-Oben Main)",
+      network: "ELPS",
+      pipelineType: "trunk",
+      diameter: 24,
+      length: 196.0,
+      capacity: 1200,
+      currentFlow: 1020,
+      utilization: 85.0,
+      pressure: 1180,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOD",
+      deferment: 0,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.9000, 5.7000], // Oben
+        [7.3000, 7.8000], // Geregu
+      ],
+    },
+    properties: {
+      id: "ngic-l30",
+      name: "L30 (Oben-Geregu Northern Trunk)",
+      network: "Oben-Geregu",
+      pipelineType: "trunk",
+      diameter: 36,
+      length: 196.0,
+      capacity: 1200,
+      currentFlow: 850,
+      utilization: 70.8,
+      pressure: 1180,
+      status: "operational",
+      corridor: "Northern",
+      operationalArea: "AOD",
+      deferment: 0,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [6.5950, 6.3400], // Ajaokuta
+        [7.3000, 7.8000], // Geregu
+      ],
+    },
+    properties: {
+      id: "ngic-l31",
+      name: "L31 (Ajaokuta-Geregu)",
+      network: "Oben-Geregu",
+      pipelineType: "trunk",
+      diameter: 18,
+      length: 90.0,
+      capacity: 420,
+      currentFlow: 355,
+      utilization: 84.5,
+      pressure: 1050,
+      status: "operational",
+      corridor: "Northern",
+      operationalArea: "AOD",
+      deferment: 0,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.7603, 5.5442], // Warri
+        [5.6250, 6.3380], // Benin
+      ],
+    },
+    properties: {
+      id: "ngic-l32",
+      name: "L32 (Warri-Benin ELPS Main)",
+      network: "ELPS",
+      pipelineType: "trunk",
+      diameter: 36,
+      length: 99.0,
+      capacity: 2200,
+      currentFlow: 1850,
+      utilization: 84.1,
+      pressure: 1250,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOD",
+      deferment: 0,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.6250, 6.3380], // Benin
+        [3.2500, 6.8800], // Ogun State
+      ],
+    },
+    properties: {
+      id: "ngic-l33",
+      name: "L33 (Benin-Ogun ELPS)",
+      network: "ELPS",
+      pipelineType: "trunk",
+      diameter: 36,
+      length: 91.0,
+      capacity: 2200,
+      currentFlow: 1840,
+      utilization: 83.6,
+      pressure: 1220,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOMW",
+      deferment: 0,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.2500, 6.8800], // Ogun
+        [3.3500, 6.6500], // Itoki Lagos
+      ],
+    },
+    properties: {
+      id: "ngic-l34",
+      name: "L34 (Ogun-Itoki ELPS Terminal)",
+      network: "ELPS",
+      pipelineType: "trunk",
+      diameter: 36,
+      length: 105.0,
+      capacity: 2200,
+      currentFlow: 1830,
+      utilization: 83.2,
+      pressure: 1200,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOW",
+      deferment: 0,
+    },
+  },
+
+  // AKK Pipeline - Northern Network (L53)
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [6.5950, 6.3400], // Ajaokuta
+        [7.3986, 9.0765], // Abuja
+        [7.4400, 10.5200], // Kaduna
+        [8.5200, 12.0000], // Kano
+      ],
+    },
+    properties: {
+      id: "ngic-l53",
+      name: "L53 (AKK Pipeline - Ajaokuta-Kaduna-Kano)",
+      network: "AKK",
+      pipelineType: "trunk",
+      diameter: 40,
+      length: 614.0,
+      capacity: 3500,
+      currentFlow: 450,
+      utilization: 12.9,
+      pressure: 1200,
+      status: "under-construction",
+      corridor: "Northern",
+      operationalArea: "AON",
+      deferment: 0,
+    },
+  },
+
+  // OB3 Main Pipeline (L54)
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [6.8200, 5.2800], // Obiafu-Obrikom
+        [6.9580, 5.4520], // Obite
+        [5.9000, 5.7000], // Oben
+      ],
+    },
+    properties: {
+      id: "ngic-l54",
+      name: "L54 (OB3 Main - Obiafu-Obrikom-Oben)",
+      network: "OB3",
+      pipelineType: "trunk",
+      diameter: 48,
+      length: 127.0,
+      capacity: 2000,
+      currentFlow: 1620,
+      utilization: 81.0,
+      pressure: 1300,
+      status: "operational",
+      corridor: "Interconnector",
+      operationalArea: "AOD",
+      deferment: 0,
+    },
+  },
+
+  // ANOH-OB3 Connection (L58)
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.0300, 5.4800], // ANOH
+        [6.8200, 5.2800], // OB3 CTMS
+      ],
+    },
+    properties: {
+      id: "ngic-l58",
+      name: "L58 (ANOH-OB3 CTMS)",
+      network: "ANOH",
+      pipelineType: "delivery",
+      diameter: 36,
+      length: 23.3,
+      capacity: 500,
+      currentFlow: 280,
+      utilization: 56.0,
+      pressure: 1100,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+
   // WAGP (West African Gas Pipeline) - International Export
   {
     type: "Feature",
@@ -942,6 +1483,7 @@ export const pipelines: PipelineFeature[] = [
       pressure: 1100,
       status: "operational",
       corridor: "Western",
+      operationalArea: "AOW",
       deferment: 0,
     },
   },
@@ -1566,6 +2108,187 @@ export const compressorStations: AssetFeature[] = [
       utilization: 84.1,
       status: "operational",
       corridor: "Western",
+      operationalArea: "AOMW",
+      deferment: 0,
+      operator: "NGPTC",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [5.9367, 5.5145],
+    },
+    properties: {
+      id: "cs-eriemu",
+      name: "Eriemu Compressor Station",
+      assetType: "compressor",
+      capacity: 1800,
+      currentOutput: 1520,
+      utilization: 84.4,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOD",
+      deferment: 0,
+      operator: "NGPTC",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [5.9367, 5.5145],
+    },
+    properties: {
+      id: "cs-utorogu",
+      name: "Utorogu Compressor Station",
+      assetType: "compressor",
+      capacity: 1600,
+      currentOutput: 1350,
+      utilization: 84.4,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOD",
+      deferment: 0,
+      operator: "NGPTC",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [5.9500, 5.5300],
+    },
+    properties: {
+      id: "cs-kokori",
+      name: "Kokori Compressor Station",
+      assetType: "compressor",
+      capacity: 1400,
+      currentOutput: 1180,
+      utilization: 84.3,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOD",
+      deferment: 0,
+      operator: "NGPTC",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [5.9600, 5.5400],
+    },
+    properties: {
+      id: "cs-afisere",
+      name: "Afisere Compressor Station",
+      assetType: "compressor",
+      capacity: 1500,
+      currentOutput: 1260,
+      utilization: 84.0,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOD",
+      deferment: 0,
+      operator: "NGPTC",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [5.9100, 5.4800],
+    },
+    properties: {
+      id: "cs-uzere",
+      name: "Uzere Compressor Station",
+      assetType: "compressor",
+      capacity: 1300,
+      currentOutput: 1090,
+      utilization: 83.8,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOD",
+      deferment: 0,
+      operator: "NGPTC",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [5.8900, 5.4600],
+    },
+    properties: {
+      id: "cs-olomoro",
+      name: "Olomoro Compressor Station",
+      assetType: "compressor",
+      capacity: 1250,
+      currentOutput: 1050,
+      utilization: 84.0,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOD",
+      deferment: 0,
+      operator: "NGPTC",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [5.8700, 5.4400],
+    },
+    properties: {
+      id: "cs-oweh",
+      name: "Oweh Compressor Station",
+      assetType: "compressor",
+      capacity: 1200,
+      currentOutput: 1010,
+      utilization: 84.2,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOD",
+      deferment: 0,
+      operator: "NGPTC",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [5.9800, 5.7200],
+    },
+    properties: {
+      id: "cs-ugbegun",
+      name: "Ugbegun Compressor Station",
+      assetType: "compressor",
+      capacity: 1100,
+      currentOutput: 920,
+      utilization: 83.6,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOD",
+      deferment: 0,
+      operator: "NGPTC",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [5.2200, 5.6300],
+    },
+    properties: {
+      id: "cs-makaraba",
+      name: "Makaraba Compressor Station",
+      assetType: "compressor",
+      capacity: 980,
+      currentOutput: 820,
+      utilization: 83.7,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOW",
       deferment: 0,
       operator: "NGPTC",
     },
@@ -1585,6 +2308,7 @@ export const compressorStations: AssetFeature[] = [
       utilization: 12.9,
       status: "under-construction",
       corridor: "Northern",
+      operationalArea: "AON",
       deferment: 0,
       operator: "NGPTC",
     },
@@ -1604,6 +2328,7 @@ export const compressorStations: AssetFeature[] = [
       utilization: 0,
       status: "under-construction",
       corridor: "Northern",
+      operationalArea: "AON",
       deferment: 0,
       operator: "NGPTC",
     },

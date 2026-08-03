@@ -88,13 +88,17 @@ export interface ProcessingPlant extends Asset {
 
 // ---------- Producers (Supply Sources) ----------
 
+export type ProducerCategory = "JV" | "PSC" | "NEPL+IND";
+
 export interface Producer {
   id: string;
   name: string; // e.g., "CNL-Escravos", "NEPL Oredo FST3"
   network: "Western Network" | "Eastern Network";
+  category: ProducerCategory; // JV (Joint Venture), PSC (Production Sharing Contract), NEPL+IND (Independent)
   plantCapacity: number; // MMscf/d
   productionForecast: number; // MMscf/d
   averageDailyProduction: number; // MMscf/d
+  contributionPercentage?: number; // Auto-calculated % of national production
   excessShortfall?: number; // derived: averageDailyProduction - productionForecast
   contractualPressureRange?: {
     min: number; // barg
@@ -344,6 +348,86 @@ export interface ProductionRecord {
   nglProduction?: number; // barrels/day
   lpgProduction?: number; // MT/day
   flareVolume?: number; // MMscf/d
+}
+
+// ---------- National Gas Utilization & Performance Metrics ----------
+
+export interface NationalGasUtilization {
+  date: string;
+  totalProduction: number; // Bcfd
+  domestic: {
+    volume: number; // Bcfd
+    percentage: number; // %
+  };
+  export: {
+    volume: number; // Bcfd
+    percentage: number; // %
+  };
+  reinjection: {
+    volume: number; // Bcfd
+    percentage: number; // %
+  };
+  flared: {
+    volume: number; // Bcfd
+    percentage: number; // %
+  };
+  linePackOther: {
+    volume: number; // Bcfd
+    percentage: number; // %
+  };
+}
+
+export interface ELPSPressureData {
+  timestamp: string;
+  wgtpPressure: number; // bar
+  wgtpMin: number; // bar - minimum threshold
+  itokiPressure: number; // bar
+  itokiMin: number; // bar - minimum threshold
+  status: "normal" | "low" | "critical";
+}
+
+export interface GasBalanceIndex {
+  date: string;
+  region: "Western/North" | "Eastern";
+  nomination: number; // MMscfd
+  allocation: number; // MMscfd
+  actualOfftake: number; // MMscfd
+  gbi: number; // Derived metric: actual / allocation
+  variance: number; // allocation - actual
+  variancePercent: number; // %
+}
+
+export interface WeeklyVariance {
+  metric: string; // "production" | "offtake" | "pressure" | "supply"
+  currentWeek: number;
+  priorWeek: number;
+  variance: number; // absolute difference
+  variancePercent: number; // %
+  trend: "up" | "down" | "stable";
+}
+
+export interface ProducerContribution {
+  category: ProducerCategory;
+  currentWeek: number; // MMscfd
+  previousWeek: number; // MMscfd
+  percentage: number; // % of total production
+  variance: number; // week-over-week change
+}
+
+// ---------- Metering & Infrastructure Projects ----------
+
+export type MeteringProjectType = "CTM" | "VFC" | "CM";
+
+export interface MeteringProject {
+  id: string;
+  name: string;
+  type: MeteringProjectType; // CTM = Custody Transfer Metering, VFC = Volumetric Flow Control, CM = Check Metering
+  status: "existing" | "planned" | "ongoing" | "completed";
+  stations: string[]; // station IDs covered by this project
+  corridor?: Corridor;
+  completionDate?: string;
+  budget?: number;
+  description?: string;
 }
 
 // ---------- UI State ----------
