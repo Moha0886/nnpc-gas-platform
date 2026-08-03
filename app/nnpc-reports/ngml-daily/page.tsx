@@ -2,273 +2,359 @@
 
 import { ArrowLeft, Download, Printer } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function NGMLDailyReportPage() {
-  const reportDate = "November 15, 2024";
+  const [reportDate, setReportDate] = useState("2026-08-01");
 
-  // Mock data for NGML daily report (aggregated allocation and offtake)
+  // Format date for display
+  const displayDate = new Date(reportDate).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  // NGML Daily Report data - matching Excel structure
   const ngmlData = {
-    summary: {
-      totalNomination: 1298.0,
-      totalAllocation: 1208.0,
-      totalOfftake: 1198.4,
-      curtailmentFactor: 0.931, // Allocation / Nomination
-      performanceFactor: 0.992, // Offtake / Allocation
-    },
-    customers: [
-      {
-        name: "Egbin Power",
-        sector: "Power",
-        nomination: 215,
-        allocation: 210,
-        offtake: 198,
-        dcq: 215,
-        perfFactor: 0.943,
-      },
-      {
-        name: "Olorunsogo Power",
-        sector: "Power",
-        nomination: 140,
-        allocation: 138,
-        offtake: 134,
-        dcq: 140,
-        perfFactor: 0.971,
-      },
-      {
-        name: "Paras Energy",
-        sector: "Power",
-        nomination: 125,
-        allocation: 125,
-        offtake: 120,
-        dcq: 125,
-        perfFactor: 0.960,
-      },
-      {
-        name: "Okpai Power",
-        sector: "Power",
-        nomination: 78,
-        allocation: 75,
-        offtake: 70,
-        dcq: 78,
-        perfFactor: 0.933,
-      },
-      {
-        name: "Afam VI Power",
-        sector: "Power",
-        nomination: 102,
-        allocation: 100,
-        offtake: 94,
-        dcq: 102,
-        perfFactor: 0.940,
-      },
-      {
-        name: "Dangote Fertilizer",
-        sector: "Industrial",
-        nomination: 195,
-        allocation: 195,
-        offtake: 195,
-        dcq: 195,
-        perfFactor: 1.000,
-      },
-      {
-        name: "Indorama Eleme",
-        sector: "Industrial",
-        nomination: 145,
-        allocation: 145,
-        offtake: 145,
-        dcq: 145,
-        perfFactor: 1.000,
-      },
-      {
-        name: "Shell LDC Lagos",
-        sector: "Commercial",
-        nomination: 85,
-        allocation: 82,
-        offtake: 76,
-        dcq: 85,
-        perfFactor: 0.927,
-      },
-      {
-        name: "Axxela LDC Lagos",
-        sector: "Commercial",
-        nomination: 72,
-        allocation: 70,
-        offtake: 65,
-        dcq: 72,
-        perfFactor: 0.929,
-      },
-      {
-        name: "Others (Various)",
-        sector: "Mixed",
-        nomination: 141,
-        allocation: 68,
-        offtake: 101.4,
-        dcq: 151,
-        perfFactor: 1.491,
-      },
+    allocationFromNGIC: 353.55,
+    ngmlNomination: 377.0,
+
+    // Regional Gas Distribution zones
+    rgdZones: [
+      { name: "REGIONAL GAS DISTRIBUTION LAGOS", allocation: 85.2, offtake: 78.5 },
+      { name: "REGIONAL GAS DISTRIBUTION CALABAR", allocation: 62.0, offtake: 57.3 },
+      { name: "REGIONAL GAS DISTRIBUTION ABUJA", allocation: 45.8, offtake: 42.1 },
+      { name: "REGIONAL GAS DISTRIBUTION PORT HARCOURT", allocation: 38.5, offtake: 35.9 },
+    ],
+
+    // Industrial customers
+    industrial: [
+      { name: "GASLINK", designCapacity: 95.0, nominations: 82.47, allocation: 82.47, offtake: 56.80, pressure: "52/34", status: "ON STREAM" },
+      { name: "FALCON", designCapacity: 20.0, nominations: 15.55, allocation: 15.55, offtake: 13.11, pressure: "52/34", status: "ON STREAM" },
+      { name: "SNG", designCapacity: 10.0, nominations: 10.0, allocation: 10.0, offtake: 10.0, pressure: "52/34", status: "ON STREAM (FIRM)" },
+      { name: "WAPCO SHAG", designCapacity: 2.5, nominations: 0.43, allocation: 0.43, offtake: 0.43, pressure: "52/34", status: "ON STREAM" },
+      { name: "WAPCO EWEK", designCapacity: 50.0, nominations: 41.60, allocation: 41.60, offtake: 40.60, pressure: "52/34", status: "ON STREAM" },
+      { name: "IBESHE CEMENT", designCapacity: 110.0, nominations: 101.28, allocation: 0, offtake: 0, pressure: "0/0", status: "STATION ON STANDBY" },
+    ],
+
+    // NGML-NIPCO UJV Franchise
+    nipcoUjv: [
+      { name: "LPL G/PWR", designCapacity: 12.0, nominations: 10.5, allocation: 10.5, offtake: 9.8, pressure: "45/30", status: "ON STREAM" },
+      { name: "OLAM", designCapacity: 8.5, nominations: 7.2, allocation: 7.2, offtake: 6.9, pressure: "45/30", status: "ON STREAM" },
+      { name: "BREEZE", designCapacity: 5.0, nominations: 4.5, allocation: 4.5, offtake: 4.2, pressure: "45/30", status: "ON STREAM" },
+      { name: "NESTLE", designCapacity: 15.0, nominations: 13.8, allocation: 13.8, offtake: 13.5, pressure: "45/30", status: "ON STREAM" },
+      { name: "AIML", designCapacity: 6.0, nominations: 5.3, allocation: 5.3, offtake: 4.9, pressure: "45/30", status: "ON STREAM" },
+    ],
+
+    // TRANSIT GAS FRANCHISE
+    transitGas: [
+      { name: "APPLE&PEARS", designCapacity: 3.5, nominations: 2.8, allocation: 2.8, offtake: 2.6, pressure: "40/28", status: "ON STREAM" },
+      { name: "WASIL", designCapacity: 4.0, nominations: 3.5, allocation: 3.5, offtake: 3.2, pressure: "40/28", status: "ON STREAM" },
+      { name: "URAGA POWER", designCapacity: 8.0, nominations: 7.0, allocation: 7.0, offtake: 6.8, pressure: "40/28", status: "ON STREAM" },
+      { name: "EMZOR", designCapacity: 2.5, nominations: 2.1, allocation: 2.1, offtake: 2.0, pressure: "40/28", status: "ON STREAM" },
+      { name: "RITE FOODS", designCapacity: 5.5, nominations: 4.8, allocation: 4.8, offtake: 4.5, pressure: "40/28", status: "ON STREAM" },
     ],
   };
 
+  // Calculate totals
+  const calculateTotals = () => {
+    const rgdTotal = {
+      allocation: ngmlData.rgdZones.reduce((sum, z) => sum + z.allocation, 0),
+      offtake: ngmlData.rgdZones.reduce((sum, z) => sum + z.offtake, 0),
+    };
+
+    const industrialTotal = {
+      designCapacity: ngmlData.industrial.reduce((sum, c) => sum + c.designCapacity, 0),
+      nominations: ngmlData.industrial.reduce((sum, c) => sum + c.nominations, 0),
+      allocation: ngmlData.industrial.reduce((sum, c) => sum + c.allocation, 0),
+      offtake: ngmlData.industrial.reduce((sum, c) => sum + c.offtake, 0),
+    };
+
+    const nipcoTotal = {
+      designCapacity: ngmlData.nipcoUjv.reduce((sum, c) => sum + c.designCapacity, 0),
+      nominations: ngmlData.nipcoUjv.reduce((sum, c) => sum + c.nominations, 0),
+      allocation: ngmlData.nipcoUjv.reduce((sum, c) => sum + c.allocation, 0),
+      offtake: ngmlData.nipcoUjv.reduce((sum, c) => sum + c.offtake, 0),
+    };
+
+    const transitTotal = {
+      designCapacity: ngmlData.transitGas.reduce((sum, c) => sum + c.designCapacity, 0),
+      nominations: ngmlData.transitGas.reduce((sum, c) => sum + c.nominations, 0),
+      allocation: ngmlData.transitGas.reduce((sum, c) => sum + c.allocation, 0),
+      offtake: ngmlData.transitGas.reduce((sum, c) => sum + c.offtake, 0),
+    };
+
+    const grandTotal = {
+      designCapacity: industrialTotal.designCapacity + nipcoTotal.designCapacity + transitTotal.designCapacity,
+      nominations: industrialTotal.nominations + nipcoTotal.nominations + transitTotal.nominations,
+      allocation: industrialTotal.allocation + nipcoTotal.allocation + transitTotal.allocation,
+      offtake: industrialTotal.offtake + nipcoTotal.offtake + transitTotal.offtake,
+    };
+
+    return { rgdTotal, industrialTotal, nipcoTotal, transitTotal, grandTotal };
+  };
+
+  const totals = calculateTotals();
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-line px-8 py-4">
+    <div className="min-h-screen bg-white">
+      {/* Action Bar - Hidden in print */}
+      <div className="bg-gray-50 border-b border-gray-200 px-6 py-3 print:hidden sticky top-0 z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/reports" className="text-ink/60 hover:text-ink">
+            <Link href="/reports" className="text-gray-600 hover:text-gray-900">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <h2 className="text-2xl font-bold text-ink">NGML Daily Allocation & Offtake Report</h2>
-              <p className="text-sm text-ink/60 mt-1">
-                {reportDate}
-              </p>
+              <h2 className="text-lg font-semibold text-gray-900">NGML Daily Report</h2>
+              <input
+                type="date"
+                value={reportDate}
+                onChange={(e) => setReportDate(e.target.value)}
+                className="text-sm text-gray-600 border-0 bg-transparent p-0 focus:ring-0"
+              />
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => alert("Excel export coming soon")}
+              className="flex items-center gap-2 px-4 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              <Download className="w-4 h-4" />
+              Excel
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
               <Printer className="w-4 h-4" />
               Print
             </button>
-            <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-2">
-              <Download className="w-4 h-4" />
-              Export Excel
-            </button>
           </div>
         </div>
       </div>
 
-      <div className="p-8 max-w-7xl mx-auto space-y-6">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="kpi-card">
-            <p className="text-sm text-ink/60 mb-1">Total Nomination</p>
-            <p className="text-2xl font-bold text-ink">{ngmlData.summary.totalNomination.toFixed(1)}</p>
-            <p className="text-xs text-ink/60">MMscf/d</p>
+      {/* Report Content - Excel-style layout */}
+      <div className="p-8 max-w-[1400px] mx-auto">
+        {/* Header - Matching Excel exactly */}
+        <div className="text-center mb-6">
+          <h1 className="text-xl font-bold text-gray-900 mb-1">
+            NNPC GAS MARKETING LIMITED
+          </h1>
+          <h2 className="text-lg font-bold text-gray-900 mb-4">
+            Daily Gas Situation Report
+          </h2>
+          <p className="text-sm text-gray-600">Date: {displayDate}</p>
+        </div>
+
+        {/* Key Metrics Row */}
+        <div className="mb-6 flex justify-center gap-12">
+          <div className="text-center">
+            <p className="text-xs text-gray-600 uppercase">Allocation from NGIC</p>
+            <p className="text-2xl font-bold text-blue-700">{ngmlData.allocationFromNGIC.toFixed(2)}</p>
+            <p className="text-xs text-gray-500">MMscfd</p>
           </div>
-          <div className="kpi-card">
-            <p className="text-sm text-ink/60 mb-1">Total Allocation</p>
-            <p className="text-2xl font-bold text-gasblue">{ngmlData.summary.totalAllocation.toFixed(1)}</p>
-            <p className="text-xs text-ink/60">MMscf/d</p>
-          </div>
-          <div className="kpi-card">
-            <p className="text-sm text-ink/60 mb-1">Total Offtake</p>
-            <p className="text-2xl font-bold text-pine">{ngmlData.summary.totalOfftake.toFixed(1)}</p>
-            <p className="text-xs text-ink/60">MMscf/d</p>
-          </div>
-          <div className="kpi-card">
-            <p className="text-sm text-ink/60 mb-1">Curtailment Factor</p>
-            <p className="text-2xl font-bold text-amber-600">{ngmlData.summary.curtailmentFactor.toFixed(3)}</p>
-            <p className="text-xs text-ink/60">Allocation / Nomination</p>
-          </div>
-          <div className="kpi-card">
-            <p className="text-sm text-ink/60 mb-1">Performance Factor</p>
-            <p className="text-2xl font-bold text-green-600">{ngmlData.summary.performanceFactor.toFixed(3)}</p>
-            <p className="text-xs text-ink/60">Offtake / Allocation</p>
+          <div className="text-center">
+            <p className="text-xs text-gray-600 uppercase">NGML Nomination</p>
+            <p className="text-2xl font-bold text-green-700">{ngmlData.ngmlNomination.toFixed(2)}</p>
+            <p className="text-xs text-gray-500">MMscfd</p>
           </div>
         </div>
 
-        {/* Customer Allocations Table */}
-        <div className="kpi-card">
-          <h3 className="text-lg font-semibold text-ink mb-4">Customer Nominations, Allocations & Offtake</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-line">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-ink">Customer</th>
-                  <th className="text-center py-3 px-4 text-sm font-semibold text-ink">Sector</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-ink">DCQ</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-ink">Nomination</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-ink">Allocation</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-ink">Offtake</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-ink">Perf</th>
+        {/* Excel-style Table */}
+        <div className="border-2 border-gray-900 overflow-hidden mb-6">
+          <table className="w-full text-sm">
+            {/* Table Header */}
+            <thead>
+              <tr className="bg-gray-100 border-b-2 border-gray-900">
+                <th className="border-r border-gray-900 px-2 py-2 text-left font-bold w-10">S/N</th>
+                <th className="border-r border-gray-900 px-2 py-2 text-left font-bold w-10">S/N</th>
+                <th className="border-r border-gray-900 px-3 py-2 text-left font-bold">CUSTOMER NAME</th>
+                <th className="border-r border-gray-900 px-3 py-2 text-right font-bold">
+                  DESIGN<br />CAPACITY<br />(MMscfd)
+                </th>
+                <th className="border-r border-gray-900 px-3 py-2 text-right font-bold">
+                  NOMINATIONS<br />(MMscfd)
+                </th>
+                <th className="border-r border-gray-900 px-3 py-2 text-right font-bold">
+                  ALLOCATION<br />(MMscfd)
+                </th>
+                <th className="border-r border-gray-900 px-3 py-2 text-right font-bold">
+                  OFFTAKE<br />(MMscfd)
+                </th>
+                <th className="border-r border-gray-900 px-3 py-2 text-center font-bold">
+                  PRESSURE<br />(BAR)
+                </th>
+                <th className="px-3 py-2 text-left font-bold">REMARKS/STATUS</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {/* RGD Zones Summary */}
+              {ngmlData.rgdZones.map((zone, idx) => (
+                <tr key={`rgd-${idx}`} className="border-b border-gray-300 bg-blue-50">
+                  <td className="border-r border-gray-900 px-2 py-1.5 text-center">{idx + 1}</td>
+                  <td className="border-r border-gray-900 px-2 py-1.5 text-center">{idx + 1}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 font-semibold">{zone.name}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">—</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">—</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">{zone.allocation.toFixed(3)}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">{zone.offtake.toFixed(3)}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-center">—</td>
+                  <td className="px-3 py-1.5">Regional Distribution</td>
                 </tr>
-              </thead>
-              <tbody>
-                {ngmlData.customers.map((customer, idx) => (
-                  <tr key={idx} className="border-b border-line hover:bg-gray-50">
-                    <td className="py-3 px-4 text-ink">{customer.name}</td>
-                    <td className="py-3 px-4 text-center">
-                      <span className={`inline-block px-2 py-0.5 text-xs rounded ${
-                        customer.sector === 'Power' ? 'bg-gasblue/20 text-gasblue' :
-                        customer.sector === 'Industrial' ? 'bg-pine/20 text-pine' :
-                        'bg-amber-100 text-amber-700'
-                      }`}>
-                        {customer.sector}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono text-ink/60 text-sm">{customer.dcq}</td>
-                    <td className="py-3 px-4 text-right font-mono text-ink">{customer.nomination}</td>
-                    <td className="py-3 px-4 text-right font-mono text-gasblue">{customer.allocation}</td>
-                    <td className="py-3 px-4 text-right font-mono text-pine font-semibold">{customer.offtake}</td>
-                    <td className={`py-3 px-4 text-right font-mono ${
-                      customer.perfFactor >= 0.95 ? 'text-green-600' :
-                      customer.perfFactor >= 0.90 ? 'text-amber-600' :
-                      'text-red-600'
-                    }`}>
-                      {customer.perfFactor.toFixed(3)}
-                    </td>
-                  </tr>
-                ))}
-                <tr className="bg-primary/5 font-semibold border-t-2 border-primary">
-                  <td className="py-3 px-4 text-ink">TOTAL</td>
-                  <td className="py-3 px-4"></td>
-                  <td className="py-3 px-4 text-right font-mono text-ink/60">
-                    {ngmlData.customers.reduce((sum, c) => sum + c.dcq, 0)}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono text-ink">
-                    {ngmlData.summary.totalNomination.toFixed(1)}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono text-gasblue">
-                    {ngmlData.summary.totalAllocation.toFixed(1)}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono text-pine font-semibold">
-                    {ngmlData.summary.totalOfftake.toFixed(1)}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono text-green-600">
-                    {ngmlData.summary.performanceFactor.toFixed(3)}
+              ))}
+
+              {/* SUB -TOTAL 1 (note the space before hyphen) */}
+              <tr className="bg-blue-200 border-t-2 border-b-2 border-gray-900 font-bold">
+                <td colSpan={5} className="border-r border-gray-900 px-3 py-2 text-right">SUB -TOTAL 1</td>
+                <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">{totals.rgdTotal.allocation.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">{totals.rgdTotal.offtake.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-2"></td>
+                <td className="px-3 py-2"></td>
+              </tr>
+
+              {/* Industrial Customers */}
+              {ngmlData.industrial.map((customer, idx) => (
+                <tr key={`ind-${idx}`} className="border-b border-gray-300">
+                  <td className="border-r border-gray-900 px-2 py-1.5 text-center">{5 + idx + 1}</td>
+                  <td className="border-r border-gray-900 px-2 py-1.5 text-center">{idx + 1}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5">{customer.name}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">{customer.designCapacity.toFixed(3)}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">{customer.nominations.toFixed(3)}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">{customer.allocation.toFixed(3)}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">{customer.offtake.toFixed(3)}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-center font-mono">{customer.pressure}</td>
+                  <td className="px-3 py-1.5">
+                    <span
+                      className={`text-xs px-2 py-1 rounded ${
+                        customer.status.includes("FIRM")
+                          ? "bg-green-100 text-green-800"
+                          : customer.status === "ON STREAM"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {customer.status}
+                    </span>
                   </td>
                 </tr>
-              </tbody>
-            </table>
-          </div>
+              ))}
+
+              {/* Industrial Subtotal */}
+              <tr className="bg-gray-100 border-t border-b border-gray-900 font-semibold">
+                <td colSpan={3} className="border-r border-gray-900 px-3 py-2 text-right">Sub-Total (Industrial)</td>
+                <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">{totals.industrialTotal.designCapacity.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">{totals.industrialTotal.nominations.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">{totals.industrialTotal.allocation.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">{totals.industrialTotal.offtake.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-2"></td>
+                <td className="px-3 py-2"></td>
+              </tr>
+
+              {/* NGML-NIPCO UJV Franchise Header */}
+              <tr className="bg-purple-100 border-b border-gray-700">
+                <td colSpan={9} className="px-3 py-2 font-bold text-purple-900">NGML-NIPCO UJV</td>
+              </tr>
+
+              {/* NIPCO UJV Customers */}
+              {ngmlData.nipcoUjv.map((customer, idx) => (
+                <tr key={`nipco-${idx}`} className="border-b border-gray-300">
+                  <td className="border-r border-gray-900 px-2 py-1.5 text-center">{11 + idx + 1}</td>
+                  <td className="border-r border-gray-900 px-2 py-1.5 text-center">{idx + 1}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5">{customer.name}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">{customer.designCapacity.toFixed(3)}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">{customer.nominations.toFixed(3)}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">{customer.allocation.toFixed(3)}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">{customer.offtake.toFixed(3)}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-center font-mono">{customer.pressure}</td>
+                  <td className="px-3 py-1.5">
+                    <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800">{customer.status}</span>
+                  </td>
+                </tr>
+              ))}
+
+              {/* NIPCO Subtotal */}
+              <tr className="bg-purple-50 border-t border-b border-gray-900 font-semibold">
+                <td colSpan={3} className="border-r border-gray-900 px-3 py-2 text-right">Sub-Total (NGML-NIPCO UJV)</td>
+                <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">{totals.nipcoTotal.designCapacity.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">{totals.nipcoTotal.nominations.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">{totals.nipcoTotal.allocation.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">{totals.nipcoTotal.offtake.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-2"></td>
+                <td className="px-3 py-2"></td>
+              </tr>
+
+              {/* TRANSIT GAS FRANCHISE Header */}
+              <tr className="bg-orange-100 border-b border-gray-700">
+                <td colSpan={9} className="px-3 py-2 font-bold text-orange-900">TRANSIT GAS FRANCHISE</td>
+              </tr>
+
+              {/* Transit Gas Customers */}
+              {ngmlData.transitGas.map((customer, idx) => (
+                <tr key={`transit-${idx}`} className="border-b border-gray-300">
+                  <td className="border-r border-gray-900 px-2 py-1.5 text-center">{17 + idx + 1}</td>
+                  <td className="border-r border-gray-900 px-2 py-1.5 text-center">{idx + 1}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5">{customer.name}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">{customer.designCapacity.toFixed(3)}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">{customer.nominations.toFixed(3)}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">{customer.allocation.toFixed(3)}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-right font-mono">{customer.offtake.toFixed(3)}</td>
+                  <td className="border-r border-gray-900 px-3 py-1.5 text-center font-mono">{customer.pressure}</td>
+                  <td className="px-3 py-1.5">
+                    <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800">{customer.status}</span>
+                  </td>
+                </tr>
+              ))}
+
+              {/* Transit Gas Subtotal */}
+              <tr className="bg-orange-50 border-t border-b border-gray-900 font-semibold">
+                <td colSpan={3} className="border-r border-gray-900 px-3 py-2 text-right">Sub-Total (TRANSIT GAS FRANCHISE)</td>
+                <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">{totals.transitTotal.designCapacity.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">{totals.transitTotal.nominations.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">{totals.transitTotal.allocation.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">{totals.transitTotal.offtake.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-2"></td>
+                <td className="px-3 py-2"></td>
+              </tr>
+
+              {/* Grand Total Row */}
+              <tr className="bg-gray-800 text-white border-t-2 border-gray-900 font-bold">
+                <td colSpan={3} className="border-r border-gray-900 px-3 py-3 text-right text-base">GRAND TOTAL</td>
+                <td className="border-r border-gray-900 px-3 py-3 text-right font-mono text-base">{totals.grandTotal.designCapacity.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-3 text-right font-mono text-base">{totals.grandTotal.nominations.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-3 text-right font-mono text-base">{totals.grandTotal.allocation.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-3 text-right font-mono text-base">{totals.grandTotal.offtake.toFixed(3)}</td>
+                <td className="border-r border-gray-900 px-3 py-3"></td>
+                <td className="px-3 py-3"></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        {/* Sector Breakdown */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="kpi-card">
-            <h4 className="text-sm font-semibold text-ink/70 mb-2">Power Sector</h4>
-            <p className="text-xl font-bold text-gasblue">
-              {ngmlData.customers.filter(c => c.sector === 'Power').reduce((sum, c) => sum + c.offtake, 0).toFixed(1)}
-            </p>
-            <p className="text-xs text-ink/60">MMscf/d offtake</p>
-          </div>
-          <div className="kpi-card">
-            <h4 className="text-sm font-semibold text-ink/70 mb-2">Industrial Sector</h4>
-            <p className="text-xl font-bold text-pine">
-              {ngmlData.customers.filter(c => c.sector === 'Industrial').reduce((sum, c) => sum + c.offtake, 0).toFixed(1)}
-            </p>
-            <p className="text-xs text-ink/60">MMscf/d offtake</p>
-          </div>
-          <div className="kpi-card">
-            <h4 className="text-sm font-semibold text-ink/70 mb-2">Commercial Sector</h4>
-            <p className="text-xl font-bold text-amber-600">
-              {ngmlData.customers.filter(c => c.sector === 'Commercial' || c.sector === 'Mixed').reduce((sum, c) => sum + c.offtake, 0).toFixed(1)}
-            </p>
-            <p className="text-xs text-ink/60">MMscf/d offtake</p>
-          </div>
-        </div>
-
-        {/* Footer Note */}
-        <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg text-sm text-ink/70">
-          <p><strong className="text-primary">Report Generated:</strong> {new Date().toLocaleString()}</p>
-          <p className="mt-2">
-            <strong>Note:</strong> This report shows daily allocation and offtake for Nigeria Gas Marketing Limited (NGML).
-            All volumes are in Million Standard Cubic Feet per Day (MMscf/d). Perf = Actual Offtake ÷ Allocation.
-            Curtailment Factor = Allocation ÷ Nomination.
-          </p>
+        {/* Footer - Print info */}
+        <div className="mt-6 text-xs text-gray-500 flex justify-between">
+          <div>Generated: {new Date().toLocaleString()}</div>
+          <div>NNPC Gas Marketing Limited</div>
         </div>
       </div>
+
+      {/* Print Styles */}
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: landscape;
+            margin: 0.5in;
+          }
+          body {
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+          }
+          .print\\:hidden {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -2,184 +2,346 @@
 
 import { ArrowLeft, Download, Printer } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function NGICDailyReportPage() {
-  const reportDate = "November 15, 2024";
+  const [reportDate, setReportDate] = useState("2026-08-01");
 
-  // Mock data for NGIC daily report
+  // Format date for display
+  const displayDate = new Date(reportDate).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const monthYear = new Date(reportDate).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+  }).toUpperCase();
+
+  // Sample data matching NGIC Excel structure: Region → Customer Type → Station
   const ngicData = {
-    summary: {
-      totalReceipt: 1245.8,
-      totalDelivered: 1198.4,
-      linepack: 47.4,
-      networkEfficiency: 96.2,
-    },
-    receipts: [
-      { source: "CNL Escravos", volume: 385.2, pressure: 1233, temperature: 32 },
-      { source: "NEPL Utorogu", volume: 298.5, pressure: 1205, temperature: 31 },
-      { source: "Seplat Oben", volume: 156.3, pressure: 1180, temperature: 30 },
-      { source: "SPDC Forcados", volume: 245.8, pressure: 1215, temperature: 33 },
-      { source: "Pan Ocean", volume: 89.6, pressure: 1165, temperature: 29 },
-      { source: "NPDC/Eland JV", volume: 70.4, pressure: 1190, temperature: 31 },
-    ],
-    deliveries: [
-      { customer: "Egbin Power", contracted: 215, delivered: 198, variance: -17, performance: 92.1 },
-      { customer: "Olorunsogo Power", contracted: 140, delivered: 134, variance: -6, performance: 95.7 },
-      { customer: "Paras Energy", contracted: 125, delivered: 120, variance: -5, performance: 96.0 },
-      { customer: "Okpai Power", contracted: 78, delivered: 70, variance: -8, performance: 89.7 },
-      { customer: "Afam VI Power", contracted: 102, delivered: 94, variance: -8, performance: 92.2 },
-      { customer: "Dangote Fertilizer", contracted: 195, delivered: 195, variance: 0, performance: 100.0 },
-      { customer: "Indorama Eleme", contracted: 145, delivered: 145, variance: 0, performance: 100.0 },
-      { customer: "Shell LDC Lagos", contracted: 85, delivered: 76, variance: -9, performance: 89.4 },
-      { customer: "Axxela LDC Lagos", contracted: 72, delivered: 65, variance: -7, performance: 90.3 },
-      { customer: "Others", contracted: 51, delivered: 101.4, variance: 50.4, performance: 198.8 },
+    regions: [
+      {
+        region: "AOW", // Implied - shown in data but not as header in Excel
+        customerTypes: [
+          {
+            type: "NPDC Power Customers",
+            stations: [
+              { name: "Transcorp Ughelli", allocation: 51.548, offtake: 51.548, pressure: "52/34", megawatts: 193.54, status: "STATION ON STREAM" },
+            ],
+          },
+          {
+            type: "NDPHC Power Customers",
+            stations: [
+              { name: "NIPP Olorunsogo", allocation: 52.000, offtake: 27.562, pressure: "64/55", megawatts: 103.73, status: "STATION ON STREAM" },
+              { name: "NIPP Ihovbor", allocation: 52.000, offtake: 0, pressure: "52/34", megawatts: 0, status: "STATION ON STANDBY" },
+              { name: "NIPP Omotosho", allocation: 49.000, offtake: 22.174, pressure: "55/43", megawatts: 83.35, status: "STATION ON STREAM" },
+              { name: "NIPP Geregu", allocation: 65.000, offtake: 16.510, pressure: "60/50", megawatts: 62.08, status: "STATION ON STREAM" },
+              { name: "NIPP Sapele", allocation: 30.000, offtake: 0, pressure: "52/34", megawatts: 0, status: "STATION ON STANDBY" },
+              { name: "Azura Power", allocation: 100.000, offtake: 95.004, pressure: "58/46", megawatts: 400.24, status: "STATION ON STREAM" },
+            ],
+          },
+          {
+            type: "Industrial Customers",
+            stations: [
+              { name: "GASLINK", allocation: 82.470, offtake: 56.800, pressure: "52/34", status: "STATION ON STREAM" },
+              { name: "Falcon Petroleum Limited", allocation: 15.550, offtake: 13.110, pressure: "52/34", status: "STATION ON STREAM" },
+              { name: "WAPCO Sagamu", allocation: 0.430, offtake: 0.430, pressure: "52/34", status: "STATION ON STREAM" },
+              { name: "WAPCO Ewekoro", allocation: 41.600, offtake: 40.600, pressure: "52/34", status: "STATION ON STREAM" },
+            ],
+          },
+          {
+            type: "Other Transmission",
+            stations: [
+              { name: "SNG", allocation: 10.000, offtake: 10.000, pressure: "52/34", status: "STATION ON STREAM" },
+              { name: "SPDC Edjeba", allocation: 15.000, offtake: 15.000, pressure: "52/34", status: "STATION ON STREAM" },
+              { name: "DFL (Dangote fertilizer limited)", allocation: 195.000, offtake: 188.962, pressure: "52/34", status: "STATION ON STREAM" },
+              { name: "SPDC Ogunu", allocation: 8.000, offtake: 8.000, pressure: "52/34", status: "STATION ON STREAM" },
+            ],
+          },
+          {
+            type: "Export",
+            stations: [
+              { name: "WAGP", allocation: 130.189, offtake: 130.189, pressure: "52/34", status: "STATION ON STREAM" },
+            ],
+          },
+        ],
+      },
+      {
+        region: "AOE",
+        customerTypes: [
+          {
+            type: "7 Energy Power Customers",
+            stations: [
+              { name: "NDPHC Calabar", allocation: 62.000, offtake: 57.277, pressure: "54/42", status: "STATION ON STREAM" },
+            ],
+          },
+          {
+            type: "Direct Power Customer",
+            stations: [
+              { name: "Trans-Afam", allocation: 20.000, offtake: 12.935, pressure: "56/44", status: "STATION ON STREAM" },
+              { name: "ALAOJI", allocation: 175.000, offtake: 0, pressure: "0/0", megawatts: 0, status: "STATION ON STANDBY" },
+            ],
+          },
+          {
+            type: "Commercial Customer",
+            stations: [
+              { name: "Gel Utility Limited", allocation: 5.000, offtake: 1.606, pressure: "52/34", status: "STATION ON STREAM" },
+            ],
+          },
+        ],
+      },
     ],
   };
 
+  // Calculate totals
+  const calculateTotals = () => {
+    let totalAllocation = 0;
+    let totalOfftake = 0;
+    let totalMegawatts = 0;
+
+    ngicData.regions.forEach((region) => {
+      region.customerTypes.forEach((ct) => {
+        ct.stations.forEach((station) => {
+          totalAllocation += station.allocation;
+          totalOfftake += station.offtake;
+          if (station.megawatts) totalMegawatts += station.megawatts;
+        });
+      });
+    });
+
+    return { totalAllocation, totalOfftake, totalMegawatts };
+  };
+
+  const totals = calculateTotals();
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownload = () => {
+    alert("Excel export coming soon");
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-line px-8 py-4">
+    <div className="min-h-screen bg-white">
+      {/* Action Bar - Hidden in print */}
+      <div className="bg-gray-50 border-b border-gray-200 px-6 py-3 print:hidden sticky top-0 z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/reports" className="text-ink/60 hover:text-ink">
+            <Link href="/reports" className="text-gray-600 hover:text-gray-900">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <h2 className="text-2xl font-bold text-ink">NGIC Daily Gas Operations Report</h2>
-              <p className="text-sm text-ink/60 mt-1">
-                {reportDate}
-              </p>
+              <h2 className="text-lg font-semibold text-gray-900">NGIC Daily Report</h2>
+              <input
+                type="date"
+                value={reportDate}
+                onChange={(e) => setReportDate(e.target.value)}
+                className="text-sm text-gray-600 border-0 bg-transparent p-0 focus:ring-0"
+              />
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="px-4 py-2 border border-line rounded-lg text-ink hover:bg-gray-50 transition-colors flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDownload}
+              className="flex items-center gap-2 px-4 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              <Download className="w-4 h-4" />
+              Excel
+            </button>
+            <button
+              onClick={handlePrint}
+              className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
               <Printer className="w-4 h-4" />
               Print
             </button>
-            <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-2">
-              <Download className="w-4 h-4" />
-              Export Excel
-            </button>
           </div>
         </div>
       </div>
 
-      <div className="p-8 max-w-7xl mx-auto space-y-6">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="kpi-card">
-            <p className="text-sm text-ink/60 mb-1">Total Receipt</p>
-            <p className="text-2xl font-bold text-gasblue">{ngicData.summary.totalReceipt.toFixed(1)}</p>
-            <p className="text-xs text-ink/60">MMscf/d</p>
-          </div>
-          <div className="kpi-card">
-            <p className="text-sm text-ink/60 mb-1">Total Delivered</p>
-            <p className="text-2xl font-bold text-pine">{ngicData.summary.totalDelivered.toFixed(1)}</p>
-            <p className="text-xs text-ink/60">MMscf/d</p>
-          </div>
-          <div className="kpi-card">
-            <p className="text-sm text-ink/60 mb-1">Linepack</p>
-            <p className="text-2xl font-bold text-amber-600">{ngicData.summary.linepack.toFixed(1)}</p>
-            <p className="text-xs text-ink/60">MMscf/d</p>
-          </div>
-          <div className="kpi-card">
-            <p className="text-sm text-ink/60 mb-1">Network Efficiency</p>
-            <p className="text-2xl font-bold text-ink">{ngicData.summary.networkEfficiency.toFixed(1)}%</p>
-            <p className="text-xs text-ink/60">Delivered / Receipt</p>
-          </div>
-        </div>
-
-        {/* Gas Receipts Table */}
-        <div className="kpi-card">
-          <h3 className="text-lg font-semibold text-ink mb-4">Gas Receipts into NGIC System</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-line">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-ink">Source</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-ink">Volume (MMscf/d)</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-ink">Pressure (PSI)</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-ink">Temp (°C)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ngicData.receipts.map((receipt, idx) => (
-                  <tr key={idx} className="border-b border-line hover:bg-gray-50">
-                    <td className="py-3 px-4 text-ink">{receipt.source}</td>
-                    <td className="py-3 px-4 text-right font-mono text-ink">{receipt.volume.toFixed(1)}</td>
-                    <td className="py-3 px-4 text-right font-mono text-ink/70">{receipt.pressure}</td>
-                    <td className="py-3 px-4 text-right font-mono text-ink/70">{receipt.temperature}</td>
-                  </tr>
-                ))}
-                <tr className="bg-gasblue/10 font-semibold">
-                  <td className="py-3 px-4 text-ink">TOTAL RECEIPT</td>
-                  <td className="py-3 px-4 text-right font-mono text-gasblue">
-                    {ngicData.summary.totalReceipt.toFixed(1)}
-                  </td>
-                  <td className="py-3 px-4"></td>
-                  <td className="py-3 px-4"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Gas Deliveries Table */}
-        <div className="kpi-card">
-          <h3 className="text-lg font-semibold text-ink mb-4">Gas Deliveries from NGIC System</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-line">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-ink">Customer</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-ink">Contracted (MMscf/d)</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-ink">Delivered (MMscf/d)</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-ink">Variance</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-ink">Performance (%)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ngicData.deliveries.map((delivery, idx) => (
-                  <tr key={idx} className="border-b border-line hover:bg-gray-50">
-                    <td className="py-3 px-4 text-ink">{delivery.customer}</td>
-                    <td className="py-3 px-4 text-right font-mono text-ink/70">{delivery.contracted}</td>
-                    <td className="py-3 px-4 text-right font-mono text-ink">{delivery.delivered}</td>
-                    <td className={`py-3 px-4 text-right font-mono ${delivery.variance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {delivery.variance > 0 ? '+' : ''}{delivery.variance}
-                    </td>
-                    <td className={`py-3 px-4 text-right font-mono ${delivery.performance >= 95 ? 'text-green-600' : delivery.performance >= 90 ? 'text-amber-600' : 'text-red-600'}`}>
-                      {delivery.performance.toFixed(1)}%
-                    </td>
-                  </tr>
-                ))}
-                <tr className="bg-pine/10 font-semibold">
-                  <td className="py-3 px-4 text-ink">TOTAL DELIVERED</td>
-                  <td className="py-3 px-4 text-right font-mono text-ink/70">
-                    {ngicData.deliveries.reduce((sum, d) => sum + d.contracted, 0)}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono text-pine">
-                    {ngicData.summary.totalDelivered.toFixed(1)}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono text-red-600">
-                    {(ngicData.summary.totalDelivered - ngicData.deliveries.reduce((sum, d) => sum + d.contracted, 0)).toFixed(1)}
-                  </td>
-                  <td className="py-3 px-4"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Footer Note */}
-        <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg text-sm text-ink/70">
-          <p><strong className="text-primary">Report Generated:</strong> {new Date().toLocaleString()}</p>
-          <p className="mt-2">
-            <strong>Note:</strong> This report shows daily gas operations for Nigerian Gas Integrated Company (NGIC).
-            All volumes are in Million Standard Cubic Feet per Day (MMscf/d). Network efficiency calculated as Total Delivered / Total Receipt × 100.
+      {/* Report Content - Excel-style layout */}
+      <div className="p-8 max-w-[1200px] mx-auto">
+        {/* Header - Matching Excel exactly */}
+        <div className="text-center mb-6">
+          <h1 className="text-xl font-bold text-gray-900 mb-1">
+            NNPC GAS INFRASTRUCTURE COMPANY LIMITED
+          </h1>
+          <p className="text-sm text-gray-700 mb-4">
+            (A Subsidiary of Nigerian National Petroleum Company Limited)
           </p>
+          <h2 className="text-lg font-bold text-gray-900">
+            GAS OFF-TAKE FOR {monthYear}
+          </h2>
+          <p className="text-sm text-gray-600 mt-1">Date: {displayDate}</p>
+        </div>
+
+        {/* Excel-style Table */}
+        <div className="border border-gray-900 overflow-hidden">
+          <table className="w-full text-sm">
+            {/* Table Header */}
+            <thead>
+              <tr className="bg-gray-100 border-b border-gray-900">
+                <th className="border-r border-gray-900 px-3 py-2 text-left font-bold">REGION</th>
+                <th className="border-r border-gray-900 px-3 py-2 text-left font-bold">CUSTOMER TYPE</th>
+                <th className="border-r border-gray-900 px-3 py-2 text-left font-bold">STATION NAME</th>
+                <th className="border-r border-gray-900 px-3 py-2 text-right font-bold">
+                  ALLOCATION<br />(Mmscfd)
+                </th>
+                <th className="border-r border-gray-900 px-3 py-2 text-right font-bold">
+                  OFFTAKE<br />(Mmscfd)
+                </th>
+                <th className="border-r border-gray-900 px-3 py-2 text-center font-bold">
+                  PRESSURE<br />(bar)
+                </th>
+                <th className="border-r border-gray-900 px-3 py-2 text-right font-bold">
+                  MEGAWATTS<br />(MW)
+                </th>
+                <th className="px-3 py-2 text-left font-bold">REMARKS/STATUS</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {ngicData.regions.map((region, regionIdx) => (
+                <>
+                  {region.customerTypes.map((customerType, ctIdx) => (
+                    <>
+                      {customerType.stations.map((station, stationIdx) => {
+                        const isFirstInCustomerType = stationIdx === 0;
+                        const rowspan = customerType.stations.length;
+
+                        return (
+                          <tr key={`${regionIdx}-${ctIdx}-${stationIdx}`} className="border-b border-gray-300">
+                            {/* Region - only show on first station of first customer type */}
+                            {ctIdx === 0 && stationIdx === 0 && (
+                              <td
+                                rowSpan={region.customerTypes.reduce((sum, ct) => sum + ct.stations.length, 0)}
+                                className="border-r border-gray-900 px-3 py-2 font-semibold align-top bg-gray-50"
+                              >
+                                {region.region}
+                              </td>
+                            )}
+
+                            {/* Customer Type - show on first station only */}
+                            {isFirstInCustomerType && (
+                              <td
+                                rowSpan={rowspan}
+                                className="border-r border-gray-900 px-3 py-2 align-top bg-blue-50"
+                              >
+                                {customerType.type}
+                              </td>
+                            )}
+
+                            {/* Station Name */}
+                            <td className="border-r border-gray-900 px-3 py-2">{station.name}</td>
+
+                            {/* Allocation */}
+                            <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">
+                              {station.allocation.toFixed(3)}
+                            </td>
+
+                            {/* Offtake */}
+                            <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">
+                              {station.offtake.toFixed(3)}
+                            </td>
+
+                            {/* Pressure */}
+                            <td className="border-r border-gray-900 px-3 py-2 text-center font-mono">
+                              {station.pressure}
+                            </td>
+
+                            {/* Megawatts */}
+                            <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">
+                              {station.megawatts ? station.megawatts.toFixed(2) : "-"}
+                            </td>
+
+                            {/* Status */}
+                            <td className="px-3 py-2">
+                              <span
+                                className={`text-xs px-2 py-1 rounded ${
+                                  station.status === "STATION ON STREAM"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-yellow-100 text-yellow-800"
+                                }`}
+                              >
+                                {station.status}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+
+                      {/* Subtotal Row per Customer Type */}
+                      <tr className="bg-blue-100 border-t border-b border-gray-900 font-semibold">
+                        <td colSpan={3} className="border-r border-gray-900 px-3 py-2 text-right">
+                          Sub-Total ({customerType.type})
+                        </td>
+                        <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">
+                          {customerType.stations.reduce((sum, s) => sum + s.allocation, 0).toFixed(3)}
+                        </td>
+                        <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">
+                          {customerType.stations.reduce((sum, s) => sum + s.offtake, 0).toFixed(3)}
+                        </td>
+                        <td className="border-r border-gray-900 px-3 py-2"></td>
+                        <td className="border-r border-gray-900 px-3 py-2 text-right font-mono">
+                          {customerType.stations.reduce((sum, s) => sum + (s.megawatts || 0), 0).toFixed(2)}
+                        </td>
+                        <td className="px-3 py-2"></td>
+                      </tr>
+                    </>
+                  ))}
+                </>
+              ))}
+
+              {/* Grand Total Row */}
+              <tr className="bg-gray-800 text-white border-t-2 border-gray-900 font-bold">
+                <td colSpan={3} className="border-r border-gray-900 px-3 py-3 text-right text-base">
+                  GRAND TOTAL
+                </td>
+                <td className="border-r border-gray-900 px-3 py-3 text-right font-mono text-base">
+                  {totals.totalAllocation.toFixed(3)}
+                </td>
+                <td className="border-r border-gray-900 px-3 py-3 text-right font-mono text-base">
+                  {totals.totalOfftake.toFixed(3)}
+                </td>
+                <td className="border-r border-gray-900 px-3 py-3"></td>
+                <td className="border-r border-gray-900 px-3 py-3 text-right font-mono text-base">
+                  {totals.totalMegawatts.toFixed(2)}
+                </td>
+                <td className="px-3 py-3"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer - Print info */}
+        <div className="mt-6 text-xs text-gray-500 flex justify-between">
+          <div>
+            Generated: {new Date().toLocaleString()}
+          </div>
+          <div>
+            NNPC Gas Infrastructure Company Limited
+          </div>
         </div>
       </div>
+
+      {/* Print Styles */}
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: landscape;
+            margin: 0.5in;
+          }
+          body {
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+          }
+          .print\\:hidden {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
