@@ -50,7 +50,8 @@ const navigationGroups: NavGroup[] = [
   {
     label: "OPERATIONS",
     items: [
-      { name: "Executive Dashboard", href: "/", icon: LayoutDashboard }, // All users
+      { name: "Executive Weekly", href: "/executive-weekly", icon: BarChart3 }, // All users - New executive dashboard
+      { name: "Detailed Analytics", href: "/", icon: LayoutDashboard }, // All users - Detailed view
       {
         name: "Production Dashboard",
         href: "/operations/production-dashboard",
