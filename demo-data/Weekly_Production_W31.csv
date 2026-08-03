@@ -1,0 +1,14 @@
+Producer,Volume (MMscf),Pressure (barg),Status,Remarks
+CNL-Escravos,2310.625,82.10,Operational,Normal operations
+NEPL/NDW Utorogu,1286.12,54.08,Operational,Pressure below contractual minimum
+NEPL Oredo FST3 (OGPOOC),113.028,38.19,Operational,Critical pressure breach - 31% below minimum
+NEPL Oredo (IGHF),246.11,49.60,Operational,Pressure breach detected
+Pan Ocean,677.26,72.02,Operational,Pressure above maximum
+Seplat Oben,2104.108,56.31,Operational,Slight pressure breach
+SPDC - Tunu/FYIP/Otumara,540.00,79.96,Operational,Tunu back online - volume improved
+NEPL/Neconde Odidi,0.00,0.00,Shutdown,Station on shutdown
+AHL,1905.12,71.42,Operational,Within contractual range
+Platform,125.286,55.73,Operational,Normal operations
+Xenergi,121.57,59.31,Operational,Pressure below minimum
+NEPL Ughelli,301.04,24.21,Operational,Low pressure line - no contractual range
+CHORUS,117.697,60.39,Operational,Pressure below minimum

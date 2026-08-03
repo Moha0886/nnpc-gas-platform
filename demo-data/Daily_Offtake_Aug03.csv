@@ -1,0 +1,21 @@
+Station,Region,Customer Type,Allocation (Mmscfd),Offtake (Mmscfd),Pressure,Megawatts,Status
+Transcorp Ughelli,AOW,NPDC Power Customers,51.548,51.548,52/34,193.54,STATION ON STREAM
+NIPP Olorunsogo,AOW,NDPHC Power Customers,52.000,27.562,64/55,103.73,STATION ON STREAM
+NIPP Ihovbor,AOW,NDPHC Power Customers,52.000,0.000,52/34,0.00,STATION ON STANDBY
+NIPP Omotosho,AOW,NDPHC Power Customers,49.000,22.174,55/43,83.35,STATION ON STREAM
+NIPP Geregu,AOW,NDPHC Power Customers,65.000,16.510,60/50,62.08,STATION ON STREAM
+NIPP Sapele,AOW,NDPHC Power Customers,30.000,0.000,52/34,0.00,STATION ON STANDBY
+Azura Power,AOW,NDPHC Power Customers,100.000,95.004,58/46,400.24,STATION ON STREAM
+GASLINK,AOW,Industrial Customers,82.470,56.800,52/34,,STATION ON STREAM
+Falcon Petroleum Limited,AOW,Industrial Customers,15.550,13.110,52/34,,STATION ON STREAM
+WAPCO Sagamu,AOW,Industrial Customers,0.430,0.430,52/34,,STATION ON STREAM
+WAPCO Ewekoro,AOW,Industrial Customers,41.600,40.600,52/34,,STATION ON STREAM
+SNG,AOW,Other Transmission,10.000,10.000,52/34,,STATION ON STREAM
+SPDC Edjeba,AOW,Other Transmission,15.000,15.000,52/34,,STATION ON STREAM
+DFL (Dangote fertilizer limited),AOW,Other Transmission,195.000,188.962,52/34,,STATION ON STREAM
+SPDC Ogunu,AOW,Other Transmission,8.000,8.000,52/34,,STATION ON STREAM
+WAGP,AOW,Export,130.189,130.189,52/34,,STATION ON STREAM
+NDPHC Calabar,AOE,7 Energy Power Customers,62.000,57.277,54/42,,STATION ON STREAM
+Trans-Afam,AOE,Direct Power Customer,20.000,12.935,56/44,,STATION ON STREAM
+ALAOJI,AOE,Direct Power Customer,175.000,0.000,0/0,0.00,STATION ON STANDBY
+Gel Utility Limited,AOE,Commercial Customer,5.000,1.606,52/34,,STATION ON STREAM
