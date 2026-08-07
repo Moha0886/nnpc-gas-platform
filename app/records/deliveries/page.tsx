@@ -21,6 +21,7 @@ import Image from "next/image";
 import { offtakers } from "@/lib/data";
 import type { Corridor } from "@/lib/types";
 import FileUpload from "@/components/FileUpload";
+import { EnhancedCustomerInfo } from "@/components/EnhancedCustomerInfo";
 
 export default function DeliveriesRecordPage() {
   const [showModal, setShowModal] = useState(false);
@@ -480,11 +481,6 @@ export default function DeliveriesRecordPage() {
                                 </option>
                               ))}
                             </select>
-                            {selectedOfftaker && (
-                              <p className="text-xs text-ink/60 mt-1">
-                                DCQ: {selectedOfftaker.contractualDemand || selectedOfftaker.firmAndEffective || 0} MMscf/d | Delivery Point: {selectedOfftaker.deliveryPointId}
-                              </p>
-                            )}
                           </div>
 
                           <div>
@@ -516,6 +512,13 @@ export default function DeliveriesRecordPage() {
                             />
                           </div>
                         </div>
+
+                        {/* Enhanced Customer Information */}
+                        {selectedOfftaker && (
+                          <div className="mt-6">
+                            <EnhancedCustomerInfo offtaker={selectedOfftaker} />
+                          </div>
+                        )}
                       </div>
 
                       {/* Volume Readings */}
