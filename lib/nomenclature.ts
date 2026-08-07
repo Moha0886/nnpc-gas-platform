@@ -31,6 +31,7 @@ export const CUSTOMER_TYPE = [
   "NPDC Power Customers",
   "7 Energy Power Customers",
   "Direct Power Customer",
+  "NDPHC NIPP",
   "Commercial Customer",
   "Other Transmission",
   "Export",
