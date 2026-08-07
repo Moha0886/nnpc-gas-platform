@@ -1784,6 +1784,685 @@ export const pipelines: PipelineFeature[] = [
       deferment: 0,
     },
   },
+
+  // ============================================================================
+  // DELIVERY SPURS TO GAS PROCESSING PLANTS
+  // ============================================================================
+
+  // Warri-Odidi GP Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.7603, 5.5442], // Warri (on ELPS)
+        [5.7200, 5.5600], // Odidi GP
+      ],
+    },
+    properties: {
+      id: "warri-odidi-spur",
+      name: "Warri → Odidi GP",
+      network: "ELPS",
+      pipelineType: "spur",
+      diameter: 24,
+      length: 5,
+      capacity: 200,
+      currentFlow: 175,
+      utilization: 87.5,
+      pressure: 1150,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOW",
+      deferment: 0,
+    },
+  },
+
+  // ELPS-Gbaran-Ubie Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.9938, 5.5002], // Ughelli/Delta (on ELPS)
+        [6.2800, 4.9200], // Gbaran/Ubie Area
+        [7.0100, 4.7800], // Gbaran-Ubie GP
+      ],
+    },
+    properties: {
+      id: "elps-gbaran-spur",
+      name: "ELPS → Gbaran-Ubie GP",
+      network: "ELPS",
+      pipelineType: "spur",
+      diameter: 36,
+      length: 60,
+      capacity: 1050,
+      currentFlow: 950,
+      utilization: 90.5,
+      pressure: 1200,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOW",
+      deferment: 0,
+    },
+  },
+
+  // OB3-Obite Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [6.9580, 5.4520], // Obiafu (on OB3)
+        [6.8500, 5.3200], // Obite GP
+      ],
+    },
+    properties: {
+      id: "ob3-obite-spur",
+      name: "OB3 → Obite GP",
+      network: "OB3",
+      pipelineType: "spur",
+      diameter: 24,
+      length: 18,
+      capacity: 480,
+      currentFlow: 440,
+      utilization: 91.7,
+      pressure: 1180,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+
+  // Eastern Network-NAOC Kwale Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.9938, 5.5002], // Ughelli/Delta (on ELPS)
+        [6.3600, 5.4500], // NAOC Kwale GP
+      ],
+    },
+    properties: {
+      id: "elps-naoc-spur",
+      name: "ELPS → NAOC Kwale GP",
+      network: "ELPS",
+      pipelineType: "spur",
+      diameter: 20,
+      length: 35,
+      capacity: 300,
+      currentFlow: 270,
+      utilization: 90.0,
+      pressure: 1100,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOMW",
+      deferment: 0,
+    },
+  },
+
+  // Trans-Niger-Alakiri Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.1616, 4.4184], // Bonny NLNG (on Trans-Niger)
+        [7.0500, 4.7200], // Alakiri GP
+      ],
+    },
+    properties: {
+      id: "trans-niger-alakiri-spur",
+      name: "Trans-Niger → Alakiri GP",
+      network: "Trans-Niger",
+      pipelineType: "spur",
+      diameter: 18,
+      length: 35,
+      capacity: 250,
+      currentFlow: 220,
+      utilization: 88.0,
+      pressure: 1050,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+
+  // Soku-Cawthorne Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [6.8800, 4.5500], // Soku GP (on EWOGGS)
+        [5.8800, 5.6500], // Cawthorne Channel GP
+      ],
+    },
+    properties: {
+      id: "soku-cawthorne-spur",
+      name: "Soku → Cawthorne Channel GP",
+      network: "EWOGGS",
+      pipelineType: "spur",
+      diameter: 16,
+      length: 12,
+      capacity: 180,
+      currentFlow: 160,
+      utilization: 88.9,
+      pressure: 1000,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+
+  // Oben-Oredo Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.9000, 5.7000], // Oben GP (on ELPS)
+        [5.6200, 6.3400], // Oredo GP
+      ],
+    },
+    properties: {
+      id: "oben-oredo-spur",
+      name: "Oben → Oredo GP",
+      network: "ELPS",
+      pipelineType: "spur",
+      diameter: 14,
+      length: 85,
+      capacity: 100,
+      currentFlow: 85,
+      utilization: 85.0,
+      pressure: 950,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOMW",
+      deferment: 0,
+    },
+  },
+
+  // TNGP-Kolmani Spur (Under Construction)
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [6.5950, 6.3400], // Ajaokuta CS (on TNGP)
+        [9.1400, 8.8900], // Kolmani GP
+      ],
+    },
+    properties: {
+      id: "tngp-kolmani-spur",
+      name: "TNGP → Kolmani GP",
+      network: "TNGP",
+      pipelineType: "spur",
+      diameter: 24,
+      length: 320,
+      capacity: 500,
+      currentFlow: 0,
+      utilization: 0,
+      pressure: 0,
+      status: "under-construction",
+      corridor: "Northern",
+      operationalArea: "AON",
+      deferment: 0,
+    },
+  },
+
+  // OB3-AHL GP-1 Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [6.9580, 5.4520], // Obiafu (on OB3)
+        [7.0200, 5.4000], // AHL GP-1
+      ],
+    },
+    properties: {
+      id: "ob3-ahl1-spur",
+      name: "OB3 → AHL GP-1",
+      network: "OB3",
+      pipelineType: "spur",
+      diameter: 20,
+      length: 9,
+      capacity: 350,
+      currentFlow: 320,
+      utilization: 91.4,
+      pressure: 1150,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+
+  // TNGP-Utapate Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.8500, 5.0200], // Utapate Area (on TNGP)
+        [7.8500, 5.0200], // Utapate CPF
+      ],
+    },
+    properties: {
+      id: "tngp-utapate-spur",
+      name: "TNGP → Utapate CPF",
+      network: "TNGP",
+      pipelineType: "spur",
+      diameter: 18,
+      length: 15,
+      capacity: 220,
+      currentFlow: 200,
+      utilization: 90.9,
+      pressure: 1100,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+
+  // ELPS-Giga Gas Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.7603, 5.5442], // Warri (on ELPS)
+        [5.4200, 5.9500], // Giga Gas CPF
+      ],
+    },
+    properties: {
+      id: "elps-giga-spur",
+      name: "ELPS → Giga Gas CPF",
+      network: "ELPS",
+      pipelineType: "spur",
+      diameter: 14,
+      length: 45,
+      capacity: 150,
+      currentFlow: 130,
+      utilization: 86.7,
+      pressure: 1000,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOW",
+      deferment: 0,
+    },
+  },
+
+  // ============================================================================
+  // DELIVERY SPURS TO POWER PLANTS
+  // ============================================================================
+
+  // Eastern Network-Alaoji Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.2400, 4.9400], // Afam (on Eastern Network)
+        [7.3500, 5.0800], // Alaoji PP
+      ],
+    },
+    properties: {
+      id: "eastern-alaoji-spur",
+      name: "Eastern Network → Alaoji PP",
+      network: "Eastern",
+      pipelineType: "delivery",
+      diameter: 30,
+      length: 18,
+      capacity: 1074,
+      currentFlow: 820,
+      utilization: 76.3,
+      pressure: 1100,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+
+  // ELPS-Azura Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.6250, 6.3380], // Benin CS (on ELPS)
+        [5.5900, 6.2800], // Azura PP
+      ],
+    },
+    properties: {
+      id: "elps-azura-spur",
+      name: "ELPS → Azura PP",
+      network: "ELPS",
+      pipelineType: "delivery",
+      diameter: 24,
+      length: 8,
+      capacity: 461,
+      currentFlow: 380,
+      utilization: 82.4,
+      pressure: 1150,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOMW",
+      deferment: 0,
+    },
+  },
+
+  // TNGP-Ibom Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.8500, 5.0200], // Utapate (on TNGP)
+        [7.8500, 5.0800], // Ibom PP
+      ],
+    },
+    properties: {
+      id: "tngp-ibom-spur",
+      name: "TNGP → Ibom PP",
+      network: "TNGP",
+      pipelineType: "delivery",
+      diameter: 18,
+      length: 9,
+      capacity: 191,
+      currentFlow: 150,
+      utilization: 78.5,
+      pressure: 1050,
+      status: "operational",
+      corridor: "Eastern",
+      operationalArea: "AOE",
+      deferment: 0,
+    },
+  },
+
+  // ============================================================================
+  // DELIVERY SPURS TO INDUSTRIAL OFFTAKERS
+  // ============================================================================
+
+  // Lagos Network-Ikorodu Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.3500, 6.6500], // Itoki (on ELPS/Lagos Network)
+        [3.5100, 6.6100], // Ikorodu Industrial
+      ],
+    },
+    properties: {
+      id: "lagos-ikorodu-spur",
+      name: "Lagos Network → Ikorodu Industrial",
+      network: "Lagos",
+      pipelineType: "delivery",
+      diameter: 12,
+      length: 18,
+      capacity: 19,
+      currentFlow: 17,
+      utilization: 89.5,
+      pressure: 900,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+    },
+  },
+
+  // ELPS-Ewekoro Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.2500, 6.8800], // Ogun State (on ELPS)
+        [3.1900, 6.8300], // Ewekoro Cement
+      ],
+    },
+    properties: {
+      id: "elps-ewekoro-spur",
+      name: "ELPS → Ewekoro Cement",
+      network: "ELPS",
+      pipelineType: "delivery",
+      diameter: 16,
+      length: 7,
+      capacity: 45,
+      currentFlow: 38,
+      utilization: 84.4,
+      pressure: 950,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOW",
+      deferment: 0,
+    },
+  },
+
+  // ELPS-Ibese Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.2500, 6.8800], // Ogun State (on ELPS)
+        [3.6000, 6.8200], // Ibese Cement
+      ],
+    },
+    properties: {
+      id: "elps-ibese-spur",
+      name: "ELPS → Ibese Cement",
+      network: "ELPS",
+      pipelineType: "delivery",
+      diameter: 16,
+      length: 38,
+      capacity: 50,
+      currentFlow: 42,
+      utilization: 84.0,
+      pressure: 950,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOW",
+      deferment: 0,
+    },
+  },
+
+  // TNGP-Obajana Spur
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [6.5950, 6.3400], // Ajaokuta CS (on TNGP)
+        [6.7900, 7.0900], // Obajana Cement
+      ],
+    },
+    properties: {
+      id: "tngp-obajana-spur",
+      name: "TNGP → Obajana Cement",
+      network: "TNGP",
+      pipelineType: "delivery",
+      diameter: 18,
+      length: 95,
+      capacity: 75,
+      currentFlow: 65,
+      utilization: 86.7,
+      pressure: 1000,
+      status: "operational",
+      corridor: "Northern",
+      operationalArea: "AON",
+      deferment: 0,
+    },
+  },
+
+  // Future Northern Spurs (Under Construction)
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [8.5200, 12.0000], // Kano CS (on AKK/TNGP Phase 2)
+        [10.9600, 11.4900], // Ashaka Cement
+      ],
+    },
+    properties: {
+      id: "tngp-ashaka-spur",
+      name: "TNGP → Ashaka Cement",
+      network: "TNGP",
+      pipelineType: "delivery",
+      diameter: 14,
+      length: 180,
+      capacity: 30,
+      currentFlow: 0,
+      utilization: 0,
+      pressure: 0,
+      status: "under-construction",
+      corridor: "Northern",
+      operationalArea: "AON",
+      deferment: 0,
+    },
+  },
+
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [7.4400, 10.5200], // Kaduna CS (on AKK)
+        [8.5300, 7.7400], // Benue Cement
+      ],
+    },
+    properties: {
+      id: "tngp-benue-spur",
+      name: "TNGP → Benue Cement",
+      network: "TNGP",
+      pipelineType: "delivery",
+      diameter: 14,
+      length: 350,
+      capacity: 25,
+      currentFlow: 0,
+      utilization: 0,
+      pressure: 0,
+      status: "under-construction",
+      corridor: "Northern",
+      operationalArea: "AON",
+      deferment: 0,
+    },
+  },
+
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [8.5200, 12.0000], // Kano CS (on AKK/TNGP Phase 2)
+        [5.2500, 12.9200], // Sokoto Cement
+      ],
+    },
+    properties: {
+      id: "tngp-sokoto-spur",
+      name: "TNGP → Sokoto Cement",
+      network: "TNGP",
+      pipelineType: "delivery",
+      diameter: 16,
+      length: 420,
+      capacity: 35,
+      currentFlow: 0,
+      utilization: 0,
+      pressure: 0,
+      status: "under-construction",
+      corridor: "Northern",
+      operationalArea: "AON",
+      deferment: 0,
+    },
+  },
+
+  // Lagos Area Industrial Spurs
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.3500, 6.6500], // Itoki (on Lagos Network)
+        [3.3400, 6.5500], // May & Baker
+      ],
+    },
+    properties: {
+      id: "lagos-may-baker-spur",
+      name: "Lagos Network → May & Baker",
+      network: "Lagos",
+      pipelineType: "delivery",
+      diameter: 8,
+      length: 12,
+      capacity: 8,
+      currentFlow: 7,
+      utilization: 87.5,
+      pressure: 850,
+      status: "operational",
+      corridor: "Lagos",
+      deferment: 0,
+    },
+  },
+
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [5.7603, 5.5442], // Warri (on ELPS)
+        [5.7800, 5.5200], // Time Ceramics
+      ],
+    },
+    properties: {
+      id: "elps-time-ceramics-spur",
+      name: "ELPS → Time Ceramics",
+      network: "ELPS",
+      pipelineType: "delivery",
+      diameter: 6,
+      length: 4,
+      capacity: 5,
+      currentFlow: 4,
+      utilization: 80.0,
+      pressure: 900,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOW",
+      deferment: 0,
+    },
+  },
+
+  {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [3.2500, 6.8800], // Ogun State (on ELPS)
+        [3.2200, 6.8400], // Purechem
+      ],
+    },
+    properties: {
+      id: "elps-purechem-spur",
+      name: "ELPS → Purechem Industries",
+      network: "ELPS",
+      pipelineType: "delivery",
+      diameter: 6,
+      length: 5,
+      capacity: 6,
+      currentFlow: 5,
+      utilization: 83.3,
+      pressure: 900,
+      status: "operational",
+      corridor: "Western",
+      operationalArea: "AOW",
+      deferment: 0,
+    },
+  },
 ];
 
 // ============================================================================
