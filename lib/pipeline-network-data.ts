@@ -74,10 +74,18 @@ export const pipelines: PipelineFeature[] = [
     geometry: {
       type: "LineString",
       coordinates: [
-        [5.2010, 5.6113], // Escravos Gas Plant
+        [5.2010, 5.6113], // Escravos Gas Plant / Escravos CS
         [5.7603, 5.5442], // Warri
+        [5.9367, 5.5145], // Eriemu/Utorogu CS
+        [5.9500, 5.5300], // Kokori CS
+        [5.9600, 5.5400], // Afisere CS
+        [5.9700, 5.5500], // Uzere CS
+        [5.9800, 5.5600], // Olomoro CS
+        [5.9900, 5.5700], // Oweh CS
+        [6.0000, 5.5800], // Ugbegun CS
         [5.9938, 5.5002], // Ughelli/Delta
-        [5.6250, 6.3380], // Benin
+        [6.0100, 5.6000], // Makaraba CS
+        [5.6250, 6.3380], // Benin CS
         [3.2500, 6.8800], // Ogun State
         [3.3500, 6.6500], // Itoki, Lagos
       ],
@@ -1581,9 +1589,9 @@ export const pipelines: PipelineFeature[] = [
     geometry: {
       type: "LineString",
       coordinates: [
-        [6.8000, 6.7400], // Ajaokuta
-        [7.4400, 9.0800], // Kaduna
-        [8.5200, 12.0000], // Kano
+        [6.5950, 6.3400], // Ajaokuta CS
+        [7.4400, 10.5200], // Kaduna CS
+        [8.5200, 12.0000], // Kano CS
       ],
     },
     properties: {
