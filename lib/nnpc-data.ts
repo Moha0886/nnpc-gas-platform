@@ -810,12 +810,61 @@ export const offtakerWeeklyData: OfftakerWeeklyData[] = [
 
 // ---------- Helper Functions ----------
 
+// Import data sync functions for hybrid approach
+let dataSync: typeof import("./data-sync") | null = null;
+if (typeof window !== "undefined") {
+  import("./data-sync").then((module) => {
+    dataSync = module;
+  });
+}
+
+/**
+ * Get station data for a specific date and station
+ * Merges seed data with manually entered data from OPERATIONS pages
+ */
 export function getStationData(date: string, stationId: string): StationDailyData | undefined {
-  return stationDailyData.find((d) => d.date === date && d.stationId === stationId);
+  // First check seed data
+  const seedData = stationDailyData.find((d) => d.date === date && d.stationId === stationId);
+
+  // Then check manually entered data (only in browser)
+  if (typeof window !== "undefined" && dataSync) {
+    const manualData = dataSync.getStationDailyRecords(date).find((d) => d.stationId === stationId);
+    // Manual data overrides seed data
+    return manualData || seedData;
+  }
+
+  return seedData;
+}
+
+/**
+ * Get all station data for a specific date
+ * Merges seed data with manually entered data
+ */
+export function getAllStationDataForDate(date: string): StationDailyData[] {
+  const seedData = stationDailyData.filter((d) => d.date === date);
+
+  if (typeof window !== "undefined" && dataSync) {
+    const manualData = dataSync.getStationDailyRecords(date);
+
+    // Merge: manual data overrides seed data for same station
+    const stationIds = new Set(manualData.map(d => d.stationId));
+    const seedFiltered = seedData.filter(d => !stationIds.has(d.stationId));
+
+    return [...seedFiltered, ...manualData];
+  }
+
+  return seedData;
 }
 
 export function getProducerData(date: string, producerId: string): ProducerDailyData | undefined {
-  return producerDailyData.find((d) => d.date === date && d.producerId === producerId);
+  const seedData = producerDailyData.find((d) => d.date === date && d.producerId === producerId);
+
+  if (typeof window !== "undefined" && dataSync) {
+    const manualData = dataSync.getProducerDailyRecords(date).find((d) => d.producerId === producerId);
+    return manualData || seedData;
+  }
+
+  return seedData;
 }
 
 export function getProducerWeeklyData(
@@ -823,6 +872,25 @@ export function getProducerWeeklyData(
   producerId: string
 ): ProducerWeeklyData | undefined {
   return producerWeeklyData.find((d) => d.weekOf === weekOf && d.producerId === producerId);
+}
+
+/**
+ * Get offtaker weekly data with manual entry support
+ */
+export function getOfftakerWeeklyDataForWeek(weekOf: string): OfftakerWeeklyData[] {
+  const seedData = offtakerWeeklyData.filter((d) => d.weekOf === weekOf);
+
+  if (typeof window !== "undefined" && dataSync) {
+    const manualData = dataSync.getOfftakerWeeklyRecords(weekOf);
+
+    // Merge: manual data overrides seed data for same offtaker
+    const offtakerIds = new Set(manualData.map(d => d.offtakerId));
+    const seedFiltered = seedData.filter(d => !offtakerIds.has(d.offtakerId));
+
+    return [...seedFiltered, ...manualData];
+  }
+
+  return seedData;
 }
 
 export function getStationsByGDZ(gdz: string): StationMaster[] {

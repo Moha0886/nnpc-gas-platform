@@ -24,15 +24,15 @@ import {
   weeklyVarianceData,
   elpsSupplyData,
 } from "@/lib/nnpc-operational-data";
-import { stationsMaster, offtakerWeeklyData } from "@/lib/nnpc-data";
+import { stationsMaster, getOfftakerWeeklyDataForWeek } from "@/lib/nnpc-data";
 
 export default function ExecutiveWeeklyDashboard() {
   const [weekEnding, setWeekEnding] = useState("2026-07-14");
 
   // Compute weekly data from real sources based on selected week
   const weeklyData = useMemo(() => {
-    // Get weekly offtake data for the selected week
-    const weeklyOfftakes = offtakerWeeklyData.filter(d => d.weekOf === weekEnding);
+    // Get weekly offtake data for the selected week (includes manual entry)
+    const weeklyOfftakes = getOfftakerWeeklyDataForWeek(weekEnding);
 
     // Get power stations by region
     const powerWestNorthStations = stationsMaster.filter(

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Calendar, Download, Printer, TrendingUp, TrendingDown } from "lucide-react";
-import { stationsMaster, stationDailyData, getStationData, getStationsByRegion } from "@/lib/nnpc-data";
+import { stationsMaster, getAllStationDataForDate, getStationData } from "@/lib/nnpc-data";
 
 // Tabs component
 function Tabs({ value, onValueChange, children }: any) {
