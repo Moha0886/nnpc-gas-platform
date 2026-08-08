@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { TrendingUp, TrendingDown, Calendar, Download, Printer } from "lucide-react";
 import {
   LineChart,
@@ -15,79 +15,163 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import { nationalProduction, elpsPressureData } from "@/lib/nnpc-operational-data";
+import {
+  nationalProduction,
+  elpsPressureData,
+  producers,
+  producerContributions,
+  majorOfftakers,
+  weeklyVarianceData,
+  elpsSupplyData,
+} from "@/lib/nnpc-operational-data";
+import { stationsMaster, offtakerWeeklyData } from "@/lib/nnpc-data";
 
 export default function ExecutiveWeeklyDashboard() {
-  const [weekEnding, setWeekEnding] = useState("2026-08-03");
+  const [weekEnding, setWeekEnding] = useState("2026-07-14");
 
-  // Sample data matching the PDF - Week ending Aug 3, 2026
-  const weeklyData = {
-    totalProduction: 7.78, // Bcfd
-    productionChange: 0.046, // Bcfd (0.6% w/w)
-    productionChangePercent: 0.6,
+  // Compute weekly data from real sources based on selected week
+  const weeklyData = useMemo(() => {
+    // Get weekly offtake data for the selected week
+    const weeklyOfftakes = offtakerWeeklyData.filter(d => d.weekOf === weekEnding);
 
-    elpsSupply: 1.44, // Bcfd
-    elpsSupplyChange: 0.7,
-    elpsOfftake: 1.25, // Bcfd
-    elpsOfftakeChange: 3.7,
+    // Get power stations by region
+    const powerWestNorthStations = stationsMaster.filter(
+      s => s.region === "Western" || s.region === "Northern" || s.region === "Lagos"
+    ).filter(s =>
+      s.customerType?.includes("Power") ||
+      s.customerType?.includes("NIPP") ||
+      s.name.toLowerCase().includes("power") ||
+      s.name.toLowerCase().includes("nipp") ||
+      s.name.toLowerCase().includes("azura")
+    );
 
-    utilization: {
-      domestic: { volume: 1.835, change: 59, changePercent: 3.3, percentage: 24 },
-      export: { volume: 3.352, change: 92, changePercent: 2.8, percentage: 43 },
-      reinjection: { volume: 1.839, change: 136, changePercent: 8.0, percentage: 24 },
-      flared: { volume: 0.471, change: -4, changePercent: -0.8, percentage: 6 },
-      linePack: { percentage: 3 },
-    },
+    const powerEasternStations = stationsMaster.filter(
+      s => s.region === "Eastern"
+    ).filter(s =>
+      s.customerType?.includes("Power") ||
+      s.name.toLowerCase().includes("power") ||
+      s.name.toLowerCase().includes("afam") ||
+      s.name.toLowerCase().includes("calabar")
+    );
 
-    production: {
-      jv: { current: 57, previous: 56 },
-      psc: { current: 25, previous: 25 },
-      neplInd: { current: 18, previous: 19 },
-    },
+    // Build power market data with weekly allocations
+    const powerWestNorth = powerWestNorthStations.map(station => {
+      const weekData = weeklyOfftakes.find(w => w.offtakerId === station.id);
+      return {
+        name: station.name,
+        allocation: weekData?.allocation || station.contractualDemand || 0,
+        offtake: weekData?.actualOfftake || 0,
+      };
+    });
 
-    subCategories: {
-      power: { volume: 534.70, change: 26.2, changePercent: 4.9 },
-      dfl: { volume: 176.87, change: 7.6, changePercent: 4.4 },
-      indorama: { volume: 174.97, change: 6.1, changePercent: 3.6 },
-    },
+    const powerEastern = powerEasternStations.map(station => {
+      const weekData = weeklyOfftakes.find(w => w.offtakerId === station.id);
+      return {
+        name: station.name,
+        allocation: weekData?.allocation || station.contractualDemand || 0,
+        offtake: weekData?.actualOfftake || 0,
+      };
+    });
 
-    powerWestNorth: [
-      { name: "Transcorp Ughelli", allocation: 51.5, offtake: 51.5 },
-      { name: "NIPP Olorunsogo", allocation: 52.0, offtake: 27.6 },
-      { name: "NIPP Omotosho", allocation: 49.0, offtake: 22.2 },
-      { name: "NIPP Geregu", allocation: 65.0, offtake: 16.5 },
-      { name: "Azura Power", allocation: 100.0, offtake: 95.0 },
-      { name: "NIPP Sapele", allocation: 30.0, offtake: 0 },
-    ],
+    // Calculate production contribution percentages
+    const jvContribution = producerContributions.find(c => c.category === "JV");
+    const pscContribution = producerContributions.find(c => c.category === "PSC");
+    const neplContribution = producerContributions.find(c => c.category === "NEPL+IND");
 
-    powerEastern: [
-      { name: "TRANS AFAM", allocation: 20.0, offtake: 12.9 },
-      { name: "NDPHC CALABAR", allocation: 62.0, offtake: 57.3 },
-      { name: "FIPL AFAM", allocation: 95.0, offtake: 0 },
-      { name: "AFAM VI", allocation: 180.0, offtake: 57.6 },
-      { name: "OKPAI -PHASE 1", allocation: 170.0, offtake: 23.6 },
-    ],
+    // Get variance data
+    const productionVariance = weeklyVarianceData.find(v => v.metric === "Total Gas Production");
+    const powerVariance = weeklyVarianceData.find(v => v.metric === "Power Offtake");
+    const domesticVariance = weeklyVarianceData.find(v => v.metric === "Domestic Supply");
+    const exportVariance = weeklyVarianceData.find(v => v.metric === "Export (NLNG)");
+    const reinjectionVariance = weeklyVarianceData.find(v => v.metric === "Reinjection");
+    const flaredVariance = weeklyVarianceData.find(v => v.metric === "Gas Flared");
 
-    ngmlSales: [
-      { date: "22-May", allocation: 520, offtake: 378 },
-      { date: "23-May", allocation: 536, offtake: 320 },
-      { date: "24-May", allocation: 528, offtake: 450 },
-      { date: "25-May", allocation: 510, offtake: 302 },
-      { date: "26-May", allocation: 558, offtake: 337 },
-      { date: "27-May", allocation: 545, offtake: 332 },
-      { date: "28-May", allocation: 550, offtake: 403 },
-    ],
+    return {
+      totalProduction: nationalProduction.totalProduction, // Already in Bcfd
+      productionChange: (productionVariance?.variance || 0) / 1000,
+      productionChangePercent: productionVariance?.variancePercent || 0,
 
-    highlights: [
-      "Average weekly gas production was 7.80Bcfd compared to 7.55Bcfd produced the previous week",
-      "This translated to an average gas production increase of 242mmscfd, driven by Producer CNL-Escravos and Seplat Oben",
-      "Gas supply to export increased by 92mmscfd, mainly driven by NLNG",
-      "Supply to domestic increased by 59mmscfd, driven by improved injection from NEPL Utorogu",
-      "Power Plant Offtake ⇒ 27% of domestic gas supply, with Western/North at 90% of allocation",
-      "DFL: 4.4% w/w to 176.87MMscfd (1.24Bcf); 98% of allocation",
-      "Indorama: 3.6% w/w to 174.97MMscfd (1.22Bcf) driven by NEPL/Oando JV",
-    ],
-  };
+      elpsSupply: elpsSupplyData.totalSupply / 1000, // Convert to Bcfd
+      elpsSupplyChange: elpsSupplyData.weekOverWeekPercent,
+      elpsOfftake: (elpsSupplyData.totalSupply * 0.87) / 1000, // Estimate 87% offtake
+      elpsOfftakeChange: 3.7,
+
+      utilization: {
+        domestic: {
+          volume: nationalProduction.domestic.volume,
+          change: domesticVariance?.variance || 0,
+          changePercent: domesticVariance?.variancePercent || 0,
+          percentage: nationalProduction.domestic.percentage,
+        },
+        export: {
+          volume: nationalProduction.export.volume,
+          change: exportVariance?.variance || 0,
+          changePercent: exportVariance?.variancePercent || 0,
+          percentage: nationalProduction.export.percentage,
+        },
+        reinjection: {
+          volume: nationalProduction.reinjection.volume,
+          change: reinjectionVariance?.variance || 0,
+          changePercent: reinjectionVariance?.variancePercent || 0,
+          percentage: nationalProduction.reinjection.percentage,
+        },
+        flared: {
+          volume: nationalProduction.flared.volume,
+          change: flaredVariance?.variance || 0,
+          changePercent: flaredVariance?.variancePercent || 0,
+          percentage: nationalProduction.flared.percentage,
+        },
+        linePack: { percentage: 3 },
+      },
+
+      production: {
+        jv: { current: Math.round(jvContribution?.percentage || 57), previous: 56 },
+        psc: { current: Math.round(pscContribution?.percentage || 25), previous: 25 },
+        neplInd: { current: Math.round(neplContribution?.percentage || 18), previous: 19 },
+      },
+
+      subCategories: {
+        power: {
+          volume: (powerVariance?.currentWeek || 723),
+          change: powerVariance?.variance || 0,
+          changePercent: powerVariance?.variancePercent || 0,
+        },
+        dfl: {
+          volume: majorOfftakers.dangoteFertilizer.actualOfftake,
+          change: majorOfftakers.dangoteFertilizer.weekOverWeekChange,
+          changePercent: majorOfftakers.dangoteFertilizer.weekOverWeekPercent,
+        },
+        indorama: {
+          volume: majorOfftakers.indorama.actualOfftake,
+          change: majorOfftakers.indorama.weekOverWeekChange,
+          changePercent: majorOfftakers.indorama.weekOverWeekPercent,
+        },
+      },
+
+      powerWestNorth,
+      powerEastern,
+
+      ngmlSales: [
+        { date: "22-May", allocation: 520, offtake: 378 },
+        { date: "23-May", allocation: 536, offtake: 320 },
+        { date: "24-May", allocation: 528, offtake: 450 },
+        { date: "25-May", allocation: 510, offtake: 302 },
+        { date: "26-May", allocation: 558, offtake: 337 },
+        { date: "27-May", allocation: 545, offtake: 332 },
+        { date: "28-May", allocation: 550, offtake: 403 },
+      ],
+
+      highlights: [
+        `Average weekly gas production was ${nationalProduction.totalProduction.toFixed(2)}Bcfd`,
+        `Production increased by ${productionVariance?.variance || 0}mmscfd (${productionVariance?.variancePercent.toFixed(1)}% w/w)`,
+        `Gas supply to export increased by ${exportVariance?.variance || 0}mmscfd, mainly driven by NLNG`,
+        `Supply to domestic increased by ${domesticVariance?.variance || 0}mmscfd`,
+        `Power Plant Offtake ⇒ ${((powerVariance?.currentWeek || 0) / (nationalProduction.domestic.volume * 1000) * 100).toFixed(0)}% of domestic gas supply`,
+        `DFL: ${majorOfftakers.dangoteFertilizer.weekOverWeekPercent.toFixed(1)}% w/w to ${majorOfftakers.dangoteFertilizer.actualOfftake.toFixed(2)}MMscfd; ${majorOfftakers.dangoteFertilizer.percentOfAllocation}% of allocation`,
+        `Indorama: ${majorOfftakers.indorama.weekOverWeekPercent.toFixed(1)}% w/w to ${majorOfftakers.indorama.actualOfftake.toFixed(2)}MMscfd`,
+      ],
+    };
+  }, [weekEnding]);
 
   // Calculate GBI (Gas Balance Index)
   const calculateGBI = (data: typeof weeklyData.powerWestNorth) => {
